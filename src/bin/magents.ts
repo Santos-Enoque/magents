@@ -6,10 +6,12 @@ import inquirer from 'inquirer';
 import ora from 'ora';
 import { AgentManager } from '../services/AgentManager';
 import { ConfigManager } from '../config/ConfigManager';
+import { SettingsManager } from '../services/SettingsManager';
 
 const program = new Command();
 const agentManager = new AgentManager();
 const configManager = ConfigManager.getInstance();
+const settingsManager = new SettingsManager();
 
 program
   .name('magents')
@@ -296,6 +298,61 @@ program
       });
       console.log('');
       console.log(chalk.gray(`Config file: ${configManager.getConfigPath()}`));
+    }
+  });
+
+// Settings command
+program
+  .command('settings')
+  .description('Claude settings management')
+  .option('-l, --list', 'List Claude configuration files')
+  .option('-s, --sync <path>', 'Sync settings to agent directory')
+  .action(async (options: { list?: boolean; sync?: string }) => {
+    if (options.list) {
+      const files = settingsManager.getClaudeConfigFiles();
+      
+      if (files.length === 0) {
+        console.log(chalk.yellow('No Claude configuration files found'));
+        return;
+      }
+      
+      console.log(chalk.blue('Claude Configuration Files:'));
+      console.log('');
+      
+      files.forEach(file => {
+        console.log(`  ${chalk.green('✓')} ${chalk.white(file)}`);
+      });
+    }
+    
+    if (options.sync) {
+      const spinner = ora('Syncing settings...').start();
+      
+      try {
+        const result = await settingsManager.syncSettingsToAgent(options.sync);
+        
+        if (result.success) {
+          spinner.succeed(chalk.green(result.message));
+          
+          if (result.syncedFiles.length > 0) {
+            console.log(chalk.blue('Synced files:'));
+            result.syncedFiles.forEach(file => {
+              console.log(`  ${chalk.green('✓')} ${chalk.gray(file)}`);
+            });
+          }
+        } else {
+          spinner.fail(chalk.red(result.message));
+          
+          if (result.errors.length > 0) {
+            console.log(chalk.red('Errors:'));
+            result.errors.forEach(error => {
+              console.log(`  ${chalk.red('✗')} ${error}`);
+            });
+          }
+        }
+        
+      } catch (error) {
+        spinner.fail(chalk.red(`Failed to sync settings: ${error instanceof Error ? error.message : String(error)}`));
+      }
     }
   });
 

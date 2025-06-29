@@ -10,9 +10,11 @@ const inquirer_1 = __importDefault(require("inquirer"));
 const ora_1 = __importDefault(require("ora"));
 const AgentManager_1 = require("../services/AgentManager");
 const ConfigManager_1 = require("../config/ConfigManager");
+const SettingsManager_1 = require("../services/SettingsManager");
 const program = new commander_1.Command();
 const agentManager = new AgentManager_1.AgentManager();
 const configManager = ConfigManager_1.ConfigManager.getInstance();
+const settingsManager = new SettingsManager_1.SettingsManager();
 program
     .name('magents')
     .description('Multi-Agent Claude Code Workflow Manager')
@@ -269,6 +271,53 @@ program
         });
         console.log('');
         console.log(chalk_1.default.gray(`Config file: ${configManager.getConfigPath()}`));
+    }
+});
+// Settings command
+program
+    .command('settings')
+    .description('Claude settings management')
+    .option('-l, --list', 'List Claude configuration files')
+    .option('-s, --sync <path>', 'Sync settings to agent directory')
+    .action(async (options) => {
+    if (options.list) {
+        const files = settingsManager.getClaudeConfigFiles();
+        if (files.length === 0) {
+            console.log(chalk_1.default.yellow('No Claude configuration files found'));
+            return;
+        }
+        console.log(chalk_1.default.blue('Claude Configuration Files:'));
+        console.log('');
+        files.forEach(file => {
+            console.log(`  ${chalk_1.default.green('✓')} ${chalk_1.default.white(file)}`);
+        });
+    }
+    if (options.sync) {
+        const spinner = (0, ora_1.default)('Syncing settings...').start();
+        try {
+            const result = await settingsManager.syncSettingsToAgent(options.sync);
+            if (result.success) {
+                spinner.succeed(chalk_1.default.green(result.message));
+                if (result.syncedFiles.length > 0) {
+                    console.log(chalk_1.default.blue('Synced files:'));
+                    result.syncedFiles.forEach(file => {
+                        console.log(`  ${chalk_1.default.green('✓')} ${chalk_1.default.gray(file)}`);
+                    });
+                }
+            }
+            else {
+                spinner.fail(chalk_1.default.red(result.message));
+                if (result.errors.length > 0) {
+                    console.log(chalk_1.default.red('Errors:'));
+                    result.errors.forEach(error => {
+                        console.log(`  ${chalk_1.default.red('✗')} ${error}`);
+                    });
+                }
+            }
+        }
+        catch (error) {
+            spinner.fail(chalk_1.default.red(`Failed to sync settings: ${error instanceof Error ? error.message : String(error)}`));
+        }
     }
 });
 program.parse();
