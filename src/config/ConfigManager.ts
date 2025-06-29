@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
-import { MagentsConfig } from '../types';
+import { MagentsConfig, AgentRecord } from '../types';
 
 export class ConfigManager {
   private static instance: ConfigManager;
@@ -117,5 +117,66 @@ CLAUDE_AUTO_ACCEPT=true
 
     fs.writeFileSync(this.configFile, configLines.join('\n') + '\n');
     this.config = newConfig;
+  }
+
+  // Agent data management methods
+  public getAgentDataPath(agentId: string): string {
+    return path.join(this.agentsDir, `${agentId}.json`);
+  }
+
+  public saveAgentData(agent: AgentRecord): void {
+    const agentPath = this.getAgentDataPath(agent.id);
+    fs.writeFileSync(agentPath, JSON.stringify(agent, null, 2));
+  }
+
+  public loadAgentData(agentId: string): AgentRecord | null {
+    const agentPath = this.getAgentDataPath(agentId);
+    if (!fs.existsSync(agentPath)) {
+      return null;
+    }
+    
+    try {
+      const data = fs.readFileSync(agentPath, 'utf8');
+      return JSON.parse(data) as AgentRecord;
+    } catch (error) {
+      console.error(`Error loading agent data for ${agentId}:`, error);
+      return null;
+    }
+  }
+
+  public getAllAgents(): AgentRecord[] {
+    const agents: AgentRecord[] = [];
+    
+    if (!fs.existsSync(this.agentsDir)) {
+      return agents;
+    }
+
+    const files = fs.readdirSync(this.agentsDir);
+    for (const file of files) {
+      if (file.endsWith('.json')) {
+        const agentId = file.replace('.json', '');
+        const agent = this.loadAgentData(agentId);
+        if (agent) {
+          agents.push(agent);
+        }
+      }
+    }
+
+    return agents;
+  }
+
+  public deleteAgentData(agentId: string): void {
+    const agentPath = this.getAgentDataPath(agentId);
+    if (fs.existsSync(agentPath)) {
+      fs.unlinkSync(agentPath);
+    }
+  }
+
+  public updateAgentData(agentId: string, updates: Partial<AgentRecord>): void {
+    const agent = this.loadAgentData(agentId);
+    if (agent) {
+      const updatedAgent = { ...agent, ...updates };
+      this.saveAgentData(updatedAgent);
+    }
   }
 }
