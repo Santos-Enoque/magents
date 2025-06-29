@@ -8,6 +8,7 @@ export interface MagentsConfig {
 }
 export interface Agent {
     id: string;
+    projectId?: string;
     branch: string;
     worktreePath: string;
     tmuxSession: string;
@@ -45,5 +46,21 @@ export interface GitWorktreeInfo {
     path: string;
     branch: string;
     head: string;
+}
+export interface Project {
+    id: string;
+    path: string;
+    name: string;
+    container?: string;
+    agents: string[];
+    portRange: [number, number];
+    status: ProjectStatus;
+    createdAt: Date;
+}
+export type ProjectStatus = 'ACTIVE' | 'STOPPED' | 'ERROR';
+export interface CreateProjectOptions {
+    path: string;
+    name?: string;
+    portRange?: [number, number];
 }
 //# sourceMappingURL=index.d.ts.map
