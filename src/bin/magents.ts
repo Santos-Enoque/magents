@@ -6,10 +6,12 @@ import inquirer from 'inquirer';
 import ora from 'ora';
 import { AgentManager } from '../services/AgentManager';
 import { ConfigManager } from '../config/ConfigManager';
+import { EnvironmentDetector } from '../services/EnvironmentDetector';
 
 const program = new Command();
 const agentManager = new AgentManager();
 const configManager = ConfigManager.getInstance();
+const environmentDetector = new EnvironmentDetector();
 
 program
   .name('magents')
@@ -296,6 +298,53 @@ program
       });
       console.log('');
       console.log(chalk.gray(`Config file: ${configManager.getConfigPath()}`));
+    }
+  });
+
+// Environment command
+program
+  .command('env')
+  .description('Environment detection and configuration')
+  .option('-i, --info', 'Show environment information')
+  .option('--claude-command', 'Show optimized Claude command for this environment')
+  .action((options: { info?: boolean; claudeCommand?: boolean }) => {
+    if (options.info || (!options.claudeCommand)) {
+      console.log(chalk.blue('Environment Information:'));
+      console.log('');
+      
+      const config = environmentDetector.getEnvironmentConfig();
+      
+      console.log(`  Type: ${chalk.yellow(config.type)}`);
+      console.log(`  Remote: ${config.isRemote ? chalk.green('Yes') : chalk.gray('No')}`);
+      console.log(`  Docker Support: ${config.supportsDocker ? chalk.green('Yes') : chalk.red('No')}`);
+      console.log(`  Max Agents: ${chalk.yellow(config.resourceLimits.maxAgents.toString())}`);
+      
+      if (config.claudeFlags.length > 0) {
+        console.log(`  Claude Flags: ${chalk.cyan(config.claudeFlags.join(' '))}`);
+      }
+
+      if (config.resourceLimits.memoryLimit) {
+        console.log(`  Memory Limit: ${chalk.yellow(config.resourceLimits.memoryLimit)}`);
+      }
+      
+      if (config.resourceLimits.cpuLimit) {
+        console.log(`  CPU Limit: ${chalk.yellow(config.resourceLimits.cpuLimit)}`);
+      }
+
+      if (environmentDetector.isCodespaces()) {
+        const codespacesConfig = environmentDetector.getCodespacesConfig();
+        console.log('');
+        console.log(chalk.blue('Codespaces Details:'));
+        console.log(`  Name: ${chalk.yellow(codespacesConfig.name)}`);
+        console.log(`  Machine: ${chalk.yellow(codespacesConfig.machineType)}`);
+        console.log(`  Region: ${chalk.yellow(codespacesConfig.region)}`);
+      }
+    }
+    
+    if (options.claudeCommand) {
+      const claudeCommand = environmentDetector.generateClaudeCommand();
+      console.log(chalk.blue('Optimized Claude Command:'));
+      console.log(`  ${chalk.green(claudeCommand)}`);
     }
   });
 
