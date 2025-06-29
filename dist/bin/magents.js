@@ -10,9 +10,11 @@ const inquirer_1 = __importDefault(require("inquirer"));
 const ora_1 = __importDefault(require("ora"));
 const AgentManager_1 = require("../services/AgentManager");
 const ConfigManager_1 = require("../config/ConfigManager");
+const EnvironmentDetector_1 = require("../services/EnvironmentDetector");
 const program = new commander_1.Command();
 const agentManager = new AgentManager_1.AgentManager();
 const configManager = ConfigManager_1.ConfigManager.getInstance();
+const environmentDetector = new EnvironmentDetector_1.EnvironmentDetector();
 program
     .name('magents')
     .description('Multi-Agent Claude Code Workflow Manager')
@@ -269,6 +271,45 @@ program
         });
         console.log('');
         console.log(chalk_1.default.gray(`Config file: ${configManager.getConfigPath()}`));
+    }
+});
+// Environment command
+program
+    .command('env')
+    .description('Environment detection and configuration')
+    .option('-i, --info', 'Show environment information')
+    .option('--claude-command', 'Show optimized Claude command for this environment')
+    .action((options) => {
+    if (options.info || (!options.claudeCommand)) {
+        console.log(chalk_1.default.blue('Environment Information:'));
+        console.log('');
+        const config = environmentDetector.getEnvironmentConfig();
+        console.log(`  Type: ${chalk_1.default.yellow(config.type)}`);
+        console.log(`  Remote: ${config.isRemote ? chalk_1.default.green('Yes') : chalk_1.default.gray('No')}`);
+        console.log(`  Docker Support: ${config.supportsDocker ? chalk_1.default.green('Yes') : chalk_1.default.red('No')}`);
+        console.log(`  Max Agents: ${chalk_1.default.yellow(config.resourceLimits.maxAgents.toString())}`);
+        if (config.claudeFlags.length > 0) {
+            console.log(`  Claude Flags: ${chalk_1.default.cyan(config.claudeFlags.join(' '))}`);
+        }
+        if (config.resourceLimits.memoryLimit) {
+            console.log(`  Memory Limit: ${chalk_1.default.yellow(config.resourceLimits.memoryLimit)}`);
+        }
+        if (config.resourceLimits.cpuLimit) {
+            console.log(`  CPU Limit: ${chalk_1.default.yellow(config.resourceLimits.cpuLimit)}`);
+        }
+        if (environmentDetector.isCodespaces()) {
+            const codespacesConfig = environmentDetector.getCodespacesConfig();
+            console.log('');
+            console.log(chalk_1.default.blue('Codespaces Details:'));
+            console.log(`  Name: ${chalk_1.default.yellow(codespacesConfig.name)}`);
+            console.log(`  Machine: ${chalk_1.default.yellow(codespacesConfig.machineType)}`);
+            console.log(`  Region: ${chalk_1.default.yellow(codespacesConfig.region)}`);
+        }
+    }
+    if (options.claudeCommand) {
+        const claudeCommand = environmentDetector.generateClaudeCommand();
+        console.log(chalk_1.default.blue('Optimized Claude Command:'));
+        console.log(`  ${chalk_1.default.green(claudeCommand)}`);
     }
 });
 program.parse();

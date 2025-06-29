@@ -1,0 +1,63 @@
+{
+  "name": "Magents Development Environment",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "dockerDashComposeVersion": "v2"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "configureZshAsDefaultShell": true,
+      "installOhMyZsh": true
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-azuretools.vscode-docker",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "ms-vscode.vscode-typescript-next",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-json"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "docker.dockerPath": "/usr/local/bin/docker"
+      }
+    }
+  },
+
+  "forwardPorts": [3000, 3001, 3002, 3003, 3004, 3005, 4000, 4001, 4002],
+  "portsAttributes": {
+    "3000": {"label": "Web App 1", "onAutoForward": "notify"},
+    "3001": {"label": "Web App 2", "onAutoForward": "notify"},
+    "3002": {"label": "Web App 3", "onAutoForward": "notify"},
+    "4000": {"label": "API Server 1", "onAutoForward": "silent"},
+    "4001": {"label": "API Server 2", "onAutoForward": "silent"}
+  },
+
+  "postCreateCommand": "npm install -g typescript @types/node && npm install",
+  "postStartCommand": "npm run build",
+
+  "remoteEnv": {
+    "MAGENTS_ENV": "codespaces",
+    "CLAUDE_PERMISSIONS": "skip",
+    "DOCKER_BUILDKIT": "1"
+  },
+
+  "mounts": [
+    "source=magents-cache,target=/workspace/.cache,type=volume"
+  ],
+
+  "containerEnv": {
+    "GITHUB_CODESPACES": "true",
+    "MAGENTS_REMOTE": "true"
+  }
+}
