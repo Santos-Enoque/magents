@@ -44,7 +44,6 @@ class AgentManager {
         this.configManager = ConfigManager_1.ConfigManager.getInstance();
         this.gitService = new GitService_1.GitService();
         this.tmuxService = new TmuxService_1.TmuxService();
-        this.activeAgentsFile = path.join(this.configManager.getAgentsDir(), 'active_agents');
     }
     async createAgent(options) {
         try {
@@ -72,17 +71,31 @@ class AgentManager {
             await this.gitService.prepareBranch(options.branch, config.DEFAULT_BASE_BRANCH);
             // Create worktree
             await this.gitService.createWorktree(worktreePath, options.branch, config.DEFAULT_BASE_BRANCH);
-            // Copy Claude configuration and CLAUDE.md
-            await this.copyClaudeConfiguration(repoRoot, worktreePath);
-            // Create tmux session
-            await this.tmuxService.createSession(tmuxSession, worktreePath, config);
-            // Record the agent
-            this.recordAgent({
+            // Copy Claude configuration and CLAUDE.md with context injection
+            await this.copyClaudeConfiguration(repoRoot, worktreePath, {
+                agentId,
+                branch: options.branch,
+                environment: options.environment,
+                context: options.context
+            });
+            // Create tmux session with environment variables
+            const environment = {
+                ...options.environment,
+                AGENT_ID: agentId,
+                PROJECT_ROOT: worktreePath,
+                PROJECT_NAME: path.basename(repoRoot)
+            };
+            await this.tmuxService.createSession(tmuxSession, worktreePath, config, environment);
+            // Record the agent with environment and context
+            const agentRecord = {
                 id: agentId,
                 branch: options.branch,
                 worktreePath,
-                tmuxSession
-            });
+                tmuxSession,
+                environment: environment,
+                context: options.context
+            };
+            this.configManager.saveAgentData(agentRecord);
             return {
                 success: true,
                 message: `Agent '${agentId}' created successfully!`,
@@ -102,28 +115,21 @@ class AgentManager {
         }
     }
     getActiveAgents() {
-        if (!fs.existsSync(this.activeAgentsFile)) {
-            return [];
-        }
-        const content = fs.readFileSync(this.activeAgentsFile, 'utf8');
+        const agentRecords = this.configManager.getAllAgents();
         const agents = [];
-        content.split('\n').forEach(line => {
-            const trimmed = line.trim();
-            if (trimmed) {
-                const [id, branch, worktreePath, tmuxSession] = trimmed.split(':');
-                if (id && branch && worktreePath && tmuxSession) {
-                    const status = this.tmuxService.sessionExists(tmuxSession) ? 'RUNNING' : 'STOPPED';
-                    agents.push({
-                        id,
-                        branch,
-                        worktreePath,
-                        tmuxSession,
-                        status: status,
-                        createdAt: new Date() // We don't store creation time yet, so use current time
-                    });
-                }
-            }
-        });
+        for (const record of agentRecords) {
+            const status = this.tmuxService.sessionExists(record.tmuxSession) ? 'RUNNING' : 'STOPPED';
+            agents.push({
+                id: record.id,
+                branch: record.branch,
+                worktreePath: record.worktreePath,
+                tmuxSession: record.tmuxSession,
+                status: status,
+                createdAt: new Date(), // We don't store creation time yet, so use current time
+                environment: record.environment,
+                context: record.context
+            });
+        }
         return agents;
     }
     async attachToAgent(agentId) {
@@ -139,7 +145,11 @@ class AgentManager {
             if (!this.tmuxService.sessionExists(agent.tmuxSession)) {
                 // Recreate session if it doesn't exist
                 const config = this.configManager.loadConfig();
-                await this.tmuxService.createSession(agent.tmuxSession, agent.worktreePath, config);
+                const envRecord = agent.environment ? Object.entries(agent.environment).reduce((acc, [key, value]) => {
+                    acc[key] = value;
+                    return acc;
+                }, {}) : undefined;
+                await this.tmuxService.createSession(agent.tmuxSession, agent.worktreePath, config, envRecord);
             }
             // Attach to session (this will replace current process)
             await this.tmuxService.attachToSession(agent.tmuxSession);
@@ -213,9 +223,9 @@ class AgentManager {
                 errors.push(`Failed to stop ${agent.id}: ${error instanceof Error ? error.message : String(error)}`);
             }
         }
-        // Clear active agents file
-        if (fs.existsSync(this.activeAgentsFile)) {
-            fs.unlinkSync(this.activeAgentsFile);
+        // Clear all agent data
+        for (const agent of agents) {
+            this.configManager.deleteAgentData(agent.id);
         }
         return {
             success: errors.length === 0,
@@ -224,32 +234,32 @@ class AgentManager {
         };
     }
     agentExists(agentId) {
-        const agents = this.getActiveAgents();
-        return agents.some(agent => agent.id === agentId);
-    }
-    recordAgent(agent) {
-        const line = `${agent.id}:${agent.branch}:${agent.worktreePath}:${agent.tmuxSession}\n`;
-        fs.appendFileSync(this.activeAgentsFile, line);
+        const agentData = this.configManager.loadAgentData(agentId);
+        return agentData !== null;
     }
     removeAgentRecord(agentId) {
-        if (!fs.existsSync(this.activeAgentsFile)) {
-            return;
-        }
-        const content = fs.readFileSync(this.activeAgentsFile, 'utf8');
-        const lines = content.split('\n').filter(line => {
-            const trimmed = line.trim();
-            return trimmed && !trimmed.startsWith(`${agentId}:`);
-        });
-        fs.writeFileSync(this.activeAgentsFile, lines.join('\n') + (lines.length > 0 ? '\n' : ''));
+        this.configManager.deleteAgentData(agentId);
     }
-    async copyClaudeConfiguration(sourceRepo, worktreePath) {
+    async copyClaudeConfiguration(sourceRepo, worktreePath, agentInfo) {
         try {
             // Copy CLAUDE.md from source repo if it exists
             const claudeMdSource = path.join(sourceRepo, 'CLAUDE.md');
             const claudeMdDest = path.join(worktreePath, 'CLAUDE.md');
             if (fs.existsSync(claudeMdSource)) {
-                fs.copyFileSync(claudeMdSource, claudeMdDest);
-                console.log('  ✓ Copied CLAUDE.md');
+                let content = fs.readFileSync(claudeMdSource, 'utf8');
+                // Inject agent context at the beginning of CLAUDE.md
+                if (agentInfo) {
+                    const contextHeader = this.generateAgentContextHeader(agentInfo);
+                    content = contextHeader + '\n\n' + content;
+                }
+                fs.writeFileSync(claudeMdDest, content);
+                console.log('  ✓ Copied and enhanced CLAUDE.md with agent context');
+            }
+            else if (agentInfo) {
+                // Create CLAUDE.md with context if it doesn't exist
+                const contextHeader = this.generateAgentContextHeader(agentInfo);
+                fs.writeFileSync(claudeMdDest, contextHeader);
+                console.log('  ✓ Created CLAUDE.md with agent context');
             }
             // Copy Claude settings from user's home directory
             const homeDir = process.env.HOME || process.env.USERPROFILE || '';
@@ -293,6 +303,66 @@ class AgentManager {
         catch (error) {
             console.warn(`  ⚠ Warning: Could not copy some Claude configuration files: ${error instanceof Error ? error.message : String(error)}`);
         }
+    }
+    generateAgentContextHeader(agentInfo) {
+        const lines = [
+            '# AGENT CONTEXT',
+            '<!-- This section is auto-generated by magents to provide agent-specific context -->',
+            '',
+            `**Agent ID:** ${agentInfo.agentId}`,
+            `**Branch:** ${agentInfo.branch}`,
+            `**Created:** ${new Date().toISOString()}`,
+            ''
+        ];
+        if (agentInfo.environment) {
+            lines.push('## Environment');
+            if (agentInfo.environment.PROJECT_ROOT) {
+                lines.push(`- **Project Root:** ${agentInfo.environment.PROJECT_ROOT}`);
+            }
+            if (agentInfo.environment.PROJECT_NAME) {
+                lines.push(`- **Project Name:** ${agentInfo.environment.PROJECT_NAME}`);
+            }
+            if (agentInfo.environment.AGENT_TASK) {
+                lines.push(`- **Task:** ${agentInfo.environment.AGENT_TASK}`);
+            }
+            if (agentInfo.environment.ALLOWED_PORTS) {
+                lines.push(`- **Allowed Ports:** ${agentInfo.environment.ALLOWED_PORTS}`);
+            }
+            if (agentInfo.environment.ISOLATION_MODE) {
+                lines.push(`- **Isolation Mode:** ${agentInfo.environment.ISOLATION_MODE}`);
+            }
+            lines.push('');
+        }
+        if (agentInfo.context) {
+            lines.push('## Context');
+            if (agentInfo.context.task) {
+                lines.push(`### Task Description`);
+                lines.push(agentInfo.context.task);
+                lines.push('');
+            }
+            if (agentInfo.context.services && Object.keys(agentInfo.context.services).length > 0) {
+                lines.push('### Services');
+                Object.entries(agentInfo.context.services).forEach(([name, url]) => {
+                    lines.push(`- **${name}:** ${url}`);
+                });
+                lines.push('');
+            }
+            if (agentInfo.context.boundaries && agentInfo.context.boundaries.length > 0) {
+                lines.push('### Boundaries');
+                agentInfo.context.boundaries.forEach(boundary => {
+                    lines.push(`- ${boundary}`);
+                });
+                lines.push('');
+            }
+        }
+        lines.push('## Important Notes');
+        lines.push('- Stay focused on this specific branch and task');
+        lines.push('- Do not access files outside the project root');
+        lines.push('- Ignore services running on ports not listed above');
+        lines.push('');
+        lines.push('---');
+        lines.push('<!-- End of auto-generated agent context -->');
+        return lines.join('\n');
     }
 }
 exports.AgentManager = AgentManager;

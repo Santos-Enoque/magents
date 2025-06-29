@@ -2,10 +2,20 @@ import { execSync } from 'child_process';
 import { MagentsConfig } from '../types';
 
 export class TmuxService {
-  public async createSession(sessionName: string, workingDir: string, config: MagentsConfig): Promise<void> {
+  public async createSession(sessionName: string, workingDir: string, config: MagentsConfig, environment?: Record<string, string | undefined>): Promise<void> {
     try {
       // Create new session
       execSync(`tmux new-session -d -s "${sessionName}" -c "${workingDir}"`, { stdio: 'pipe' });
+      
+      // Set environment variables in the session if provided
+      if (environment) {
+        Object.entries(environment).forEach(([key, value]) => {
+          if (value !== undefined) {
+            // Set environment variable for all windows in the session
+            execSync(`tmux set-environment -t "${sessionName}" "${key}" "${value}"`, { stdio: 'pipe' });
+          }
+        });
+      }
       
       // Rename first window
       execSync(`tmux rename-window -t "${sessionName}:0" "main"`, { stdio: 'pipe' });

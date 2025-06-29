@@ -133,6 +133,58 @@ CLAUDE_AUTO_ACCEPT=true
         fs.writeFileSync(this.configFile, configLines.join('\n') + '\n');
         this.config = newConfig;
     }
+    // Agent data management methods
+    getAgentDataPath(agentId) {
+        return path.join(this.agentsDir, `${agentId}.json`);
+    }
+    saveAgentData(agent) {
+        const agentPath = this.getAgentDataPath(agent.id);
+        fs.writeFileSync(agentPath, JSON.stringify(agent, null, 2));
+    }
+    loadAgentData(agentId) {
+        const agentPath = this.getAgentDataPath(agentId);
+        if (!fs.existsSync(agentPath)) {
+            return null;
+        }
+        try {
+            const data = fs.readFileSync(agentPath, 'utf8');
+            return JSON.parse(data);
+        }
+        catch (error) {
+            console.error(`Error loading agent data for ${agentId}:`, error);
+            return null;
+        }
+    }
+    getAllAgents() {
+        const agents = [];
+        if (!fs.existsSync(this.agentsDir)) {
+            return agents;
+        }
+        const files = fs.readdirSync(this.agentsDir);
+        for (const file of files) {
+            if (file.endsWith('.json')) {
+                const agentId = file.replace('.json', '');
+                const agent = this.loadAgentData(agentId);
+                if (agent) {
+                    agents.push(agent);
+                }
+            }
+        }
+        return agents;
+    }
+    deleteAgentData(agentId) {
+        const agentPath = this.getAgentDataPath(agentId);
+        if (fs.existsSync(agentPath)) {
+            fs.unlinkSync(agentPath);
+        }
+    }
+    updateAgentData(agentId, updates) {
+        const agent = this.loadAgentData(agentId);
+        if (agent) {
+            const updatedAgent = { ...agent, ...updates };
+            this.saveAgentData(updatedAgent);
+        }
+    }
 }
 exports.ConfigManager = ConfigManager;
 //# sourceMappingURL=ConfigManager.js.map

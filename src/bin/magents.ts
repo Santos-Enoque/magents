@@ -23,14 +23,48 @@ program
   .argument('<branch>', 'Branch name for the agent')
   .argument('[agent-id]', 'Optional agent ID (auto-generated if not provided)')
   .option('--no-auto-accept', 'Disable automatic command acceptance in Claude Code')
-  .action(async (branch: string, agentId?: string, options?: { autoAccept: boolean }) => {
+  .option('-e, --env <key=value>', 'Set environment variable (can be used multiple times)', (value: string, previous: Record<string, string>) => {
+    const envVars = previous || {};
+    const [key, val] = value.split('=');
+    if (key && val) {
+      envVars[key] = val;
+    }
+    return envVars;
+  }, {} as Record<string, string>)
+  .option('-t, --task <description>', 'Task description for the agent')
+  .option('-s, --service <name=url>', 'Service endpoint (can be used multiple times)', (value: string, previous: Record<string, string>) => {
+    const services = previous || {};
+    const [name, url] = value.split('=');
+    if (name && url) {
+      services[name] = url;
+    }
+    return services;
+  }, {} as Record<string, string>)
+  .option('-b, --boundary <rule>', 'Add boundary rule (can be used multiple times)', (value: string, previous: string[]) => {
+    const boundaries = previous || [];
+    boundaries.push(value);
+    return boundaries;
+  }, [] as string[])
+  .action(async (branch: string, agentId?: string, options?: { 
+    autoAccept: boolean;
+    env?: Record<string, string>;
+    task?: string;
+    service?: Record<string, string>;
+    boundary?: string[];
+  }) => {
     const spinner = ora('Creating agent...').start();
     
     try {
       const result = await agentManager.createAgent({
         branch,
         agentId,
-        autoAccept: options?.autoAccept
+        autoAccept: options?.autoAccept,
+        environment: options?.task ? { ...options.env, AGENT_TASK: options.task } : options?.env,
+        context: {
+          task: options?.task,
+          services: options?.service,
+          boundaries: options?.boundary
+        }
       });
 
       if (result.success && result.data) {
@@ -88,6 +122,12 @@ program
         `${statusColor(agent.status.padEnd(10))} ` +
         `${chalk.gray(agent.worktreePath)}`
       );
+      
+      // Show task if present
+      if (agent.environment?.AGENT_TASK || agent.context?.task) {
+        const task = agent.environment?.AGENT_TASK || agent.context?.task || '';
+        console.log(`    ${chalk.cyan('Task:')} ${chalk.white(task)}`);
+      }
     });
     
     console.log('');
