@@ -39,11 +39,13 @@ const path = __importStar(require("path"));
 const ConfigManager_1 = require("../config/ConfigManager");
 const GitService_1 = require("./GitService");
 const TmuxService_1 = require("./TmuxService");
+const DockerService_1 = require("./DockerService");
 class AgentManager {
     constructor() {
         this.configManager = ConfigManager_1.ConfigManager.getInstance();
         this.gitService = new GitService_1.GitService();
         this.tmuxService = new TmuxService_1.TmuxService();
+        this.dockerService = new DockerService_1.DockerService();
         this.activeAgentsFile = path.join(this.configManager.getAgentsDir(), 'active_agents');
     }
     async createAgent(options) {
@@ -74,14 +76,43 @@ class AgentManager {
             await this.gitService.createWorktree(worktreePath, options.branch, config.DEFAULT_BASE_BRANCH);
             // Copy Claude configuration and CLAUDE.md
             await this.copyClaudeConfiguration(repoRoot, worktreePath);
-            // Create tmux session
-            await this.tmuxService.createSession(tmuxSession, worktreePath, config);
+            // Create session (Docker or tmux)
+            if (options.useDocker) {
+                // Check if Docker is available
+                if (!this.dockerService.isDockerAvailable()) {
+                    return {
+                        success: false,
+                        message: 'Docker is not available. Please install Docker and docker-compose.'
+                    };
+                }
+                const portRange = options.portRange || '3000-3010:3000-3010';
+                const projectName = path.basename(repoRoot);
+                // Create and start Docker container
+                await this.dockerService.createContainer({
+                    agentId,
+                    projectPath: worktreePath,
+                    portRange,
+                    branch: options.branch,
+                    projectName,
+                    isolationMode: options.isolationMode
+                });
+                await this.dockerService.startContainer(agentId, worktreePath);
+                console.log(`  ✓ Docker container created and started for agent ${agentId}`);
+            }
+            else {
+                // Create tmux session
+                await this.tmuxService.createSession(tmuxSession, worktreePath, config);
+            }
             // Record the agent
             this.recordAgent({
                 id: agentId,
                 branch: options.branch,
                 worktreePath,
-                tmuxSession
+                tmuxSession,
+                useDocker: options.useDocker,
+                containerId: options.useDocker ? `magents-${agentId}` : undefined,
+                portRange: options.portRange,
+                isolationMode: options.isolationMode
             });
             return {
                 success: true,

@@ -3,6 +3,7 @@ export declare class AgentManager {
     private configManager;
     private gitService;
     private tmuxService;
+    private dockerService;
     private activeAgentsFile;
     constructor();
     createAgent(options: CreateAgentOptions): Promise<CommandResult<CreateAgentResult>>;
