@@ -14,6 +14,9 @@ export interface MagentsConfig {
     tmuxSession: string;
     status: AgentStatus;
     createdAt: Date;
+    useDocker?: boolean;
+    containerId?: string;
+    portRange?: string;
   }
   
   export type AgentStatus = 'RUNNING' | 'STOPPED' | 'ERROR';
@@ -22,6 +25,9 @@ export interface MagentsConfig {
     branch: string;
     agentId?: string;
     autoAccept?: boolean;
+    useDocker?: boolean;
+    portRange?: string;
+    isolationMode?: 'strict' | 'permissive';
   }
   
   export interface AgentRecord {
@@ -29,6 +35,10 @@ export interface MagentsConfig {
     branch: string;
     worktreePath: string;
     tmuxSession: string;
+    useDocker?: boolean;
+    containerId?: string;
+    portRange?: string;
+    isolationMode?: 'strict' | 'permissive';
   }
   
   export interface CreateAgentResult {
@@ -54,3 +64,15 @@ export interface MagentsConfig {
     branch: string;
     head: string;
   }
+
+  export interface DockerContainerOptions {
+    agentId: string;
+    projectPath: string;
+    portRange: string;
+    environment?: Record<string, string>;
+    branch: string;
+    projectName: string;
+    isolationMode?: 'strict' | 'permissive';
+  }
+
+  export type ContainerStatus = 'running' | 'stopped' | 'paused' | 'restarting' | 'removing' | 'dead' | 'created' | 'exited';
