@@ -1,0 +1,73 @@
+{
+    "name": "magents",
+    "version": "1.0.0",
+    "description": "Multi-Agent Claude Code Workflow Manager - Manage multiple Claude Code instances with git worktrees",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "bin": {
+        "magents": "dist/bin/magents.js"
+    },
+    "scripts": {
+        "build": "tsc && cp src/scripts/postinstall.js dist/scripts/",
+        "dev": "tsc --watch",
+        "prepublishOnly": "npm run build",
+        "postinstall": "node dist/scripts/postinstall.js",
+        "test": "jest",
+        "lint": "eslint src/**/*.ts",
+        "format": "prettier --write src/**/*.ts"
+    },
+    "keywords": [
+        "claude",
+        "claude-code",
+        "git",
+        "worktree",
+        "tmux",
+        "workflow",
+        "ai",
+        "development",
+        "multi-agent",
+        "typescript"
+    ],
+    "author": "Your Name <your.email@example.com>",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/yourusername/magents.git"
+    },
+    "bugs": {
+        "url": "https://github.com/yourusername/magents/issues"
+    },
+    "homepage": "https://github.com/yourusername/magents#readme",
+    "engines": {
+        "node": ">=16.0.0"
+    },
+    "os": [
+        "darwin",
+        "linux"
+    ],
+    "dependencies": {
+        "chalk": "^5.3.0",
+        "commander": "^11.1.0",
+        "inquirer": "^9.2.12",
+        "ora": "^7.0.1"
+    },
+    "devDependencies": {
+        "@types/inquirer": "^9.0.7",
+        "@types/jest": "^29.5.8",
+        "@types/node": "^20.8.10",
+        "@typescript-eslint/eslint-plugin": "^6.9.1",
+        "@typescript-eslint/parser": "^6.9.1",
+        "eslint": "^8.53.0",
+        "jest": "^29.7.0",
+        "prettier": "^3.0.3",
+        "ts-jest": "^29.1.1",
+        "typescript": "^5.2.2"
+    },
+    "preferGlobal": true,
+    "files": [
+        "dist/",
+        "README.md",
+        "LICENSE"
+    ],
+    "type": "commonjs"
+}
