@@ -6,7 +6,6 @@ import inquirer from 'inquirer';
 import ora from 'ora';
 import { AgentManager } from '../services/AgentManager';
 import { ConfigManager } from '../config/ConfigManager';
-import { AgentEnvironment, AgentContext } from '../types';
 
 const program = new Command();
 const agentManager = new AgentManager();
@@ -24,28 +23,28 @@ program
   .argument('<branch>', 'Branch name for the agent')
   .argument('[agent-id]', 'Optional agent ID (auto-generated if not provided)')
   .option('--no-auto-accept', 'Disable automatic command acceptance in Claude Code')
-  .option('-e, --env <key=value>', 'Set environment variable (can be used multiple times)', (value, previous) => {
+  .option('-e, --env <key=value>', 'Set environment variable (can be used multiple times)', (value: string, previous: Record<string, string>) => {
     const envVars = previous || {};
     const [key, val] = value.split('=');
     if (key && val) {
       envVars[key] = val;
     }
     return envVars;
-  }, {})
+  }, {} as Record<string, string>)
   .option('-t, --task <description>', 'Task description for the agent')
-  .option('-s, --service <name=url>', 'Service endpoint (can be used multiple times)', (value, previous) => {
+  .option('-s, --service <name=url>', 'Service endpoint (can be used multiple times)', (value: string, previous: Record<string, string>) => {
     const services = previous || {};
     const [name, url] = value.split('=');
     if (name && url) {
       services[name] = url;
     }
     return services;
-  }, {})
-  .option('-b, --boundary <rule>', 'Add boundary rule (can be used multiple times)', (value, previous) => {
+  }, {} as Record<string, string>)
+  .option('-b, --boundary <rule>', 'Add boundary rule (can be used multiple times)', (value: string, previous: string[]) => {
     const boundaries = previous || [];
     boundaries.push(value);
     return boundaries;
-  }, [])
+  }, [] as string[])
   .action(async (branch: string, agentId?: string, options?: { 
     autoAccept: boolean;
     env?: Record<string, string>;
