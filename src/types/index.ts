@@ -9,6 +9,7 @@ export interface MagentsConfig {
   
   export interface Agent {
     id: string;
+    projectId?: string;
     branch: string;
     worktreePath: string;
     tmuxSession: string;
@@ -53,4 +54,23 @@ export interface MagentsConfig {
     path: string;
     branch: string;
     head: string;
+  }
+
+  export interface Project {
+    id: string;
+    path: string;
+    name: string;
+    container?: string;
+    agents: string[]; // Agent IDs
+    portRange: [number, number];
+    status: ProjectStatus;
+    createdAt: Date;
+  }
+
+  export type ProjectStatus = 'ACTIVE' | 'STOPPED' | 'ERROR';
+
+  export interface CreateProjectOptions {
+    path: string;
+    name?: string;
+    portRange?: [number, number];
   }

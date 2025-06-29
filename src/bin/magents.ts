@@ -6,10 +6,12 @@ import inquirer from 'inquirer';
 import ora from 'ora';
 import { AgentManager } from '../services/AgentManager';
 import { ConfigManager } from '../config/ConfigManager';
+import { ProjectManager } from '../services/ProjectManager';
 
 const program = new Command();
 const agentManager = new AgentManager();
 const configManager = ConfigManager.getInstance();
+const projectManager = new ProjectManager();
 
 program
   .name('magents')
@@ -298,5 +300,78 @@ program
       console.log(chalk.gray(`Config file: ${configManager.getConfigPath()}`));
     }
   });
+
+// Project commands
+program
+  .command('project')
+  .description('Project management commands')
+  .addCommand(
+    new Command('create')
+      .description('Create new project')
+      .argument('<path>', 'Project directory path')
+      .option('-n, --name <name>', 'Project name')
+      .option('-p, --ports <start-end>', 'Port range (e.g., 3000-3010)')
+      .action(async (projectPath: string, options: { name?: string; ports?: string }) => {
+        const spinner = ora('Creating project...').start();
+        
+        try {
+          let portRange: [number, number] | undefined;
+          
+          if (options.ports) {
+            const [start, end] = options.ports.split('-').map(Number);
+            if (start && end && start < end) {
+              portRange = [start, end];
+            }
+          }
+          
+          const result = await projectManager.createProject({
+            path: projectPath,
+            name: options.name,
+            portRange
+          });
+          
+          if (result.success && result.data) {
+            spinner.succeed(chalk.green(result.message));
+            console.log(chalk.blue('Project Details:'));
+            console.log(`  ID: ${chalk.yellow(result.data.id)}`);
+            console.log(`  Name: ${chalk.yellow(result.data.name)}`);
+            console.log(`  Path: ${chalk.gray(result.data.path)}`);
+            console.log(`  Port Range: ${chalk.gray(result.data.portRange.join('-'))}`);
+          } else {
+            spinner.fail(chalk.red(result.message));
+            process.exit(1);
+          }
+        } catch (error) {
+          spinner.fail(chalk.red(`Failed to create project: ${error instanceof Error ? error.message : String(error)}`));
+          process.exit(1);
+        }
+      })
+  )
+  .addCommand(
+    new Command('list')
+      .description('List all projects')
+      .action(() => {
+        const projects = projectManager.getAllProjects();
+        
+        if (projects.length === 0) {
+          console.log(chalk.yellow('No projects found'));
+          return;
+        }
+        
+        console.log(chalk.blue('Projects:'));
+        console.log('');
+        
+        projects.forEach(project => {
+          const statusColor = project.status === 'ACTIVE' ? chalk.green : 
+                             project.status === 'STOPPED' ? chalk.yellow : chalk.red;
+          
+          console.log(`  ${chalk.yellow(project.id)} - ${chalk.white(project.name)}`);
+          console.log(`    Path: ${chalk.gray(project.path)}`);
+          console.log(`    Status: ${statusColor(project.status)}`);
+          console.log(`    Agents: ${chalk.blue(project.agents.length)}`);
+          console.log('');
+        });
+      })
+  );
 
 program.parse();

@@ -10,9 +10,11 @@ const inquirer_1 = __importDefault(require("inquirer"));
 const ora_1 = __importDefault(require("ora"));
 const AgentManager_1 = require("../services/AgentManager");
 const ConfigManager_1 = require("../config/ConfigManager");
+const ProjectManager_1 = require("../services/ProjectManager");
 const program = new commander_1.Command();
 const agentManager = new AgentManager_1.AgentManager();
 const configManager = ConfigManager_1.ConfigManager.getInstance();
+const projectManager = new ProjectManager_1.ProjectManager();
 program
     .name('magents')
     .description('Multi-Agent Claude Code Workflow Manager')
@@ -271,5 +273,67 @@ program
         console.log(chalk_1.default.gray(`Config file: ${configManager.getConfigPath()}`));
     }
 });
+// Project commands
+program
+    .command('project')
+    .description('Project management commands')
+    .addCommand(new commander_1.Command('create')
+    .description('Create new project')
+    .argument('<path>', 'Project directory path')
+    .option('-n, --name <name>', 'Project name')
+    .option('-p, --ports <start-end>', 'Port range (e.g., 3000-3010)')
+    .action(async (projectPath, options) => {
+    const spinner = (0, ora_1.default)('Creating project...').start();
+    try {
+        let portRange;
+        if (options.ports) {
+            const [start, end] = options.ports.split('-').map(Number);
+            if (start && end && start < end) {
+                portRange = [start, end];
+            }
+        }
+        const result = await projectManager.createProject({
+            path: projectPath,
+            name: options.name,
+            portRange
+        });
+        if (result.success && result.data) {
+            spinner.succeed(chalk_1.default.green(result.message));
+            console.log(chalk_1.default.blue('Project Details:'));
+            console.log(`  ID: ${chalk_1.default.yellow(result.data.id)}`);
+            console.log(`  Name: ${chalk_1.default.yellow(result.data.name)}`);
+            console.log(`  Path: ${chalk_1.default.gray(result.data.path)}`);
+            console.log(`  Port Range: ${chalk_1.default.gray(result.data.portRange.join('-'))}`);
+        }
+        else {
+            spinner.fail(chalk_1.default.red(result.message));
+            process.exit(1);
+        }
+    }
+    catch (error) {
+        spinner.fail(chalk_1.default.red(`Failed to create project: ${error instanceof Error ? error.message : String(error)}`));
+        process.exit(1);
+    }
+}))
+    .addCommand(new commander_1.Command('list')
+    .description('List all projects')
+    .action(() => {
+    const projects = projectManager.getAllProjects();
+    if (projects.length === 0) {
+        console.log(chalk_1.default.yellow('No projects found'));
+        return;
+    }
+    console.log(chalk_1.default.blue('Projects:'));
+    console.log('');
+    projects.forEach(project => {
+        const statusColor = project.status === 'ACTIVE' ? chalk_1.default.green :
+            project.status === 'STOPPED' ? chalk_1.default.yellow : chalk_1.default.red;
+        console.log(`  ${chalk_1.default.yellow(project.id)} - ${chalk_1.default.white(project.name)}`);
+        console.log(`    Path: ${chalk_1.default.gray(project.path)}`);
+        console.log(`    Status: ${statusColor(project.status)}`);
+        console.log(`    Agents: ${chalk_1.default.blue(project.agents.length)}`);
+        console.log('');
+    });
+}));
 program.parse();
 //# sourceMappingURL=magents.js.map
