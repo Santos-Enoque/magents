@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  {{AGENT_ID}}:
+    build:
+      context: {{TEMPLATES_DIR}}
+      dockerfile: Dockerfile.magents
+    container_name: magents-{{AGENT_ID}}
+    hostname: {{AGENT_ID}}
+    volumes:
+      # Mount project directory
+      - {{PROJECT_PATH}}:/workspace
+      # Mount Claude settings (read-only)
+      - {{CLAUDE_CONFIG_DIR}}:/home/developer/.claude:ro
+      # Mount agent-specific storage
+      - {{AGENT_DATA_DIR}}:/home/developer/.magents
+    ports:
+      # Allocate port range for this project
+      - "{{PORT_RANGE}}"
+    environment:
+      - AGENT_ID={{AGENT_ID}}
+      - PROJECT_NAME={{PROJECT_NAME}}
+      - PROJECT_ROOT=/workspace
+      - BRANCH={{BRANCH}}
+      - ISOLATION_MODE={{ISOLATION_MODE}}
+    networks:
+      - magents-{{AGENT_ID}}
+    restart: unless-stopped
+    # Resource limits to prevent one container from consuming all resources
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+networks:
+  magents-{{AGENT_ID}}:
+    driver: bridge
+    # Create isolated network for this agent
+    ipam:
+      driver: default
+      config:
+        - subnet: {{SUBNET}}

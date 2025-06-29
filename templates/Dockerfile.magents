@@ -1,0 +1,29 @@
+FROM node:20-slim
+
+# Install required tools for development
+RUN apt-get update && apt-get install -y \
+    git \
+    tmux \
+    curl \
+    vim \
+    nano \
+    procps \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user for security
+RUN useradd -m -s /bin/bash developer && \
+    echo "developer:developer" | chpasswd && \
+    usermod -aG sudo developer
+
+# Set up workspace
+WORKDIR /workspace
+RUN chown developer:developer /workspace
+
+# Switch to non-root user
+USER developer
+
+# Create directories for Claude settings
+RUN mkdir -p /home/developer/.claude /home/developer/.magents
+
+# Keep container running
+CMD ["tail", "-f", "/dev/null"]
