@@ -23,14 +23,25 @@ program
   .argument('<branch>', 'Branch name for the agent')
   .argument('[agent-id]', 'Optional agent ID (auto-generated if not provided)')
   .option('--no-auto-accept', 'Disable automatic command acceptance in Claude Code')
-  .action(async (branch: string, agentId?: string, options?: { autoAccept: boolean }) => {
+  .option('--docker', 'Use Docker containers for complete project isolation')
+  .option('-p, --ports <range>', 'Port range for Docker container (e.g., 3000-3010:3000-3010)', '3000-3010:3000-3010')
+  .option('--isolation <mode>', 'Isolation mode: strict or permissive', 'strict')
+  .action(async (branch: string, agentId?: string, options?: { 
+    autoAccept: boolean;
+    docker?: boolean;
+    ports?: string;
+    isolation?: 'strict' | 'permissive';
+  }) => {
     const spinner = ora('Creating agent...').start();
     
     try {
       const result = await agentManager.createAgent({
         branch,
         agentId,
-        autoAccept: options?.autoAccept
+        autoAccept: options?.autoAccept,
+        useDocker: options?.docker,
+        portRange: options?.ports,
+        isolationMode: options?.isolation
       });
 
       if (result.success && result.data) {
