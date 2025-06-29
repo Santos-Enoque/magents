@@ -10,9 +10,11 @@ const inquirer_1 = __importDefault(require("inquirer"));
 const ora_1 = __importDefault(require("ora"));
 const AgentManager_1 = require("../services/AgentManager");
 const ConfigManager_1 = require("../config/ConfigManager");
+const PortManager_1 = require("../services/PortManager");
 const program = new commander_1.Command();
 const agentManager = new AgentManager_1.AgentManager();
 const configManager = ConfigManager_1.ConfigManager.getInstance();
+const portManager = new PortManager_1.PortManager();
 program
     .name('magents')
     .description('Multi-Agent Claude Code Workflow Manager')
@@ -269,6 +271,58 @@ program
         });
         console.log('');
         console.log(chalk_1.default.gray(`Config file: ${configManager.getConfigPath()}`));
+    }
+});
+// Ports command
+program
+    .command('ports')
+    .description('Port management commands')
+    .option('-l, --list', 'List all allocated ports')
+    .option('-d, --detect <path>', 'Detect ports in project directory')
+    .option('-a, --allocate <count>', 'Allocate port range for project')
+    .option('--project <id>', 'Project ID for operations')
+    .action((options) => {
+    if (options.list) {
+        const allocations = portManager.getAllocatedPorts();
+        if (allocations.length === 0) {
+            console.log(chalk_1.default.yellow('No ports currently allocated'));
+            return;
+        }
+        console.log(chalk_1.default.blue('Allocated Ports:'));
+        console.log('');
+        allocations.forEach(allocation => {
+            const inUse = portManager.isPortInUse(allocation.port);
+            const statusColor = inUse ? chalk_1.default.green : chalk_1.default.yellow;
+            console.log(`  Port ${chalk_1.default.white(allocation.port.toString())} - ${statusColor(inUse ? 'IN USE' : 'ALLOCATED')}`);
+            console.log(`    Project: ${chalk_1.default.yellow(allocation.projectId)}`);
+            console.log(`    Service: ${chalk_1.default.gray(allocation.service)}`);
+            console.log(`    Allocated: ${chalk_1.default.gray(allocation.allocatedAt.toISOString())}`);
+            console.log('');
+        });
+    }
+    if (options.detect) {
+        const detected = portManager.detectProjectPorts(options.detect);
+        if (Object.keys(detected).length === 0) {
+            console.log(chalk_1.default.yellow('No ports detected in project'));
+            return;
+        }
+        console.log(chalk_1.default.blue('Detected Ports:'));
+        console.log('');
+        Object.entries(detected).forEach(([service, port]) => {
+            const inUse = portManager.isPortInUse(port);
+            const statusColor = inUse ? chalk_1.default.red : chalk_1.default.green;
+            console.log(`  ${chalk_1.default.white(service)}: ${chalk_1.default.yellow(port.toString())} ${statusColor(inUse ? '(IN USE)' : '(AVAILABLE)')}`);
+        });
+    }
+    if (options.allocate && options.project) {
+        try {
+            const count = parseInt(options.allocate, 10);
+            const [start, end] = portManager.allocateRange(options.project, count);
+            console.log(chalk_1.default.green(`Allocated port range: ${start}-${end} for project ${options.project}`));
+        }
+        catch (error) {
+            console.log(chalk_1.default.red(`Failed to allocate ports: ${error instanceof Error ? error.message : String(error)}`));
+        }
     }
 });
 program.parse();
