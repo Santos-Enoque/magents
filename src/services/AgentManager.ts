@@ -71,7 +71,7 @@ export class AgentManager {
         branch: options.branch,
         worktreePath,
         tmuxSession,
-        environment: environment as any,
+        environment: environment as import('../types').AgentEnvironment,
         context: options.context
       };
       this.configManager.saveAgentData(agentRecord);
@@ -131,7 +131,11 @@ export class AgentManager {
       if (!this.tmuxService.sessionExists(agent.tmuxSession)) {
         // Recreate session if it doesn't exist
         const config = this.configManager.loadConfig();
-        await this.tmuxService.createSession(agent.tmuxSession, agent.worktreePath, config, agent.environment);
+        const envRecord = agent.environment ? Object.entries(agent.environment).reduce((acc, [key, value]) => {
+          acc[key] = value;
+          return acc;
+        }, {} as Record<string, string | undefined>) : undefined;
+        await this.tmuxService.createSession(agent.tmuxSession, agent.worktreePath, config, envRecord);
       }
 
       // Attach to session (this will replace current process)

@@ -13,18 +13,37 @@ export interface Agent {
     tmuxSession: string;
     status: AgentStatus;
     createdAt: Date;
+    environment?: AgentEnvironment;
+    context?: AgentContext;
 }
 export type AgentStatus = 'RUNNING' | 'STOPPED' | 'ERROR';
+export interface AgentEnvironment {
+    PROJECT_ROOT: string;
+    PROJECT_NAME: string;
+    ALLOWED_PORTS?: string;
+    AGENT_ID: string;
+    AGENT_TASK?: string;
+    ISOLATION_MODE?: 'strict' | 'permissive';
+}
+export interface AgentContext {
+    task?: string;
+    services?: Record<string, string>;
+    boundaries?: string[];
+}
 export interface CreateAgentOptions {
     branch: string;
     agentId?: string;
     autoAccept?: boolean;
+    environment?: Partial<AgentEnvironment>;
+    context?: AgentContext;
 }
 export interface AgentRecord {
     id: string;
     branch: string;
     worktreePath: string;
     tmuxSession: string;
+    environment?: AgentEnvironment;
+    context?: AgentContext;
 }
 export interface CreateAgentResult {
     agentId: string;

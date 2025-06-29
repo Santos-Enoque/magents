@@ -3,10 +3,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TmuxService = void 0;
 const child_process_1 = require("child_process");
 class TmuxService {
-    async createSession(sessionName, workingDir, config) {
+    async createSession(sessionName, workingDir, config, environment) {
         try {
             // Create new session
             (0, child_process_1.execSync)(`tmux new-session -d -s "${sessionName}" -c "${workingDir}"`, { stdio: 'pipe' });
+            // Set environment variables in the session if provided
+            if (environment) {
+                Object.entries(environment).forEach(([key, value]) => {
+                    if (value !== undefined) {
+                        // Set environment variable for all windows in the session
+                        (0, child_process_1.execSync)(`tmux set-environment -t "${sessionName}" "${key}" "${value}"`, { stdio: 'pipe' });
+                    }
+                });
+            }
             // Rename first window
             (0, child_process_1.execSync)(`tmux rename-window -t "${sessionName}:0" "main"`, { stdio: 'pipe' });
             // Create claude window

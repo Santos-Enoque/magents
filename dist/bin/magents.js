@@ -24,13 +24,41 @@ program
     .argument('<branch>', 'Branch name for the agent')
     .argument('[agent-id]', 'Optional agent ID (auto-generated if not provided)')
     .option('--no-auto-accept', 'Disable automatic command acceptance in Claude Code')
+    .option('-e, --env <key=value>', 'Set environment variable (can be used multiple times)', (value, previous) => {
+    const envVars = previous || {};
+    const [key, val] = value.split('=');
+    if (key && val) {
+        envVars[key] = val;
+    }
+    return envVars;
+}, {})
+    .option('-t, --task <description>', 'Task description for the agent')
+    .option('-s, --service <name=url>', 'Service endpoint (can be used multiple times)', (value, previous) => {
+    const services = previous || {};
+    const [name, url] = value.split('=');
+    if (name && url) {
+        services[name] = url;
+    }
+    return services;
+}, {})
+    .option('-b, --boundary <rule>', 'Add boundary rule (can be used multiple times)', (value, previous) => {
+    const boundaries = previous || [];
+    boundaries.push(value);
+    return boundaries;
+}, [])
     .action(async (branch, agentId, options) => {
     const spinner = (0, ora_1.default)('Creating agent...').start();
     try {
         const result = await agentManager.createAgent({
             branch,
             agentId,
-            autoAccept: options?.autoAccept
+            autoAccept: options?.autoAccept,
+            environment: options?.task ? { ...options.env, AGENT_TASK: options.task } : options?.env,
+            context: {
+                task: options?.task,
+                services: options?.service,
+                boundaries: options?.boundary
+            }
         });
         if (result.success && result.data) {
             spinner.succeed(chalk_1.default.green(result.message));
@@ -79,6 +107,11 @@ program
             `${chalk_1.default.white(agent.branch.padEnd(23))} ` +
             `${statusColor(agent.status.padEnd(10))} ` +
             `${chalk_1.default.gray(agent.worktreePath)}`);
+        // Show task if present
+        if (agent.environment?.AGENT_TASK || agent.context?.task) {
+            const task = agent.environment?.AGENT_TASK || agent.context?.task || '';
+            console.log(`    ${chalk_1.default.cyan('Task:')} ${chalk_1.default.white(task)}`);
+        }
     });
     console.log('');
     console.log(chalk_1.default.blue(`Total: ${agents.length} agent${agents.length !== 1 ? 's' : ''}`));
