@@ -1,4 +1,4 @@
-import { execSync, spawn } from 'child_process';
+import { execSync } from 'child_process';
 import { MagentsConfig } from '../types';
 
 export class TmuxService {
@@ -17,10 +17,8 @@ export class TmuxService {
       execSync(`tmux new-window -t "${sessionName}" -n "git" -c "${workingDir}"`, { stdio: 'pipe' });
       
       // Build Claude Code command
-      let claudeCmd = config.CLAUDE_CODE_PATH;
-      if (config.CLAUDE_AUTO_ACCEPT) {
-        claudeCmd += ' --accept-all';
-      }
+      const claudeCmd = config.CLAUDE_CODE_PATH;
+      // Note: claude CLI doesn't have an --accept-all flag
       
       // Start Claude Code in the claude window
       execSync(`tmux send-keys -t "${sessionName}:claude" "cd '${workingDir}' && ${claudeCmd}" Enter`, { stdio: 'pipe' });
@@ -58,27 +56,37 @@ export class TmuxService {
 
   public async attachToSession(sessionName: string): Promise<void> {
     try {
-      // Use spawn instead of execSync to replace current process
-      const child = spawn('tmux', ['attach-session', '-t', sessionName], {
-        stdio: 'inherit'
-      });
-
-      return new Promise((resolve, reject) => {
-        child.on('close', (code) => {
-          if (code === 0) {
-            resolve();
-          } else {
-            reject(new Error(`tmux attach failed with code ${code}`));
-          }
-        });
-
-        child.on('error', (error) => {
-          reject(new Error(`Failed to attach to tmux session: ${error.message}`));
-        });
+      // Check if we're in a TTY
+      if (!process.stdout.isTTY) {
+        throw new Error('Not running in a terminal. Please run this command from a proper terminal.');
+      }
+      
+      // Check if we're already inside a tmux session
+      const insideTmux = process.env.TMUX !== undefined;
+      
+      if (insideTmux) {
+        // If inside tmux, use switch-client instead of attach
+        execSync(`tmux switch-client -t "${sessionName}"`, { stdio: 'inherit' });
+        return;
+      }
+      
+      // Use execSync with stdio: 'inherit' to properly handle terminal
+      // This allows tmux to take over the terminal completely
+      execSync(`tmux attach-session -t "${sessionName}"`, { 
+        stdio: 'inherit',
+        // Ensure we're in a proper TTY environment
+        env: { ...process.env, TERM: process.env.TERM || 'xterm-256color' }
       });
 
     } catch (error) {
-      throw new Error(`Failed to attach to session: ${error instanceof Error ? error.message : String(error)}`);
+      // Check if it's a command error
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      if (errorMessage.includes('exited unexpectedly') || errorMessage.includes('server exited')) {
+        throw new Error('Terminal compatibility issue. Try running: tmux attach-session -t ' + sessionName);
+      }
+      
+      throw new Error(`Failed to attach to session: ${errorMessage}`);
     }
   }
 

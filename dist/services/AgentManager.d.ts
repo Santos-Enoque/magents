@@ -13,5 +13,6 @@ export declare class AgentManager {
     private agentExists;
     private recordAgent;
     private removeAgentRecord;
+    private copyClaudeConfiguration;
 }
 //# sourceMappingURL=AgentManager.d.ts.map

@@ -15,6 +15,7 @@ class GitService {
             throw new Error('Not in a git repository');
         }
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async prepareBranch(branchName, baseBranch) {
         try {
             // Check if branch exists locally
