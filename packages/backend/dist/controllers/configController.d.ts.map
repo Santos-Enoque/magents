@@ -1,1 +1,0 @@
-{"version":3,"file":"configController.d.ts","sourceRoot":"","sources":["../../src/controllers/configController.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,aAAa,EAAkB,MAAM,iBAAiB,CAAC;AAKhE,eAAO,MAAM,gBAAgB;iBACR,OAAO,CAAC,aAAa,CAAC;0BAIb,OAAO,CAAC,aAAa,CAAC,GAAG,OAAO,CAAC,aAAa,CAAC;mBAqBtD,OAAO,CAAC,aAAa,CAAC;CAI5C,CAAC"}

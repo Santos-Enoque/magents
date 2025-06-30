@@ -1,26 +1,33 @@
 {
-    "compilerOptions": {
-      "target": "ES2020",
-      "module": "commonjs",
-      "lib": ["ES2020"],
-      "outDir": "./dist",
-      "rootDir": "./src",
-      "strict": true,
-      "esModuleInterop": true,
-      "skipLibCheck": true,
-      "forceConsistentCasingInFileNames": true,
-      "declaration": true,
-      "declarationMap": true,
-      "sourceMap": true,
-      "resolveJsonModule": true,
-      "moduleResolution": "node"
-    },
-    "include": [
-      "src/**/*"
-    ],
-    "exclude": [
-      "node_modules",
-      "dist",
-      "**/*.test.ts"
-    ]
-  }
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "lib": ["ES2020"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "composite": true,
+    "incremental": true
+  },
+  "files": [],
+  "references": [
+    { "path": "./packages/shared" },
+    { "path": "./packages/cli" },
+    { "path": "./packages/backend" },
+    { "path": "./packages/web" }
+  ],
+  "include": [],
+  "exclude": [
+    "node_modules",
+    "**/dist",
+    "**/build",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
+}
