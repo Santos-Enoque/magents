@@ -7,6 +7,7 @@ import { apiService } from '../services/api';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { StatusIndicator, StatusSummary } from './StatusIndicator';
 import { AgentActions } from './AgentActions';
+import { toast } from 'react-toastify';
 
 interface AgentDashboardProps {
   className?: string;
@@ -143,49 +144,65 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ className }) => 
     return d.toLocaleString();
   };
 
-  const handleRefresh = () => {
-    refetch();
+  const handleRefresh = async () => {
+    try {
+      await refetch();
+      toast.success('Dashboard refreshed');
+    } catch (error) {
+      toast.error('Failed to refresh dashboard');
+    }
   };
 
   // Agent action handlers
   const handleStartAgent = async (agentId: string) => {
     try {
       await apiService.updateAgentStatus(agentId, 'RUNNING');
+      toast.success(`Agent ${agentId} started successfully`);
       // Status will be updated via WebSocket
     } catch (error) {
       console.error('Failed to start agent:', error);
-      // TODO: Show error toast
+      toast.error(`Failed to start agent ${agentId}`);
     }
   };
 
   const handleStopAgent = async (agentId: string) => {
     try {
       await apiService.updateAgentStatus(agentId, 'STOPPED');
+      toast.success(`Agent ${agentId} stopped successfully`);
       // Status will be updated via WebSocket
     } catch (error) {
       console.error('Failed to stop agent:', error);
-      // TODO: Show error toast
+      toast.error(`Failed to stop agent ${agentId}`);
     }
   };
 
   const handleDeleteAgent = async (agentId: string, removeWorktree: boolean = false) => {
     try {
       await apiService.deleteAgent(agentId, removeWorktree);
+      toast.success(`Agent ${agentId} deleted successfully`);
       // Remove from local state
       setAgents(prevAgents => prevAgents.filter(agent => agent.id !== agentId));
     } catch (error) {
       console.error('Failed to delete agent:', error);
-      // TODO: Show error toast
+      toast.error(`Failed to delete agent ${agentId}`);
     }
   };
 
   const handleRestartAgent = async (agentId: string) => {
     try {
-      await handleStopAgent(agentId);
+      await apiService.updateAgentStatus(agentId, 'STOPPED');
       // Small delay before starting
-      setTimeout(() => handleStartAgent(agentId), 1000);
+      setTimeout(async () => {
+        try {
+          await apiService.updateAgentStatus(agentId, 'RUNNING');
+          toast.success(`Agent ${agentId} restarted successfully`);
+        } catch (error) {
+          toast.error(`Failed to restart agent ${agentId}`);
+        }
+      }, 1000);
     } catch (error) {
       console.error('Failed to restart agent:', error);
+      toast.error(`Failed to restart agent ${agentId}`);
     }
   };
 
@@ -392,6 +409,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ className }) => 
             onStop={handleStopAgent}
             onRestart={handleRestartAgent}
             onDelete={handleDeleteAgent}
+            navigate={navigate}
           />
         ) : (
           <CardView 
@@ -401,6 +419,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ className }) => 
             onStop={handleStopAgent}
             onRestart={handleRestartAgent}
             onDelete={handleDeleteAgent}
+            navigate={navigate}
           />
         )}
       </div>
@@ -415,9 +434,10 @@ interface AgentViewProps {
   onStop: (agentId: string) => void;
   onRestart: (agentId: string) => void;
   onDelete: (agentId: string, removeWorktree?: boolean) => void;
+  navigate: (path: string) => void;
 }
 
-const TableView: React.FC<AgentViewProps> = ({ agents, formatDate, onStart, onStop, onRestart, onDelete }) => (
+const TableView: React.FC<AgentViewProps> = ({ agents, formatDate, onStart, onStop, onRestart, onDelete, navigate }) => (
   <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
     <table className="min-w-full divide-y divide-gray-300">
       <thead className="bg-gray-50">
@@ -446,7 +466,12 @@ const TableView: React.FC<AgentViewProps> = ({ agents, formatDate, onStart, onSt
         {agents.map((agent) => (
           <tr key={agent.id} className="hover:bg-gray-50">
             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-              {agent.id}
+              <button
+                onClick={() => navigate(`/agents/${agent.id}`)}
+                className="text-blue-600 hover:text-blue-800 hover:underline focus:outline-none"
+              >
+                {agent.id}
+              </button>
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               <code className="bg-gray-100 px-2 py-1 rounded text-xs">{agent.branch}</code>
@@ -478,13 +503,20 @@ const TableView: React.FC<AgentViewProps> = ({ agents, formatDate, onStart, onSt
   </div>
 );
 
-const CardView: React.FC<AgentViewProps> = ({ agents, formatDate, onStart, onStop, onRestart, onDelete }) => (
+const CardView: React.FC<AgentViewProps> = ({ agents, formatDate, onStart, onStop, onRestart, onDelete, navigate }) => (
   <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
     {agents.map((agent) => (
       <div key={agent.id} className="bg-white overflow-hidden shadow rounded-lg">
         <div className="p-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium text-gray-900 truncate">{agent.id}</h3>
+            <h3 className="text-lg font-medium text-gray-900 truncate">
+              <button
+                onClick={() => navigate(`/agents/${agent.id}`)}
+                className="text-blue-600 hover:text-blue-800 hover:underline focus:outline-none"
+              >
+                {agent.id}
+              </button>
+            </h3>
             <StatusIndicator status={agent.status} size="sm" />
           </div>
           <div className="mt-4 space-y-3">
