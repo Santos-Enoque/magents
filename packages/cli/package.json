@@ -1,0 +1,49 @@
+{
+  "name": "@magents/cli",
+  "version": "1.0.0",
+  "description": "Multi-Agent Claude Code Workflow Manager CLI",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "magents": "dist/bin/magents.js"
+  },
+  "scripts": {
+    "build": "tsc && mkdir -p dist/scripts && cp src/scripts/postinstall.js dist/scripts/",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@magents/shared": "workspace:*",
+    "boxen": "^8.0.1",
+    "chalk": "^5.3.0",
+    "cli-spinners": "^3.2.0",
+    "cli-table3": "^0.6.5",
+    "commander": "^11.1.0",
+    "figures": "^6.1.0",
+    "gradient-string": "^3.0.0",
+    "inquirer": "^9.2.12",
+    "log-symbols": "^7.0.1",
+    "ora": "^7.0.1"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "@types/jest": "^29.5.8",
+    "@types/node": "^20.8.10",
+    "@typescript-eslint/eslint-plugin": "^6.9.1",
+    "@typescript-eslint/parser": "^6.9.1",
+    "eslint": "^8.53.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.0.3",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.2.2"
+  },
+  "preferGlobal": true,
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "type": "commonjs"
+}
