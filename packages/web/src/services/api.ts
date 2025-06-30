@@ -1,4 +1,4 @@
-import { Agent, Project, MagentsConfig, ApiResponse, PaginatedResponse } from '@magents/shared';
+import { Agent, Project, MagentsConfig, ApiResponse, PaginatedResponse, CreateAgentOptions } from '@magents/shared';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
@@ -42,11 +42,46 @@ class ApiService {
     return this.request<Agent>(`/api/agents/${id}`);
   }
 
-  async createAgent(options: any) {
-    return this.request<Agent>('/api/agents', {
-      method: 'POST',
-      body: JSON.stringify(options),
-    });
+  async createAgent(options: CreateAgentOptions) {
+    // Log the request for debugging
+    console.log('Creating agent with options:', options);
+    
+    try {
+      const result = await this.request<Agent>('/api/agents', {
+        method: 'POST',
+        body: JSON.stringify(options),
+      });
+      
+      console.log('Agent created successfully:', result);
+      return result;
+    } catch (error) {
+      console.error('Failed to create agent:', error);
+      
+      // Enhanced error handling with specific error types
+      if (error instanceof Error) {
+        // Check for common error scenarios
+        if (error.message.includes('already exists')) {
+          throw new Error(`Agent with ID "${options.agentId || options.branch}" already exists. Please use a different ID or branch name.`);
+        }
+        
+        if (error.message.includes('branch')) {
+          throw new Error(`Invalid branch name "${options.branch}". Please check that the branch exists or can be created.`);
+        }
+        
+        if (error.message.includes('network') || error.message.includes('fetch')) {
+          throw new Error('Network error: Please check your connection and try again.');
+        }
+        
+        if (error.message.includes('validation')) {
+          throw new Error('Validation error: Please check your input and try again.');
+        }
+        
+        // Re-throw with original message if no specific handling
+        throw error;
+      }
+      
+      throw new Error('Unknown error occurred while creating agent');
+    }
   }
 
   async updateAgentStatus(id: string, status: string) {

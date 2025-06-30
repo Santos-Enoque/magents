@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { RefreshCw, Table, Grid, Plus, Search, Filter } from 'lucide-react';
 import { Agent, AgentStatus } from '@magents/shared';
@@ -16,6 +17,7 @@ interface ViewMode {
 }
 
 export const AgentDashboard: React.FC<AgentDashboardProps> = ({ className }) => {
+  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<ViewMode['mode']>('table');
   const [agents, setAgents] = useState<Agent[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -355,7 +357,10 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ className }) => 
               Get started by creating a new agent.
             </p>
             <div className="mt-6">
-              <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <button 
+                onClick={() => navigate('/agents/new')}
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Agent
               </button>

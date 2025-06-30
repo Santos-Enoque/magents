@@ -6,6 +6,7 @@ import { ToastContainer } from 'react-toastify';
 import { Layout } from './components/Layout';
 import { Dashboard } from './pages/Dashboard';
 import { Agents } from './pages/Agents';
+import { CreateAgent } from './pages/CreateAgent';
 import { Projects } from './pages/Projects';
 import { Settings } from './pages/Settings';
 import { AgentDetail } from './pages/AgentDetail';
@@ -34,6 +35,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/agents" element={<Agents />} />
+                <Route path="/agents/new" element={<CreateAgent />} />
                 <Route path="/agents/:id" element={<AgentDetail />} />
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/projects/:id" element={<ProjectDetail />} />

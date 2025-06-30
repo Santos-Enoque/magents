@@ -483,7 +483,7 @@
           4,
           6
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -491,7 +491,7 @@
             "description": "Build the basic form component with input fields for agent name, branch selection, and submit button",
             "dependencies": [],
             "details": "Create AgentCreateForm.tsx component with form fields for agent name (text input), branch selection (dropdown/combobox), and submit button. Use controlled components with useState for form state management. Include proper TypeScript interfaces for form data.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests for component rendering and form field interactions"
           },
           {
@@ -502,7 +502,7 @@
               1
             ],
             "details": "Implement validation rules for agent name (required, alphanumeric with hyphens/underscores) and branch name (required, valid git branch format). Add error state management and display validation messages. Use form validation library like react-hook-form or custom validation functions.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests for validation functions and error message display"
           },
           {
@@ -513,7 +513,7 @@
               2
             ],
             "details": "Create agentService.ts with createAgent function that posts to /api/agents endpoint. Include proper TypeScript types for request/response. Implement error handling for network failures, validation errors, and server errors. Add request/response logging.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Integration tests for API service with mock server responses"
           },
           {
@@ -524,7 +524,7 @@
               3
             ],
             "details": "Add loading state during form submission with spinner/disabled button. Implement success feedback (toast notification or success message) and error handling with user-friendly error messages. Add form reset functionality after successful submission.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "UI tests for loading states and user feedback scenarios"
           },
           {
@@ -535,7 +535,7 @@
               4
             ],
             "details": "Verify backend integration creates tmux sessions and git worktrees correctly. Add validation that submitted data matches expected backend format. Implement proper error handling for tmux/git operations. Add success verification that agent is actually created and running.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "End-to-end tests verifying full agent creation workflow including tmux session and git worktree creation"
           }
         ]
@@ -683,7 +683,7 @@
     ],
     "metadata": {
       "created": "2025-06-30T14:18:19.843Z",
-      "updated": "2025-06-30T17:05:04.663Z",
+      "updated": "2025-06-30T17:23:51.197Z",
       "description": "Tasks for master context"
     }
   }
