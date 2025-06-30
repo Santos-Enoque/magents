@@ -79,7 +79,7 @@
         "dependencies": [
           1
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -87,7 +87,7 @@
             "description": "Initialize the shared package with proper directory structure and TypeScript configuration",
             "dependencies": [],
             "details": "Create packages/shared directory with src/, dist/, and package.json. Configure package.json with proper name (@magents/shared), version, main/types exports, and TypeScript as devDependency. Setup tsconfig.json for compilation and create initial index.ts barrel export file.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify package structure matches monorepo conventions and package.json has correct export paths"
           },
           {
@@ -98,7 +98,7 @@
               1
             ],
             "details": "Copy all type definitions from src/types/index.ts to packages/shared/src/types.ts. Maintain all existing interfaces, types, and enums. Update packages/shared/src/index.ts to re-export all types from types.ts file.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Ensure all types are properly exported and accessible when importing from @magents/shared"
           },
           {
@@ -109,7 +109,7 @@
               2
             ],
             "details": "Scan codebase for utility functions that could be shared across packages. Create packages/shared/src/utils.ts and packages/shared/src/constants.ts. Move functions like validation helpers, formatting utilities, and shared constants. Update barrel exports in index.ts.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test that utilities work correctly when imported and maintain same functionality as original locations"
           },
           {
@@ -120,7 +120,7 @@
               3
             ],
             "details": "Configure tsconfig.json for declaration generation, set outDir to dist/, include all src files. Add build script to package.json using tsc. Ensure proper module resolution and export maps for both CommonJS and ESM. Generate type declarations in dist/ directory.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run build process and verify .d.ts files are generated correctly with proper type exports"
           },
           {
@@ -131,7 +131,7 @@
               4
             ],
             "details": "Update src/types/index.ts to re-export from @magents/shared instead of defining types locally. Update all import statements throughout the codebase to use the shared package. Add @magents/shared as dependency in main package.json. Test that all existing functionality continues to work.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run existing tests to ensure no regressions, verify TypeScript compilation passes, and check that all imports resolve correctly"
           }
         ]
@@ -146,7 +146,7 @@
         "dependencies": [
           2
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -154,7 +154,7 @@
             "description": "Create the new packages/cli directory structure and move all existing src/ code to packages/cli/src/",
             "dependencies": [],
             "details": "Create packages/cli directory with src/, dist/, and tests/ subdirectories. Move all files from src/ to packages/cli/src/. Update any internal relative imports within the CLI code to reflect the new structure.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify all files are moved correctly and no files are lost in the migration"
           },
           {
@@ -165,7 +165,7 @@
               1
             ],
             "details": "Identify all imports that should reference shared types from packages/shared. Update import statements to use relative paths to packages/shared or configure proper module resolution. Ensure types like AgentConfig, GitConfig, etc. are imported from shared package.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run TypeScript compilation to verify all imports resolve correctly"
           },
           {
@@ -176,7 +176,7 @@
               2
             ],
             "details": "Create package.json in packages/cli with bin field pointing to compiled CLI entry point. Configure dependencies including packages/shared. Set up proper npm scripts for build, test, and dev. Ensure the binary name 'magents' is properly configured.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test local npm link to verify binary is accessible globally"
           },
           {
@@ -187,7 +187,7 @@
               3
             ],
             "details": "Create tsconfig.json in packages/cli with proper project references to packages/shared. Update root tsconfig.json to include packages/cli in references. Configure proper output directories and module resolution. Ensure proper build order between packages.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run tsc --build to verify TypeScript compilation works correctly"
           },
           {
@@ -198,7 +198,7 @@
               4
             ],
             "details": "Update root package.json build scripts to build CLI package. Test global installation with npm install -g. Verify all core services work: AgentManager can create/manage agents, GitService handles git operations, TmuxService manages tmux sessions, ConfigManager handles configuration, UIService provides proper UI feedback. Test CLI commands end-to-end.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run full CLI test suite and manual testing of all major commands to ensure no functionality is broken"
           }
         ]
@@ -683,7 +683,7 @@
     ],
     "metadata": {
       "created": "2025-06-30T14:18:19.843Z",
-      "updated": "2025-06-30T15:10:59.532Z",
+      "updated": "2025-06-30T15:17:06.595Z",
       "description": "Tasks for master context"
     }
   }
