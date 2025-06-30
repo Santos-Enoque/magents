@@ -213,7 +213,7 @@
         "dependencies": [
           2
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -221,7 +221,7 @@
             "description": "Create the backend package directory structure and setup TypeScript configuration with proper build tooling",
             "dependencies": [],
             "details": "Create packages/backend/ directory with src/, dist/, and config subdirectories. Setup package.json with Express.js, TypeScript, and build dependencies. Configure tsconfig.json with proper module resolution for importing from CLI package. Setup build scripts and dev server with nodemon for hot reload.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify TypeScript compilation works and basic package structure is correct"
           },
           {
@@ -232,7 +232,7 @@
               1
             ],
             "details": "Create src/server.ts with Express app initialization. Add CORS middleware configured for web frontend. Implement global error handling middleware with proper error response formatting. Add request logging middleware. Setup JSON body parsing and request validation middleware using express-validator.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test server startup, CORS headers, and error handling with basic requests"
           },
           {
@@ -243,7 +243,7 @@
               2
             ],
             "details": "Import AgentManager, ConfigManager, and other core services from packages/cli/src/. Create service adapters in src/services/ to handle API-specific concerns like async responses and error formatting. Ensure proper dependency injection and service lifecycle management for server environment.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests for service adapters and integration tests for service imports"
           },
           {
@@ -254,7 +254,7 @@
               3
             ],
             "details": "Create src/routes/agents.ts with GET /api/agents (list with pagination), POST /api/agents (create with validation), GET /api/agents/:id (details), DELETE /api/agents/:id (remove). Implement request validation schemas for each endpoint. Add proper HTTP status codes and error responses. Include route-level error handling.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "API integration tests for each endpoint covering success and error scenarios"
           },
           {
@@ -265,7 +265,7 @@
               4
             ],
             "details": "Setup build scripts in package.json for production compilation. Configure environment variable management for API keys and server configuration. Add start scripts for production and development modes. Setup health check endpoint. Configure proper logging for production environment.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test production build process and verify server runs correctly in production mode"
           }
         ]
@@ -280,7 +280,7 @@
         "dependencies": [
           4
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -288,7 +288,7 @@
             "description": "Install and configure Socket.IO or ws library with the existing Express server",
             "dependencies": [],
             "details": "Install Socket.IO package, create WebSocket server instance that shares the same HTTP server as Express, configure CORS settings for WebSocket connections, and set up basic connection handling with logging",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test WebSocket server starts successfully, accepts connections, and handles basic connect/disconnect events"
           },
           {
@@ -299,7 +299,7 @@
               1
             ],
             "details": "Implement connection tracking, add authentication middleware if needed (JWT token validation), create connection pools or rooms for different types of clients, handle connection cleanup on disconnect",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test authenticated and unauthenticated connections, verify connection tracking works correctly, test cleanup on disconnect"
           },
           {
@@ -310,7 +310,7 @@
               2
             ],
             "details": "Design event payload structure for agent status changes (agent_id, status, timestamp, metadata), define event types (agent_status_changed, agent_error, agent_metrics), create event validation schemas, implement event emitters and listeners",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test event schema validation, verify event payload structure matches specification, test event emission and reception"
           },
           {
@@ -321,7 +321,7 @@
               3
             ],
             "details": "Identify existing agent status update points in the codebase, inject WebSocket event emissions at status change locations, ensure events are emitted for all status transitions (RUNNING, STOPPED, ERROR), add error handling for failed event emissions",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test that status changes trigger WebSocket events, verify all agent state transitions emit appropriate events, test event emission doesn't break existing functionality"
           },
           {
@@ -332,7 +332,7 @@
               4
             ],
             "details": "Implement room-based or targeted broadcasting (clients can subscribe to specific agents or all agents), add event queuing for disconnected clients if needed, implement rate limiting for high-frequency updates, add logging for event broadcasting",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test multiple clients receive broadcasts correctly, verify targeted broadcasting works, test rate limiting prevents spam, verify event delivery to reconnected clients"
           }
         ]
@@ -347,7 +347,7 @@
         "dependencies": [
           2
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -355,7 +355,7 @@
             "description": "Create the React application structure in packages/web/ using Vite bundler with TypeScript template",
             "dependencies": [],
             "details": "Run 'npm create vite@latest packages/web -- --template react-ts' to scaffold the application. Configure package.json with proper name, scripts, and dependencies. Setup TypeScript configuration (tsconfig.json) with project references to shared packages if they exist. Install core dependencies: React, React-DOM, TypeScript, and Vite dev dependencies.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify the development server starts successfully and renders the default React app"
           },
           {
@@ -366,7 +366,7 @@
               1
             ],
             "details": "Update tsconfig.json to include project references to other packages in the monorepo if they exist. Configure proper module resolution, target ES2020+, and enable strict mode. Setup build scripts in package.json for both development and production. Configure Vite config for proper asset handling and environment variables.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run build command and verify TypeScript compilation succeeds without errors"
           },
           {
@@ -377,7 +377,7 @@
               2
             ],
             "details": "Install react-router-dom and @types/react-router-dom. Create a Router component with BrowserRouter wrapper. Setup basic routes for home page and placeholder routes for future pages. Create route configuration that can be easily extended. Setup proper TypeScript types for route parameters.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test navigation between routes works correctly and browser back/forward buttons function properly"
           },
           {
@@ -388,7 +388,7 @@
               3
             ],
             "details": "Create Layout component with responsive design using CSS modules or styled-components. Build Navigation component with header containing logo/title and navigation menu. Create MainContent component for page content with proper spacing and responsive breakpoints. Use CSS Grid or Flexbox for layout structure. Ensure mobile-first responsive design with proper breakpoints (mobile: 320px+, tablet: 768px+, desktop: 1024px+).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test layout responsiveness across different screen sizes and verify navigation is accessible on mobile devices"
           },
           {
@@ -399,7 +399,7 @@
               4
             ],
             "details": "Install axios or fetch wrapper for HTTP requests. Create API client configuration with base URL and common headers. Setup environment variable handling for different environments (development, staging, production). Configure development server with proper proxy settings if needed for API calls. Create utility functions for common HTTP operations (GET, POST, PUT, DELETE).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test HTTP client configuration with mock API calls and verify environment variables are properly loaded"
           }
         ]
@@ -415,7 +415,7 @@
           5,
           6
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -423,7 +423,7 @@
             "description": "Build the basic AgentDashboard React component with table/card layout for displaying agent information",
             "dependencies": [],
             "details": "Create AgentDashboard.tsx component with responsive table structure. Include columns for agent ID, branch, status, creation time, and actions. Implement toggle between table and card views for mobile responsiveness. Add basic styling with CSS modules or styled-components. Create mock data structure for initial development.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests for component rendering and layout switching between table/card views"
           },
           {
@@ -434,7 +434,7 @@
               1
             ],
             "details": "Create StatusIndicator component with color-coded badges (RUNNING/green, STOPPED/yellow, ERROR/red). Implement responsive CSS for mobile/desktop layouts. Add loading states and empty state handling. Include icons for different statuses using a icon library like React Icons or Lucide.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Visual regression tests for status indicators and responsive layout testing"
           },
           {
@@ -443,7 +443,7 @@
             "description": "Build WebSocket client service for real-time agent status updates",
             "dependencies": [],
             "details": "Create WebSocketService class to handle connection, message parsing, and reconnection logic. Implement event handlers for agent status updates. Add connection state management (connecting, connected, disconnected, error). Include exponential backoff for reconnection attempts and heartbeat mechanism.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests for WebSocket service methods and mock WebSocket server for integration testing"
           },
           {
@@ -455,7 +455,7 @@
               3
             ],
             "details": "Integrate WebSocketService with AgentDashboard using React hooks (useEffect, useState). Implement agent data state management with real-time updates. Add connection status indicator in the UI. Handle message parsing and state updates when receiving agent status changes. Implement proper cleanup on component unmount.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Integration tests for WebSocket message handling and component state updates"
           },
           {
@@ -467,7 +467,7 @@
               4
             ],
             "details": "Add manual refresh button and auto-refresh toggle with configurable intervals. Implement action buttons for each agent (start, stop, restart, delete). Add confirmation dialogs for destructive actions. Include error handling and user feedback for failed actions. Add keyboard shortcuts for common actions.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "End-to-end tests for user interactions, action button functionality, and auto-refresh behavior"
           }
         ]
@@ -683,7 +683,7 @@
     ],
     "metadata": {
       "created": "2025-06-30T14:18:19.843Z",
-      "updated": "2025-06-30T15:17:06.595Z",
+      "updated": "2025-06-30T17:05:04.663Z",
       "description": "Tasks for master context"
     }
   }
