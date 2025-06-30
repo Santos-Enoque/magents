@@ -1,0 +1,88 @@
+# Magents Web GUI Development - Phase 1: Monorepo & Foundation
+
+## Project Overview
+
+Transform the existing magents CLI into a modern monorepo with web GUI capabilities. The goal is to create a comprehensive web interface for multi-agent management while preserving all existing CLI functionality.
+
+## Current State
+
+### Existing Architecture (Already Implemented)
+- **CLI Tool**: Fully functional multi-agent manager using git worktrees and tmux
+- **Core Services**: AgentManager, GitService, TmuxService, ConfigManager, UIService
+- **Agent Operations**: Create, list, attach, stop, cleanup agents with full tmux integration  
+- **Task Master Integration**: Automatic PRD parsing and task generation
+- **Real-time Monitoring**: CLI `dashboard` and `monitor` commands already exist
+- **Agent Status Tracking**: RUNNING, STOPPED, ERROR states
+
+### Key CLI Commands Working
+- `create <branch>` - Create agent with git worktree and tmux session
+- `list` - Show all active agents with status
+- `attach <id>` - Connect to agent's tmux session
+- `dashboard` - Real-time agent monitoring (CLI)
+- `monitor` - Monitor agent activities
+- `task-create <task-id>` - Create agent for specific tasks
+
+## Phase 1 Requirements
+
+### 1. Monorepo Structure Setup
+Transform current single-package project into workspace-based monorepo:
+- Convert to npm workspaces with packages/cli, packages/shared, packages/backend, packages/web
+- Extract shared types and utilities from existing src/types into packages/shared
+- Move existing CLI code to packages/cli preserving all functionality
+- Update TypeScript configurations for project references
+- Ensure magents binary continues working globally
+
+### 2. Shared Package Creation
+Create packages/shared with:
+- All existing types from src/types/index.ts (Agent, AgentRecord, CreateAgentOptions, etc.)
+- Common utilities and helper functions
+- Shared constants and configuration interfaces
+- Proper TypeScript exports and declarations
+
+### 3. Backend API Foundation  
+Create packages/backend with Express.js server:
+- REST API endpoints exposing existing AgentManager functionality
+- WebSocket server for real-time agent status updates
+- Reuse existing services (AgentManager, GitService, TmuxService)
+- Core endpoints: GET /api/agents, POST /api/agents, DELETE /api/agents/:id
+- Real-time WebSocket events for agent status changes
+
+### 4. Web Frontend Foundation
+Create packages/web with React application:
+- Basic responsive layout with navigation
+- Agent list dashboard showing current agents and status
+- Real-time status updates via WebSocket connection
+- Agent creation form with branch selection
+- Basic agent management (start, stop, view details)
+
+### 5. Build System Updates
+- Configure workspace-aware build processes
+- Setup TypeScript project references for cross-package imports  
+- Update npm scripts for concurrent package development
+- Ensure proper module resolution and dependencies
+
+## Success Criteria
+
+### Functional Requirements
+- All existing CLI functionality preserved and working
+- Web interface can list, create, and manage agents
+- Real-time agent status updates in web UI
+- Agent creation through web form creates working tmux sessions
+- WebSocket connection provides live updates
+
+### Technical Requirements
+- Clean monorepo structure with proper package separation
+- TypeScript compilation working across all packages
+- Web UI responsive and fast loading
+- WebSocket connection stable and reliable
+- All existing tests passing
+
+## Implementation Priority
+
+1. **High Priority**: Monorepo restructuring and shared package extraction
+2. **High Priority**: Backend API with core agent management endpoints
+3. **Medium Priority**: Basic web frontend with agent dashboard
+4. **Medium Priority**: Real-time WebSocket integration
+5. **Low Priority**: Enhanced UI features and styling
+
+This phase focuses on establishing the foundation while preserving existing functionality. Future phases will add advanced monitoring, notifications, and enhanced web features.

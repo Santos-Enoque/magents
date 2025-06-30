@@ -2,19 +2,23 @@
     "name": "magents",
     "version": "1.0.0",
     "description": "Multi-Agent Claude Code Workflow Manager - Manage multiple Claude Code instances with git worktrees",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
-    "bin": {
-        "magents": "dist/bin/magents.js"
-    },
+    "private": true,
+    "workspaces": [
+        "packages/*"
+    ],
     "scripts": {
-        "build": "tsc && cp src/scripts/postinstall.js dist/scripts/",
-        "dev": "tsc --watch",
-        "prepublishOnly": "npm run build",
-        "postinstall": "node dist/scripts/postinstall.js",
-        "test": "jest",
-        "lint": "eslint src/**/*.ts",
-        "format": "prettier --write src/**/*.ts"
+        "build": "npm run build --workspaces",
+        "build:cli": "npm run build --workspace=@magents/cli",
+        "build:shared": "npm run build --workspace=@magents/shared",
+        "build:backend": "npm run build --workspace=@magents/backend",
+        "build:web": "npm run build --workspace=@magents/web",
+        "dev": "npm run dev --workspaces --if-present",
+        "dev:backend": "npm run dev --workspace=@magents/backend",
+        "dev:web": "npm run dev --workspace=@magents/web",
+        "test": "npm run test --workspaces --if-present",
+        "lint": "npm run lint --workspaces --if-present",
+        "format": "npm run format --workspaces --if-present",
+        "clean": "npm run clean --workspaces --if-present"
     },
     "keywords": [
         "claude",
