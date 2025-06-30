@@ -1,7 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.errorHandler = void 0;
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res, 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+_next) => {
     console.error('Error:', err.message);
     console.error('Stack:', err.stack);
     // Default error response

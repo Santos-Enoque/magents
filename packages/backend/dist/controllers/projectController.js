@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.projectController = void 0;
 const shared_1 = require("@magents/shared");
 // In-memory storage for scaffolding
-let projects = [];
+const projects = [];
 exports.projectController = {
     async listProjects() {
         return projects;

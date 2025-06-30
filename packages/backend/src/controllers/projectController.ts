@@ -1,7 +1,7 @@
 import { Project, CreateProjectOptions, ProjectStatus, generateId } from '@magents/shared';
 
 // In-memory storage for scaffolding
-let projects: Project[] = [];
+const projects: Project[] = [];
 
 export const projectController = {
   async listProjects(): Promise<Project[]> {

@@ -13,20 +13,20 @@ const setupWebSocket = (io) => {
         };
         socket.emit('message', welcomeMessage);
         // Handle agent events subscription
-        socket.on('subscribe:agents', (data) => {
+        socket.on('subscribe:agents', () => {
             socket.join('agents');
             console.log(`Client ${socket.id} subscribed to agent events`);
         });
-        socket.on('unsubscribe:agents', (data) => {
+        socket.on('unsubscribe:agents', () => {
             socket.leave('agents');
             console.log(`Client ${socket.id} unsubscribed from agent events`);
         });
         // Handle project events subscription
-        socket.on('subscribe:projects', (data) => {
+        socket.on('subscribe:projects', () => {
             socket.join('projects');
             console.log(`Client ${socket.id} subscribed to project events`);
         });
-        socket.on('unsubscribe:projects', (data) => {
+        socket.on('unsubscribe:projects', () => {
             socket.leave('projects');
             console.log(`Client ${socket.id} unsubscribed from project events`);
         });

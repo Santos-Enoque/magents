@@ -7,6 +7,7 @@ import { agentRoutes } from './routes/agents';
 import { projectRoutes } from './routes/projects';
 import { configRoutes } from './routes/config';
 import { healthRoutes } from './routes/health';
+import { tmuxRoutes } from './routes/tmux';
 import { errorHandler } from './middleware/errorHandler';
 import { logger } from './middleware/logger';
 import { setupWebSocket } from './services/websocket';
@@ -31,6 +32,7 @@ app.use(API_ENDPOINTS.HEALTH, healthRoutes);
 app.use(API_ENDPOINTS.AGENTS, agentRoutes);
 app.use(API_ENDPOINTS.PROJECTS, projectRoutes);
 app.use(API_ENDPOINTS.CONFIG, configRoutes);
+app.use('/api/tmux', tmuxRoutes);
 
 // WebSocket setup
 setupWebSocket(io);
@@ -39,7 +41,7 @@ setupWebSocket(io);
 app.use(errorHandler);
 
 // Start server
-const PORT = process.env.PORT || PORT_RANGES.BACKEND_DEFAULT;
+const PORT = parseInt(process.env.PORT || PORT_RANGES.BACKEND_DEFAULT.toString(), 10);
 const HOST = process.env.HOST || 'localhost';
 
 server.listen(PORT, HOST, () => {

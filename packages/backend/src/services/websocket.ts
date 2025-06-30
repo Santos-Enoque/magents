@@ -14,23 +14,23 @@ export const setupWebSocket = (io: SocketIOServer) => {
     socket.emit('message', welcomeMessage);
     
     // Handle agent events subscription
-    socket.on('subscribe:agents', (data) => {
+    socket.on('subscribe:agents', () => {
       socket.join('agents');
       console.log(`Client ${socket.id} subscribed to agent events`);
     });
     
-    socket.on('unsubscribe:agents', (data) => {
+    socket.on('unsubscribe:agents', () => {
       socket.leave('agents');
       console.log(`Client ${socket.id} unsubscribed from agent events`);
     });
     
     // Handle project events subscription
-    socket.on('subscribe:projects', (data) => {
+    socket.on('subscribe:projects', () => {
       socket.join('projects');
       console.log(`Client ${socket.id} subscribed to project events`);
     });
     
-    socket.on('unsubscribe:projects', (data) => {
+    socket.on('unsubscribe:projects', () => {
       socket.leave('projects');
       console.log(`Client ${socket.id} unsubscribed from project events`);
     });
@@ -60,7 +60,7 @@ export const setupWebSocket = (io: SocketIOServer) => {
     },
     
     // Broadcast project update to subscribed clients
-    broadcastProjectUpdate: (projectId: string, data: any) => {
+    broadcastProjectUpdate: (projectId: string, data: Record<string, unknown>) => {
       const message: WebSocketMessage = {
         type: WS_EVENTS.PROJECT_UPDATED,
         data: { projectId, ...data },
@@ -71,7 +71,7 @@ export const setupWebSocket = (io: SocketIOServer) => {
     },
     
     // Broadcast configuration change
-    broadcastConfigChange: (config: any) => {
+    broadcastConfigChange: (config: unknown) => {
       const message: WebSocketMessage = {
         type: WS_EVENTS.CONFIG_CHANGED,
         data: config,

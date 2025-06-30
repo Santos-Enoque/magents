@@ -13,8 +13,8 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@magents/shared": "workspace:*",
-    "@magents/cli": "workspace:*",
+    "@magents/shared": "file:../shared",
+    "@magents/cli": "file:../cli",
     "express": "^4.18.2",
     "cors": "^2.8.5",
     "socket.io": "^4.7.4",
@@ -24,6 +24,7 @@
     "@types/express": "^4.17.21",
     "@types/cors": "^2.8.17",
     "@types/node": "^20.8.10",
+    "@types/jest": "^29.5.5",
     "@typescript-eslint/eslint-plugin": "^6.9.1",
     "@typescript-eslint/parser": "^6.9.1",
     "eslint": "^8.53.0",

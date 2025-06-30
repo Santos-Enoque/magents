@@ -13,6 +13,7 @@ const agents_1 = require("./routes/agents");
 const projects_1 = require("./routes/projects");
 const config_1 = require("./routes/config");
 const health_1 = require("./routes/health");
+const tmux_1 = require("./routes/tmux");
 const errorHandler_1 = require("./middleware/errorHandler");
 const logger_1 = require("./middleware/logger");
 const websocket_1 = require("./services/websocket");
@@ -37,12 +38,13 @@ app.use(shared_1.API_ENDPOINTS.HEALTH, health_1.healthRoutes);
 app.use(shared_1.API_ENDPOINTS.AGENTS, agents_1.agentRoutes);
 app.use(shared_1.API_ENDPOINTS.PROJECTS, projects_1.projectRoutes);
 app.use(shared_1.API_ENDPOINTS.CONFIG, config_1.configRoutes);
+app.use('/api/tmux', tmux_1.tmuxRoutes);
 // WebSocket setup
 (0, websocket_1.setupWebSocket)(io);
 // Error handling middleware (must be last)
 app.use(errorHandler_1.errorHandler);
 // Start server
-const PORT = process.env.PORT || shared_1.PORT_RANGES.BACKEND_DEFAULT;
+const PORT = parseInt(process.env.PORT || shared_1.PORT_RANGES.BACKEND_DEFAULT.toString(), 10);
 const HOST = process.env.HOST || 'localhost';
 server.listen(PORT, HOST, () => {
     console.log(`🚀 Magents Backend Server running on http://${HOST}:${PORT}`);

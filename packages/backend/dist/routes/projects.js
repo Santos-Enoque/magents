@@ -3,8 +3,77 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.projectRoutes = void 0;
 const express_1 = require("express");
 const projectController_1 = require("../controllers/projectController");
+const projectDiscovery_1 = require("../services/projectDiscovery");
 const router = (0, express_1.Router)();
 exports.projectRoutes = router;
+// GET /api/projects/discover - Browse directories for project discovery
+router.get('/discover', async (req, res, next) => {
+    try {
+        const { path, maxDepth, includeHidden } = req.query;
+        if (!path || typeof path !== 'string') {
+            return res.status(400).json({
+                success: false,
+                error: 'Path parameter is required'
+            });
+        }
+        const options = {
+            path,
+            maxDepth: maxDepth ? parseInt(maxDepth) : undefined,
+            includeHidden: includeHidden === 'true'
+        };
+        const directories = await projectDiscovery_1.projectDiscoveryService.browseDirectory(options);
+        const response = {
+            success: true,
+            data: directories
+        };
+        res.json(response);
+    }
+    catch (error) {
+        next(error);
+    }
+});
+// GET /api/projects/validate - Validate git repository
+router.get('/validate', async (req, res, next) => {
+    try {
+        const { path } = req.query;
+        if (!path || typeof path !== 'string') {
+            return res.status(400).json({
+                success: false,
+                error: 'Path parameter is required'
+            });
+        }
+        const validationResult = await projectDiscovery_1.projectDiscoveryService.validateGitRepository(path);
+        const response = {
+            success: true,
+            data: validationResult
+        };
+        res.json(response);
+    }
+    catch (error) {
+        next(error);
+    }
+});
+// GET /api/projects/metadata - Extract project metadata
+router.get('/metadata', async (req, res, next) => {
+    try {
+        const { path } = req.query;
+        if (!path || typeof path !== 'string') {
+            return res.status(400).json({
+                success: false,
+                error: 'Path parameter is required'
+            });
+        }
+        const metadata = await projectDiscovery_1.projectDiscoveryService.getRepositoryMetadata(path);
+        const response = {
+            success: true,
+            data: metadata
+        };
+        res.json(response);
+    }
+    catch (error) {
+        next(error);
+    }
+});
 // GET /api/projects - List all projects
 router.get('/', async (req, res, next) => {
     try {

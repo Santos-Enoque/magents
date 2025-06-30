@@ -1,21 +1,22 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.agentController = void 0;
-const shared_1 = require("@magents/shared");
-// In a real implementation, this would use a database or file storage
-// For now, we'll use in-memory storage for scaffolding
-let agents = [];
+const cli_1 = require("@magents/cli");
+// Initialize the AgentManager to connect to CLI storage
+const agentManager = new cli_1.AgentManager();
 exports.agentController = {
     async listAgents(options) {
         const { page, limit, status } = options;
-        let filteredAgents = agents;
+        // Get agents from CLI storage
+        let allAgents = agentManager.getActiveAgents();
+        // Filter by status if provided
         if (status) {
-            filteredAgents = agents.filter(agent => agent.status === status);
+            allAgents = allAgents.filter(agent => agent.status === status);
         }
-        const total = filteredAgents.length;
+        const total = allAgents.length;
         const totalPages = Math.ceil(total / limit);
         const offset = (page - 1) * limit;
-        const paginatedAgents = filteredAgents.slice(offset, offset + limit);
+        const paginatedAgents = allAgents.slice(offset, offset + limit);
         return {
             agents: paginatedAgents,
             pagination: {
@@ -27,45 +28,51 @@ exports.agentController = {
         };
     },
     async getAgent(id) {
-        const agent = agents.find(a => a.id === id);
+        const allAgents = agentManager.getActiveAgents();
+        const agent = allAgents.find(a => a.id === id);
         if (!agent) {
             throw new Error(`Agent with id ${id} not found`);
         }
         return agent;
     },
     async createAgent(options) {
-        const agentId = options.agentId || (0, shared_1.generateAgentId)(options.branch);
-        // Check if agent already exists
-        const existingAgent = agents.find(a => a.id === agentId);
-        if (existingAgent) {
-            throw new Error(`Agent with id ${agentId} already exists`);
+        // Use CLI AgentManager to create agent
+        const result = await agentManager.createAgent(options);
+        if (!result.success) {
+            throw new Error(result.message || 'Failed to create agent');
         }
-        const agent = {
-            id: agentId,
-            branch: options.branch,
-            worktreePath: `/tmp/magents/${agentId}`, // This would be properly computed
-            tmuxSession: `magent-${agentId}`,
-            status: 'STOPPED',
+        // Return the created agent data
+        const agent = result.data;
+        if (!agent) {
+            throw new Error('Agent created but no data returned');
+        }
+        return {
+            id: agent.agentId,
+            branch: agent.branch,
+            worktreePath: agent.worktreePath,
+            tmuxSession: agent.tmuxSession,
+            status: 'RUNNING',
             createdAt: new Date()
         };
-        agents.push(agent);
-        return agent;
     },
     async updateAgentStatus(id, status) {
+        // For status updates, we need to implement this in CLI AgentManager
+        // For now, we'll just return the agent with updated status from memory
         const agent = await this.getAgent(id);
-        agent.status = status;
-        return agent;
+        // Note: This doesn't persist the status change to the CLI storage
+        // In a complete implementation, AgentManager would need status update methods
+        return {
+            ...agent,
+            status,
+            updatedAt: new Date()
+        };
     },
     async deleteAgent(id, removeWorktree = false) {
-        const agentIndex = agents.findIndex(a => a.id === id);
-        if (agentIndex === -1) {
-            throw new Error(`Agent with id ${id} not found`);
+        // Use CLI AgentManager to stop and remove agent
+        const result = await agentManager.stopAgent(id, removeWorktree);
+        if (!result.success) {
+            throw new Error(result.message || 'Failed to delete agent');
         }
-        // In a real implementation, this would:
-        // 1. Stop the tmux session
-        // 2. Optionally remove the worktree
-        // 3. Clean up any docker containers
-        agents.splice(agentIndex, 1);
     }
 };
 //# sourceMappingURL=agentController.js.map
