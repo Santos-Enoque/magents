@@ -17,7 +17,8 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@magents/shared": ["../shared/src/index.ts"]
     },
     "composite": true,
     "incremental": true

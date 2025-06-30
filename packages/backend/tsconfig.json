@@ -18,7 +18,12 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "composite": true,
-    "incremental": true
+    "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      "@magents/shared": ["../shared/src/index.ts"],
+      "@magents/cli": ["../cli/src/index.ts"]
+    }
   },
   "include": [
     "src/**/*"
@@ -30,6 +35,7 @@
     "**/*.spec.ts"
   ],
   "references": [
-    { "path": "../shared" }
+    { "path": "../shared" },
+    { "path": "../cli" }
   ]
 }
