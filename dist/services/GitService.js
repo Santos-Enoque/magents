@@ -64,7 +64,39 @@ class GitService {
     }
     async removeWorktree(worktreePath) {
         try {
-            (0, child_process_1.execSync)(`git worktree remove "${worktreePath}" --force`, { stdio: 'pipe' });
+            // Get the parent directory of the worktree path
+            const parentDir = worktreePath.split('/').slice(0, -1).join('/');
+            // Try to find git repository by checking parent directories
+            let gitRoot = null;
+            let currentDir = parentDir;
+            // Walk up the directory tree to find a git repository
+            while (currentDir && currentDir !== '/' && currentDir !== '.') {
+                try {
+                    const result = (0, child_process_1.execSync)('git rev-parse --show-toplevel', {
+                        cwd: currentDir,
+                        encoding: 'utf8',
+                        stdio: ['pipe', 'pipe', 'pipe']
+                    }).trim();
+                    if (result) {
+                        gitRoot = result;
+                        break;
+                    }
+                }
+                catch {
+                    // Not a git repo, try parent directory
+                    const parts = currentDir.split('/');
+                    parts.pop();
+                    currentDir = parts.join('/') || '/';
+                }
+            }
+            if (!gitRoot) {
+                throw new Error('Could not find git repository for worktree');
+            }
+            // Execute the worktree remove command from the git repository root
+            (0, child_process_1.execSync)(`git worktree remove "${worktreePath}" --force`, {
+                cwd: gitRoot,
+                stdio: 'pipe'
+            });
         }
         catch (error) {
             throw new Error(`Failed to remove worktree: ${error instanceof Error ? error.message : String(error)}`);

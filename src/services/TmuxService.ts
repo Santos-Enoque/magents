@@ -16,9 +16,8 @@ export class TmuxService {
       // Create git window
       execSync(`tmux new-window -t "${sessionName}" -n "git" -c "${workingDir}"`, { stdio: 'pipe' });
       
-      // Build Claude Code command
-      const claudeCmd = config.CLAUDE_CODE_PATH;
-      // Note: claude CLI doesn't have an --accept-all flag
+      // Build Claude Code command with skip permissions flag
+      const claudeCmd = `${config.CLAUDE_CODE_PATH} --dangerously-skip-permissions`;
       
       // Start Claude Code in the claude window
       execSync(`tmux send-keys -t "${sessionName}:claude" "cd '${workingDir}' && ${claudeCmd}" Enter`, { stdio: 'pipe' });

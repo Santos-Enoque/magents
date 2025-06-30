@@ -39,6 +39,7 @@ const path = __importStar(require("path"));
 const ConfigManager_1 = require("../config/ConfigManager");
 const GitService_1 = require("./GitService");
 const TmuxService_1 = require("./TmuxService");
+const UIService_1 = require("../ui/UIService");
 class AgentManager {
     constructor() {
         this.configManager = ConfigManager_1.ConfigManager.getInstance();
@@ -100,6 +101,9 @@ class AgentManager {
                 message: `Failed to create agent: ${error instanceof Error ? error.message : String(error)}`
             };
         }
+    }
+    getTmuxService() {
+        return this.tmuxService;
     }
     getActiveAgents() {
         if (!fs.existsSync(this.activeAgentsFile)) {
@@ -278,7 +282,7 @@ class AgentManager {
                         }
                     });
                     if (commandFiles.length > 0) {
-                        console.log(`  ✓ Copied ${commandFiles.length} custom commands`);
+                        UIService_1.ui.muted(`  ✓ Copied ${commandFiles.length} custom commands`);
                     }
                 }
             }
@@ -287,11 +291,63 @@ class AgentManager {
             if (fs.existsSync(claudeJsonPath)) {
                 const claudeJsonDest = path.join(worktreePath, '.claude.json');
                 fs.copyFileSync(claudeJsonPath, claudeJsonDest);
-                console.log('  ✓ Copied .claude.json');
+                UIService_1.ui.muted('  ✓ Copied .claude.json');
             }
+            // Copy MCP configuration from source repo
+            await this.copyMCPConfiguration(sourceRepo, worktreePath);
         }
         catch (error) {
-            console.warn(`  ⚠ Warning: Could not copy some Claude configuration files: ${error instanceof Error ? error.message : String(error)}`);
+            UIService_1.ui.muted(`  ⚠ Warning: Could not copy some Claude configuration files: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
+    async copyMCPConfiguration(sourceRepo, worktreePath) {
+        try {
+            // Check for .mcp.json in source repo
+            const mcpSource = path.join(sourceRepo, '.mcp.json');
+            const mcpDest = path.join(worktreePath, '.mcp.json');
+            let mcpConfig = {};
+            // Load existing MCP config from source repo if it exists
+            if (fs.existsSync(mcpSource)) {
+                const sourceContent = fs.readFileSync(mcpSource, 'utf8');
+                mcpConfig = JSON.parse(sourceContent);
+                UIService_1.ui.muted('  ✓ Found project MCP configuration');
+            }
+            else {
+                // Initialize with empty structure
+                mcpConfig = {
+                    mcpServers: {}
+                };
+            }
+            // Ensure default MCPs are included
+            const defaultMCPs = {
+                playwright: {
+                    command: "npx",
+                    args: ["@playwright/mcp@latest"],
+                    description: "Playwright MCP server for browser automation"
+                },
+                context7: {
+                    command: "npx",
+                    args: ["@modelcontextprotocol/server-http-client", "https://mcp.context7.com/mcp"],
+                    transport: "http",
+                    description: "Context7 MCP server"
+                }
+            };
+            // Add default MCPs if they don't exist
+            if (!mcpConfig.mcpServers) {
+                mcpConfig.mcpServers = {};
+            }
+            for (const [name, config] of Object.entries(defaultMCPs)) {
+                if (!mcpConfig.mcpServers[name]) {
+                    mcpConfig.mcpServers[name] = config;
+                    UIService_1.ui.muted(`  ✓ Added default MCP: ${name}`);
+                }
+            }
+            // Write the combined MCP configuration to the worktree
+            fs.writeFileSync(mcpDest, JSON.stringify(mcpConfig, null, 2));
+            UIService_1.ui.muted(`  ✓ Created .mcp.json with ${Object.keys(mcpConfig.mcpServers).length} MCP servers`);
+        }
+        catch (error) {
+            UIService_1.ui.muted(`  ⚠ Warning: Could not copy MCP configuration: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
 }

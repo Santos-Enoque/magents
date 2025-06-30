@@ -33,6 +33,7 @@ While Claude Code has built-in subagents capabilities for parallel task executio
 - [Core Concepts](#core-concepts)
 - [Features](#features)
 - [Commands Reference](#commands-reference)
+- [Task Master Integration](#task-master-integration)
 - [Advanced Usage](#advanced-usage)
 - [Integration with Claude Subagents](#integration-with-claude-subagents)
 - [Best Practices](#best-practices)
@@ -296,6 +297,410 @@ magents project stop <project-id>
 magents project remove <project-id>
 ```
 
+### Task Master Integration
+
+```bash
+# Create intelligent agent for specific task (ENHANCED)
+magents task-create <task-id> [options]
+  -p, --prefix <prefix>   # Branch prefix (default: "task")
+  -n, --dry-run          # Show what would be created without creating
+  --create-issue         # Create structured GitHub issue for the task
+  --no-auto-setup        # Skip automatic Task Master setup and PRD parsing
+
+# Create agents automatically from all pending tasks
+magents task-agents [options]
+  -p, --prefix <prefix>   # Branch prefix (default: "task")
+  -n, --dry-run          # Show what would be created without creating
+
+# Structured development workflow (PLAN→CREATE→TEST→DEPLOY)
+magents work-issue <issue-or-task-id> [options]
+  --agent <agent-id>     # Specific agent to use (auto-detects if not provided)
+  --skip-plan           # Skip planning phase and go directly to implementation
+  --plan-only           # Only run the planning phase
+
+# Enhanced attach with task briefing
+magents attach <agent-id> [options]
+  --no-briefing          # Skip showing task briefing before attaching
+
+# Sync complete Task Master environment to existing agent
+magents sync-taskmaster <agent-id>
+
+# Configuration
+magents config
+  -e, --edit             # Edit configuration interactively
+
+# Initialize configuration
+magents init
+```
+
+## 🎯 Task Master Integration
+
+Magents provides seamless integration with [Task Master AI](https://www.npmjs.com/package/task-master-ai) for structured agentic development workflows.
+
+### Prerequisites
+
+Install Task Master AI:
+
+```bash
+npm install -g task-master-ai
+```
+
+**Compatibility**: Magents works with all versions of Task Master AI. Newer versions provide richer JSON output, while older versions are supported through intelligent text parsing.
+
+### Quick Start with Task Master
+
+1. **Initialize Task Master in your project:**
+
+```bash
+task-master init
+task-master models --setup  # Configure AI models
+```
+
+2. **Create a PRD and parse it:**
+
+```bash
+echo "Build e-commerce platform with user auth, product catalog, shopping cart, and checkout" > .taskmaster/docs/prd.txt
+task-master parse-prd .taskmaster/docs/prd.txt --research
+task-master expand --all --research
+```
+
+3. **View generated tasks:**
+
+```bash
+task-master list
+# Outputs:
+# 1. User Authentication System
+#   1.1 Database schema and models
+#   1.2 Registration and login API
+#   1.3 JWT token management
+# 2. Product Catalog
+#   2.1 Product model and database
+#   2.2 Product CRUD API
+# ...
+```
+
+4. **Create intelligent, self-contained agents:**
+
+**Option A: Smart agent for specific task (RECOMMENDED):**
+```bash
+# Create fully-configured agent with automatic setup
+magents task-create 1.2 --prefix feature --create-issue
+# What happens:
+# ✅ Inherits AI models and config from base project
+# ✅ Automatically initializes Task Master in agent worktree
+# ✅ Copies and parses PRD in agent context  
+# ✅ Creates comprehensive task briefing
+# ✅ Sets up project-specific environment
+# ✅ Creates GitHub issue for tracking (optional)
+# ✅ Agent knows exactly what to work on!
+
+# Result: task-1.2-agent with complete autonomous setup
+```
+
+**Option B: Create multiple intelligent agents:**
+```bash
+magents task-agents --prefix feature
+# Creates multiple agents, each with:
+# - Complete Task Master environment
+# - Inherited project settings
+# - Task-specific context and briefing
+# - Full autonomy and project awareness
+```
+
+5. **Start working on tasks with automatic briefing:**
+
+```bash
+# Attach to specific agents - shows task briefing automatically
+magents attach task-1.2-agent    # Shows Task 1.2 details before attaching
+# Displays:
+# ┌─────── Current Task: 1.2 ───────┐
+# │ Task ID: 1.2                    │
+# │ Title: Registration and login   │
+# │ Status: pending                 │
+# │ Priority: high                  │
+# │                                 │
+# │ Description:                    │
+# │ Implement user registration...  │
+# └─────────────────────────────────┘
+# 
+# Quick Commands:
+# $ get_task({id: "1.2"}) # Get full task details
+# $ set_task_status({id: "1.2", status: "in_progress"}) # Mark as started
+# $ update_subtask({id: "1.2", prompt: "your notes"}) # Log progress
+
+# Skip briefing if needed
+magents attach task-1.2-agent --no-briefing
+
+# Agent automatically knows about the task context
+# Task details are available in:
+# - TASK_BRIEFING.md (full briefing)  
+# - .taskmaster/current-task.json (task data)
+# - .claude/task-context.md (Claude context)
+```
+
+### Advanced Task Master Workflows
+
+#### Dependency-Aware Development
+
+Task Master handles task dependencies automatically:
+
+```bash
+# Check dependencies before creating agents
+task-master validate-dependencies
+
+# Example dependency chain:
+# Task 1.1 (Database) → Task 1.2 (Auth API) → Task 3.1 (Cart with Auth)
+
+# Create agents in dependency order
+magents create task/1-database db-agent       # Start with foundational work
+# Wait for db-agent to complete task 1.1
+magents create task/1-auth auth-agent         # Then create auth agent
+magents create task/3-cart cart-agent         # Cart can start after auth
+```
+
+#### Context Sharing Between Agents
+
+Agents share implementation context through Task Master:
+
+```bash
+# Agent 1 logs implementation details
+update_subtask({
+  id: "1.2", 
+  prompt: "Created User model with bcrypt hashing. JWT tokens expire in 24h. Auth middleware checks Authorization header."
+})
+
+# Agent 2 reads this context when working on related tasks
+get_task({id: "3.1"})  # Shows: "Implement cart with user authentication"
+# Agent 2 can see Agent 1's auth implementation details
+```
+
+#### Multi-Agent Coordination
+
+```bash
+# Daily workflow
+task-master list                    # Check overall project status
+task-master complexity-report       # See complexity analysis
+
+# Create agents for the day's work
+magents task-agents --dry-run       # Preview what will be created
+magents task-agents                 # Create agents for pending tasks
+
+# Work in parallel across multiple terminals
+magents list                        # See all active agents
+magents attach task-1-agent &       # Background terminal 1
+magents attach task-2-agent &       # Background terminal 2
+magents attach task-3-agent &       # Background terminal 3
+```
+
+### MCP Integration
+
+Configure `.mcp.json` for Task Master MCP tools in Claude Code:
+
+```json
+{
+  "mcpServers": {
+    "task-master-ai": {
+      "command": "npx",
+      "args": ["-y", "--package=task-master-ai", "task-master-ai"],
+      "env": {
+        "ANTHROPIC_API_KEY": "your_key_here",
+        "PERPLEXITY_API_KEY": "your_key_here"
+      }
+    }
+  }
+}
+```
+
+Available MCP commands in Claude Code:
+
+```javascript
+// Task Master MCP commands
+help()                              // Show available commands
+get_tasks()                         // List all tasks
+next_task()                         // Get next available task
+get_task({id: "1.2"})              // Get specific task details
+set_task_status({id: "1.2", status: "done"})  // Mark task complete
+update_subtask({id: "1.2", prompt: "implementation notes"})  // Log progress
+add_task({prompt: "new task description", research: true})   // Add new task
+expand_task({id: "1", research: true})  // Break task into subtasks
+```
+
+### Best Practices
+
+1. **Start with Task Structure:**
+   - Always initialize Task Master first
+   - Use `task-master analyze-complexity --research` for better task breakdown
+   - Expand main tasks into subtasks before creating agents
+
+2. **Agent-Task Mapping:**
+   - Create one agent per main task category
+   - Use descriptive branch names that match task themes
+   - Keep agents focused on their task domain
+
+3. **Context Management:**
+   - Use `update-subtask` to log implementation decisions
+   - Check task dependencies before starting new work
+   - Reference completed tasks when working on dependent features
+
+4. **Coordination:**
+   - Use `task-master list` to track overall progress
+   - Monitor agent status with `magents list`
+   - Clean up completed agents to free resources
+
+## 🔄 Structured Development Workflow
+
+Magents implements a professional **PLAN → CREATE → TEST → DEPLOY** workflow for systematic feature development:
+
+### The `work-issue` Command
+
+Start a structured development workflow for any GitHub issue or Task Master task:
+
+```bash
+# Work on a GitHub issue
+magents work-issue 123                    # GitHub issue #123
+
+# Work on a Task Master task  
+magents work-issue 1.2                    # Task Master task 1.2
+
+# Advanced options
+magents work-issue 123 --agent my-agent   # Use specific agent
+magents work-issue 1.2 --plan-only        # Just create the plan
+magents work-issue 123 --skip-plan        # Skip to implementation
+```
+
+### Workflow Phases
+
+#### 1. **PLAN Phase** 📋
+- **Issue Analysis**: Fetches GitHub issue or Task Master task details
+- **Context Research**: Searches scratchpads, PRs, and codebase for relevant information
+- **Planning Document**: Creates comprehensive implementation plan with:
+  - Detailed requirements analysis
+  - Implementation breakdown into phases
+  - Testing strategy (unit, integration, e2e)
+  - Commit strategy with Task Master updates
+  - Technical considerations and dependencies
+
+#### 2. **CREATE Phase** 🔨
+- **Guided Implementation**: Follow the detailed plan step-by-step
+- **Incremental Development**: Make focused commits after each step
+- **Progress Tracking**: Update Task Master progress regularly
+- **Pattern Following**: Adhere to established coding patterns
+
+#### 3. **TEST Phase** 🧪
+- **Unit Testing**: Write and run unit tests
+- **Integration Testing**: Test component interactions
+- **E2E Testing**: Use Playwright for end-to-end scenarios
+- **Manual Testing**: Verify key user scenarios
+
+#### 4. **DEPLOY Phase** 🚀
+- **Build Verification**: Ensure build succeeds
+- **PR Creation**: Open pull request to dev branch
+- **Review Process**: Request and address code review
+- **Final Testing**: QA verification before merge
+
+### Enhanced GitHub Issues
+
+Issues created with `--create-issue` follow a professional structure:
+
+```markdown
+[Feature] Add user authentication
+
+## Problem Statement
+[Clear description of user problem or need]
+
+## Proposed Solution  
+[High-level feature description]
+
+## User Stories
+- As a user, I want to authenticate so that I can access personalized features
+- As a developer, I want clear auth patterns so that I can implement securely
+
+## Acceptance Criteria
+- [ ] User can register with email/password
+- [ ] User can login and logout
+- [ ] Session management works correctly
+- [ ] Password validation and security
+
+## Technical Considerations
+**Task ID:** 1.2
+**Priority:** high
+**Dependencies:** Database setup (Task 1.1)
+**Agent Setup:** ✅ Complete environment configured
+
+## Implementation Approach
+- [ ] Research & Planning: Analyze auth patterns
+- [ ] Environment Setup: Configure auth libraries  
+- [ ] Core Implementation: Build auth system
+- [ ] Testing: Unit, integration, and e2e tests
+- [ ] Documentation: Update auth documentation
+- [ ] Review: Code review and refinements
+
+## Definition of Done
+- [ ] Feature implemented and working
+- [ ] Tests written and passing
+- [ ] Code follows project guidelines
+- [ ] Documentation updated
+- [ ] Code reviewed and approved
+- [ ] Task Master status updated to 'done'
+- [ ] Ready for deployment
+
+## Development Setup
+# Attach to dedicated agent
+magents attach task-1.2-agent
+
+# Work with structured workflow  
+magents work-issue 1.2
+```
+
+### Example Workflow
+
+```bash
+# 1. Create intelligent agent with GitHub issue
+magents task-create 1.2 --prefix feature --create-issue
+
+# 2. Start structured development workflow
+magents work-issue 1.2
+
+# Magents creates comprehensive plan and guides you through:
+# ✅ Requirements analysis and context research
+# ✅ Implementation breakdown with clear steps  
+# ✅ Testing strategy for all scenarios
+# ✅ Commit strategy with Task Master updates
+
+# 3. Attach to agent and follow the plan
+magents attach task-1.2-agent
+
+# 4. Inside agent - implement step by step:
+# - Follow the generated plan document
+# - Make focused commits after each step
+# - Update Task Master: tm update-subtask --id=1.2 --prompt="progress notes"
+# - Test incrementally as you build
+
+# 5. Complete workflow automatically guides you to:
+# - Run full test suite
+# - Build and verify
+# - Create PR with proper description
+# - Update GitHub issue and Task Master
+```
+
+### Claude Code Custom Commands
+
+Create custom slash commands for seamless workflow integration:
+
+```bash
+# Available custom commands in .claude/commands/
+/work-issue <id>        # Start PLAN→CREATE→TEST→DEPLOY workflow
+/create-task-agent <id> # Create intelligent agent for a task
+/task-progress         # Show progress across all tasks and agents
+/task-status <id>      # Check and update task status
+/sync-agents          # Sync Task Master config to all agents
+```
+
+For detailed examples and advanced workflows, see:
+- [TASKMASTER_INTEGRATION.md](docs/TASKMASTER_INTEGRATION.md) - Task Master integration guide
+- [COMPLETE_WORKFLOW_EXAMPLE.md](docs/COMPLETE_WORKFLOW_EXAMPLE.md) - Full project example
+- [TASK_SPECIFIC_WORKFLOW.md](docs/TASK_SPECIFIC_WORKFLOW.md) - Task-specific agent guide
+
 ### Port Management
 
 ```bash
@@ -500,6 +905,16 @@ lsof -i :3000
 # Allocate different range
 magents create feature/web web-agent \
   --ports "5000-5010:5000-5010"
+```
+
+#### Orphaned Agents
+If agents show as STOPPED but can't be removed:
+```bash
+# Fix orphaned agents (removes from list)
+magents cleanup --fix-orphaned
+
+# Or manually stop specific agent without removing worktree
+magents stop <agent-id>
 ```
 
 #### Docker Issues
