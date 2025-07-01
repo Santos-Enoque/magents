@@ -99,12 +99,18 @@ export interface Project {
     dockerNetwork?: string;
     status: ProjectStatus;
     createdAt: Date;
+    updatedAt?: Date;
+    description?: string;
+    tags?: string[];
 }
 export type ProjectStatus = 'ACTIVE' | 'INACTIVE';
 export interface CreateProjectOptions {
     name?: string;
+    path?: string;
     ports?: string;
     docker?: boolean;
+    description?: string;
+    tags?: string[];
 }
 export interface PortAllocation {
     port: number;
@@ -164,9 +170,29 @@ export interface WebSocketMessage<T = any> {
 }
 export interface AgentEvent {
     agentId: string;
-    event: 'created' | 'started' | 'stopped' | 'error';
+    event: 'created' | 'started' | 'stopped' | 'error' | 'progress';
     data?: any;
     timestamp: Date;
+}
+export interface AgentCreationProgress {
+    step: number;
+    totalSteps: number;
+    currentStep: AgentCreationStep;
+    message: string;
+    percentage: number;
+    error?: string;
+}
+export interface AgentCreationStep {
+    id: string;
+    name: string;
+    description: string;
+    status: 'pending' | 'in-progress' | 'completed' | 'error';
+    startTime?: Date;
+    endTime?: Date;
+    error?: string;
+}
+export interface ProgressCallback {
+    (progress: AgentCreationProgress): void;
 }
 export interface TaskMasterTask {
     id: string;

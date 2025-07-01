@@ -85,6 +85,7 @@ export const WS_EVENTS = {
   AGENT_STARTED: 'agent:started',
   AGENT_STOPPED: 'agent:stopped',
   AGENT_ERROR: 'agent:error',
+  AGENT_PROGRESS: 'agent:progress',
   AGENT_LOG: 'agent:log',
   PROJECT_UPDATED: 'project:updated',
   CONFIG_CHANGED: 'config:changed',

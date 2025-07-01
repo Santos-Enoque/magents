@@ -64,6 +64,7 @@ export declare const WS_EVENTS: {
     readonly AGENT_STARTED: "agent:started";
     readonly AGENT_STOPPED: "agent:stopped";
     readonly AGENT_ERROR: "agent:error";
+    readonly AGENT_PROGRESS: "agent:progress";
     readonly AGENT_LOG: "agent:log";
     readonly PROJECT_UPDATED: "project:updated";
     readonly CONFIG_CHANGED: "config:changed";
