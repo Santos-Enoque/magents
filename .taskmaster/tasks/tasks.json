@@ -679,11 +679,203 @@
             "testStrategy": "Verify all validation scripts catch common issues and provide clear error messages"
           }
         ]
+      },
+      {
+        "id": 11,
+        "title": "Implement Backend Project Discovery API",
+        "description": "Create API endpoints for discovering and validating local git repositories, including directory browsing, git repo detection, and project metadata extraction",
+        "details": "Build REST endpoints: GET /api/projects/discover (browse directories), GET /api/projects/validate (validate git repos), GET /api/projects/metadata (extract repo info). Implement secure directory browsing with path validation. Add git repository detection using isomorphic-git or child_process. Extract project metadata like branches, remotes, TaskMaster config. Include comprehensive error handling and security measures to prevent directory traversal attacks.",
+        "testStrategy": "Test directory browsing works securely, git repository detection identifies valid repos, metadata extraction returns correct branch/remote info, path validation prevents security issues, API handles errors gracefully",
+        "priority": "high",
+        "dependencies": [
+          10
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "Create Frontend Directory Browser Component",
+        "description": "Build React component for browsing local file system and selecting project directories from the GUI",
+        "details": "Create DirectoryBrowser component with tree-view interface for navigating local directories. Implement folder expansion/collapse, file filtering (show only directories), and visual indicators for git repositories. Add search functionality for quick directory location. Include breadcrumb navigation and favorite/recent directories. Integrate with backend project discovery API. Use virtual scrolling for performance with large directory trees.",
+        "testStrategy": "Test directory navigation works smoothly, git repositories are visually indicated, search functionality finds directories quickly, component handles large directory structures efficiently, integration with backend API is seamless",
+        "priority": "high",
+        "dependencies": [
+          11
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 13,
+        "title": "Enhance Agent Creation Form with Project Selection",
+        "description": "Upgrade existing agent creation form to include project selection, git branch management, and validation",
+        "details": "Modify AgentCreateForm to include DirectoryBrowser integration for project selection. Add git branch selection dropdown with create-new-branch option. Implement real-time validation for project path, branch names, and agent IDs. Add project metadata display (repo name, current branch, last commit). Include form steps/wizard pattern for better UX. Add preview of what will be created before submission.",
+        "testStrategy": "Test project selection updates available branches, branch validation prevents invalid names, form wizard guides users through process, preview shows accurate information, submission creates agents correctly",
+        "priority": "medium",
+        "dependencies": [
+          8,
+          12
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 14,
+        "title": "Implement TaskMaster Integration API",
+        "description": "Create backend endpoints for TaskMaster task discovery, assignment, and environment setup for agents",
+        "details": "Build API endpoints: GET /api/taskmaster/detect (check if TM configured), GET /api/taskmaster/tasks (list available tasks), GET /api/taskmaster/:taskId (get task details), POST /api/agents/:id/assign-task (assign task to agent). Implement TaskMaster CLI integration using child_process to execute task-master commands. Add automatic TaskMaster environment setup during agent creation. Include task briefing generation and context file creation.",
+        "testStrategy": "Test TaskMaster detection works in configured projects, task listing returns available tasks, task assignment creates proper environment, briefing files are generated correctly, CLI integration executes commands successfully",
+        "priority": "medium",
+        "dependencies": [
+          11
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 15,
+        "title": "Build TaskMaster Task Browser Interface",
+        "description": "Create React components for browsing, selecting, and previewing TaskMaster tasks in the GUI",
+        "details": "Create TaskBrowser component with task list, search, and filtering capabilities. Implement TaskPreview component showing task details, dependencies, and requirements. Add task assignment interface with validation. Include task status indicators and progress tracking. Implement drag-and-drop task assignment to agents. Add task creation wizard for creating new tasks from GUI.",
+        "testStrategy": "Test task browsing shows all available tasks, search and filtering work correctly, task preview displays complete information, assignment interface validates properly, drag-and-drop functionality works smoothly",
+        "priority": "medium",
+        "dependencies": [
+          14
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create TaskBrowser Component with List View",
+            "description": "Build the main TaskBrowser component with a list view for displaying all TaskMaster tasks",
+            "dependencies": [],
+            "details": "Create TaskBrowser.tsx component that fetches and displays tasks from the TaskMaster API. Implement a list view with task cards showing ID, title, status, priority, and brief description. Add pagination or virtual scrolling for large task lists. Include loading states and error handling. Style with Tailwind CSS to match the existing UI design.",
+            "status": "done",
+            "testStrategy": "Unit tests for component rendering, mock API responses for task list, test pagination/scrolling behavior, verify error states display correctly"
+          },
+          {
+            "id": 2,
+            "title": "Implement Task Search and Filtering",
+            "description": "Add search functionality and filters to the TaskBrowser for finding specific tasks",
+            "dependencies": [
+              1
+            ],
+            "details": "Add search input field with real-time filtering by task title, description, and ID. Implement filter controls for task status (pending, in-progress, done), priority levels, and dependency status. Add sorting options (by ID, priority, status, title). Store filter state in URL params for shareable views. Implement keyboard shortcuts for common filters.",
+            "status": "done",
+            "testStrategy": "Test search filters tasks correctly, verify all filter combinations work, ensure URL params persist filter state, test keyboard shortcuts functionality"
+          },
+          {
+            "id": 3,
+            "title": "Build TaskPreview Component",
+            "description": "Create a detailed preview component for displaying full task information",
+            "dependencies": [
+              1
+            ],
+            "details": "Create TaskPreview.tsx component that shows complete task details including description, implementation details, test strategy, dependencies graph, subtasks tree, and metadata. Add syntax highlighting for code snippets in task descriptions. Include collapsible sections for better organization. Show task relationships and dependency chains visually.",
+            "status": "done",
+            "testStrategy": "Test all task fields display correctly, verify dependency visualization, test collapsible sections, ensure code highlighting works"
+          },
+          {
+            "id": 4,
+            "title": "Add Task Assignment Interface with Drag-and-Drop",
+            "description": "Implement drag-and-drop functionality for assigning tasks to agents",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Implement drag-and-drop using react-beautiful-dnd or similar library. Make task cards draggable from the browser to agent panels. Add visual feedback during drag operations (ghost image, drop zones). Validate task assignments (check dependencies, agent capabilities). Show confirmation dialog for task assignment. Update both task and agent states after successful assignment.",
+            "status": "done",
+            "testStrategy": "Test drag-and-drop mechanics work smoothly, verify assignment validation logic, test state updates after assignment, ensure accessibility compliance"
+          },
+          {
+            "id": 5,
+            "title": "Create Task Creation Wizard",
+            "description": "Build a wizard interface for creating new TaskMaster tasks from the GUI",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Create multi-step wizard for task creation with fields for title, description, priority, dependencies, implementation details, and test strategy. Add dependency picker with search functionality. Include task template selection for common task types. Implement form validation and preview before submission. Add ability to create subtasks within the wizard. Integrate with TaskMaster API to save new tasks.",
+            "status": "done",
+            "testStrategy": "Test wizard flow and navigation, verify form validation works correctly, test task creation API integration, ensure created tasks appear in browser immediately"
+          }
+        ]
+      },
+      {
+        "id": 16,
+        "title": "Add Advanced Agent Configuration Options",
+        "description": "Implement GUI controls for Docker settings, environment variables, and advanced agent options",
+        "details": "Create AdvancedConfigPanel component with Docker configuration (enable/disable, image selection, network settings). Add environment variable editor with key-value pairs. Implement port allocation settings with conflict detection. Add Claude settings customization (auto-accept, model selection). Include MCP configuration editor. Add configuration templates and presets for common setups.",
+        "testStrategy": "Test Docker configuration correctly sets up containers, environment variables are properly passed to agents, port allocation prevents conflicts, Claude settings override defaults correctly, configuration templates apply settings properly",
+        "priority": "low",
+        "dependencies": [
+          13
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 17,
+        "title": "Implement Project Management System",
+        "description": "Create project registration, management, and agent association system for organizing work",
+        "details": "Build Project entity with CRUD operations: create, read, update, delete projects. Implement project-agent relationship management. Add project dashboard showing associated agents and their status. Include project settings for default configurations. Add project templates for common project types. Implement project health monitoring and statistics.",
+        "testStrategy": "Test project CRUD operations work correctly, agent associations are maintained properly, project dashboard displays accurate information, templates create properly configured projects, health monitoring shows correct metrics",
+        "priority": "medium",
+        "dependencies": [
+          11,
+          13
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 18,
+        "title": "Add Agent Creation Progress Tracking",
+        "description": "Implement real-time progress indicators and status updates during complex agent creation operations",
+        "details": "Create ProgressTracker component with step-by-step progress display. Implement WebSocket-based real-time updates for long-running operations. Add detailed status messages for each creation step (git operations, tmux setup, configuration copying). Include error recovery and retry mechanisms. Add operation cancellation capability. Implement progress persistence across page refreshes.",
+        "testStrategy": "Test progress tracking shows accurate status, real-time updates work correctly, error messages are informative, cancellation stops operations cleanly, progress persists across page refreshes",
+        "priority": "medium",
+        "dependencies": [
+          5,
+          13
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 19,
+        "title": "Create Agent Creation Wizard",
+        "description": "Build comprehensive multi-step wizard interface for guided agent creation with validation and preview",
+        "details": "Create AgentCreationWizard component with steps: 1) Project Selection, 2) Branch Management, 3) TaskMaster Integration, 4) Advanced Configuration, 5) Preview & Create. Implement step validation and navigation controls. Add form state persistence across steps. Include comprehensive preview showing all settings before creation. Add wizard templates for common use cases.",
+        "testStrategy": "Test wizard navigation works smoothly, step validation prevents invalid configurations, state persistence maintains data across steps, preview shows accurate information, templates create proper configurations",
+        "priority": "medium",
+        "dependencies": [
+          13,
+          15,
+          16,
+          18
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 20,
+        "title": "Implement GUI Agent Creation Integration Testing",
+        "description": "Create comprehensive end-to-end tests for GUI agent creation workflow covering all features and edge cases",
+        "details": "Build E2E test suite using Playwright covering: project discovery and selection, git repository validation, branch creation and selection, TaskMaster task assignment, agent creation with various configurations, error handling and recovery. Include performance tests for large directory structures. Add integration tests for CLI equivalence verification. Implement automated testing of complex scenarios.",
+        "testStrategy": "Test suite covers all user workflows, performance tests validate responsiveness, integration tests verify CLI compatibility, error scenarios are properly handled, complex configurations work correctly",
+        "priority": "high",
+        "dependencies": [
+          19
+        ],
+        "status": "done",
+        "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-06-30T14:18:19.843Z",
-      "updated": "2025-06-30T17:45:25.616Z",
+      "updated": "2025-07-01T04:41:37.592Z",
       "description": "Tasks for master context"
     }
   }
