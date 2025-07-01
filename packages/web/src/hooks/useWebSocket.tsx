@@ -21,7 +21,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const WS_URL = process.env.REACT_APP_WS_URL || 'http://localhost:3001';
+    const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:3001';
     const newSocket = io(WS_URL, {
       transports: ['websocket', 'polling'],
     });

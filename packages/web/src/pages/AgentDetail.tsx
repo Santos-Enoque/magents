@@ -6,6 +6,8 @@ import { Agent, AgentStatus } from '@magents/shared';
 import { apiService } from '../services/api';
 import { StatusIndicator } from '../components/StatusIndicator';
 import { AgentActions } from '../components/AgentActions';
+import { TmuxViewer } from '../components/TmuxViewer';
+import { InteractiveTerminal } from '../components/InteractiveTerminal';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { toast } from 'react-toastify';
 
@@ -19,7 +21,8 @@ const tabs: TabConfig[] = [
   { id: 'overview', label: 'Overview', icon: <Info className="w-4 h-4" /> },
   { id: 'configuration', label: 'Configuration', icon: <Settings className="w-4 h-4" /> },
   { id: 'activity', label: 'Activity', icon: <Activity className="w-4 h-4" /> },
-  { id: 'terminal', label: 'Terminal', icon: <Terminal className="w-4 h-4" /> },
+  { id: 'terminal', label: 'Terminal View', icon: <Terminal className="w-4 h-4" /> },
+  { id: 'interactive', label: 'Interactive', icon: <Terminal className="w-4 h-4" /> },
 ];
 
 export const AgentDetail: React.FC = () => {
@@ -69,9 +72,9 @@ export const AgentDetail: React.FC = () => {
   };
 
   // Agent action handlers
-  const handleStartAgent = async () => {
+  const handleStartAgent = async (agentId: string) => {
     try {
-      await apiService.updateAgentStatus(id!, 'RUNNING');
+      await apiService.updateAgentStatus(agentId, 'RUNNING');
       toast.success('Agent started successfully');
       refetch();
     } catch (error) {
@@ -80,9 +83,9 @@ export const AgentDetail: React.FC = () => {
     }
   };
 
-  const handleStopAgent = async () => {
+  const handleStopAgent = async (agentId: string) => {
     try {
-      await apiService.updateAgentStatus(id!, 'STOPPED');
+      await apiService.updateAgentStatus(agentId, 'STOPPED');
       toast.success('Agent stopped successfully');
       refetch();
     } catch (error) {
@@ -91,9 +94,9 @@ export const AgentDetail: React.FC = () => {
     }
   };
 
-  const handleDeleteAgent = async (removeWorktree: boolean = false) => {
+  const handleDeleteAgent = async (agentId: string, removeWorktree: boolean = false) => {
     try {
-      await apiService.deleteAgent(id!, removeWorktree);
+      await apiService.deleteAgent(agentId, removeWorktree);
       toast.success('Agent deleted successfully');
       navigate('/agents');
     } catch (error) {
@@ -102,10 +105,10 @@ export const AgentDetail: React.FC = () => {
     }
   };
 
-  const handleRestartAgent = async () => {
+  const handleRestartAgent = async (agentId: string) => {
     try {
-      await handleStopAgent();
-      setTimeout(() => handleStartAgent(), 1000);
+      await handleStopAgent(agentId);
+      setTimeout(() => handleStartAgent(agentId), 1000);
     } catch (error) {
       toast.error('Failed to restart agent');
       console.error('Failed to restart agent:', error);
@@ -385,31 +388,52 @@ export const AgentDetail: React.FC = () => {
 
         {activeTab === 'terminal' && (
           <div className="bg-white shadow rounded-lg p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Terminal Access</h3>
-            <div className="bg-gray-900 rounded-lg p-4">
-              <p className="text-gray-400 font-mono text-sm mb-4">
-                To attach to this agent's tmux session, run:
-              </p>
-              <div className="bg-black rounded p-3">
-                <code className="text-green-400 font-mono text-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-gray-900">Live Terminal View</h3>
+              <div className="text-sm text-gray-500">
+                Real-time view of agent's tmux session
+              </div>
+            </div>
+            
+            <TmuxViewer agent={agent} />
+            
+            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <h4 className="text-sm font-medium text-blue-900">Direct Access</h4>
+              <p className="text-sm text-blue-800 mt-1">For full terminal control, attach directly:</p>
+              <div className="mt-2 bg-blue-100 rounded p-2">
+                <code className="text-blue-900 text-sm">
                   tmux attach-session -t {agent.tmuxSession}
                 </code>
               </div>
-              <p className="text-gray-400 font-mono text-sm mt-4">
-                Or use the magents CLI:
-              </p>
-              <div className="bg-black rounded p-3 mt-2">
-                <code className="text-green-400 font-mono text-sm">
+              <p className="text-sm text-blue-800 mt-2">Or use the magents CLI:</p>
+              <div className="mt-2 bg-blue-100 rounded p-2">
+                <code className="text-blue-900 text-sm">
                   magents attach {agent.id}
                 </code>
               </div>
             </div>
-            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <h4 className="text-sm font-medium text-blue-900">Terminal Commands</h4>
+          </div>
+        )}
+
+        {activeTab === 'interactive' && (
+          <div className="bg-white shadow rounded-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-gray-900">Interactive Terminal</h3>
+              <div className="text-sm text-gray-500">
+                Direct command interface to agent's tmux session
+              </div>
+            </div>
+            
+            <InteractiveTerminal agent={agent} />
+            
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <h4 className="text-sm font-medium text-blue-900">Usage Tips</h4>
               <ul className="mt-2 text-sm text-blue-800 space-y-1 list-disc list-inside">
-                <li>Detach from session: <code className="bg-blue-100 px-1 rounded">Ctrl+B, D</code></li>
-                <li>Kill session: <code className="bg-blue-100 px-1 rounded">tmux kill-session -t {agent.tmuxSession}</code></li>
-                <li>List all sessions: <code className="bg-blue-100 px-1 rounded">tmux list-sessions</code></li>
+                <li>Type commands and press Enter to execute them in the agent's tmux session</li>
+                <li>Switch between tmux windows (main, claude, git) using the dropdown</li>
+                <li>Use standard terminal commands: <code className="bg-blue-100 px-1 rounded">ls</code>, <code className="bg-blue-100 px-1 rounded">cd</code>, <code className="bg-blue-100 px-1 rounded">git status</code></li>
+                <li>Commands are executed in the agent's working directory</li>
+                <li>Use <code className="bg-blue-100 px-1 rounded">clear</code> to clear the terminal display</li>
               </ul>
             </div>
           </div>

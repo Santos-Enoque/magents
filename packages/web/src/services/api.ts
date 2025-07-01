@@ -1,6 +1,6 @@
-import { Agent, Project, MagentsConfig, ApiResponse, PaginatedResponse, CreateAgentOptions } from '@magents/shared';
+import { Agent, Project, MagentsConfig, ApiResponse, PaginatedResponse, CreateAgentOptions, DirectoryItem, ProjectValidationResult, GitRepositoryInfo, ProjectDiscoveryOptions } from '@magents/shared';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 class ApiService {
   private async request<T>(url: string, options?: RequestInit): Promise<T> {
@@ -125,6 +125,27 @@ class ApiService {
     return this.request<void>(`/api/projects/${id}`, {
       method: 'DELETE',
     });
+  }
+
+  // Project Discovery
+  async discoverProjects(options: ProjectDiscoveryOptions) {
+    const queryParams = new URLSearchParams({
+      path: options.path,
+      ...(options.maxDepth && { maxDepth: options.maxDepth.toString() }),
+      ...(options.includeHidden && { includeHidden: 'true' })
+    });
+    
+    return this.request<DirectoryItem[]>(`/api/projects/discover?${queryParams}`);
+  }
+
+  async validateProject(path: string) {
+    const queryParams = new URLSearchParams({ path });
+    return this.request<ProjectValidationResult>(`/api/projects/validate?${queryParams}`);
+  }
+
+  async getProjectMetadata(path: string) {
+    const queryParams = new URLSearchParams({ path });
+    return this.request<GitRepositoryInfo>(`/api/projects/metadata?${queryParams}`);
   }
 
   // Config
