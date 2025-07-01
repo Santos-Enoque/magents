@@ -14,6 +14,7 @@ const projects_1 = require("./routes/projects");
 const config_1 = require("./routes/config");
 const health_1 = require("./routes/health");
 const tmux_1 = require("./routes/tmux");
+const taskmaster_1 = require("./routes/taskmaster");
 const errorHandler_1 = require("./middleware/errorHandler");
 const logger_1 = require("./middleware/logger");
 const websocket_1 = require("./services/websocket");
@@ -39,6 +40,7 @@ app.use(shared_1.API_ENDPOINTS.AGENTS, agents_1.agentRoutes);
 app.use(shared_1.API_ENDPOINTS.PROJECTS, projects_1.projectRoutes);
 app.use(shared_1.API_ENDPOINTS.CONFIG, config_1.configRoutes);
 app.use('/api/tmux', tmux_1.tmuxRoutes);
+app.use('/api/taskmaster', taskmaster_1.taskMasterRoutes);
 // WebSocket setup
 (0, websocket_1.setupWebSocket)(io);
 // Error handling middleware (must be last)

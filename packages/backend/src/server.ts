@@ -8,6 +8,7 @@ import { projectRoutes } from './routes/projects';
 import { configRoutes } from './routes/config';
 import { healthRoutes } from './routes/health';
 import { tmuxRoutes } from './routes/tmux';
+import { taskMasterRoutes } from './routes/taskmaster';
 import { errorHandler } from './middleware/errorHandler';
 import { logger } from './middleware/logger';
 import { setupWebSocket } from './services/websocket';
@@ -33,6 +34,7 @@ app.use(API_ENDPOINTS.AGENTS, agentRoutes);
 app.use(API_ENDPOINTS.PROJECTS, projectRoutes);
 app.use(API_ENDPOINTS.CONFIG, configRoutes);
 app.use('/api/tmux', tmuxRoutes);
+app.use('/api/taskmaster', taskMasterRoutes);
 
 // WebSocket setup
 setupWebSocket(io);

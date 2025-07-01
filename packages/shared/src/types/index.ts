@@ -16,6 +16,11 @@ export interface Agent {
   tmuxSession: string;
   status: AgentStatus;
   createdAt: Date;
+  updatedAt?: Date;
+  projectId?: string;
+  autoAccept?: boolean;
+  useDocker?: boolean;
+  config?: Record<string, any>;
 }
 
 export type AgentStatus = 'RUNNING' | 'STOPPED' | 'ERROR';
@@ -220,4 +225,51 @@ export interface TaskMasterConfig {
     fallback?: string;
   };
   research?: boolean;
+}
+
+// Project Discovery interfaces
+export interface DirectoryItem {
+  name: string;
+  path: string;
+  type: 'file' | 'directory';
+  isGitRepo?: boolean;
+  children?: DirectoryItem[];
+}
+
+export interface ProjectDiscoveryOptions {
+  path: string;
+  maxDepth?: number;
+  includeHidden?: boolean;
+}
+
+export interface GitRepositoryInfo {
+  path: string;
+  isValid: boolean;
+  currentBranch?: string;
+  branches?: string[];
+  remotes?: GitRemote[];
+  lastCommit?: GitCommit;
+  isClean?: boolean;
+  hasTaskMaster?: boolean;
+  taskMasterConfig?: TaskMasterConfig;
+}
+
+export interface GitRemote {
+  name: string;
+  url: string;
+  type: 'fetch' | 'push';
+}
+
+export interface GitCommit {
+  hash: string;
+  message: string;
+  author: string;
+  date: Date;
+}
+
+export interface ProjectValidationResult {
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+  gitInfo?: GitRepositoryInfo;
 }

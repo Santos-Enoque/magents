@@ -73,6 +73,17 @@ exports.agentController = {
         if (!result.success) {
             throw new Error(result.message || 'Failed to delete agent');
         }
+    },
+    async updateAgentConfig(id, config) {
+        // Get the agent first to ensure it exists
+        const agent = await this.getAgent(id);
+        // Note: In a complete implementation, this would persist the config
+        // to the CLI storage. For now, we're storing in memory only.
+        // The AgentManager would need to be extended to support config updates.
+        // Store config in agent object (this is temporary, would need proper storage)
+        agent.config = config;
+        // TODO: Implement proper config persistence in AgentManager
+        console.log(`Updated config for agent ${id}:`, config);
     }
 };
 //# sourceMappingURL=agentController.js.map

@@ -94,4 +94,38 @@ router.delete('/:id', async (req, res, next) => {
   }
 });
 
+// POST /api/agents/:id/assign-task - Assign a task to an agent
+router.post('/:id/assign-task', async (req, res, next) => {
+  try {
+    const { id: agentId } = req.params;
+    const { taskId, projectPath } = req.body;
+    
+    if (!taskId || !projectPath) {
+      return res.status(400).json({
+        success: false,
+        error: 'Task ID and project path are required'
+      });
+    }
+
+    // Import taskMasterController here to avoid circular dependencies
+    const { taskMasterController } = await import('../controllers/taskMasterController');
+    
+    const assignment = await taskMasterController.assignTaskToAgent(
+      agentId,
+      taskId,
+      projectPath
+    );
+    
+    const response: ApiResponse<unknown> = {
+      success: true,
+      message: 'Task assigned successfully',
+      data: assignment
+    };
+    
+    res.json(response);
+  } catch (error) {
+    next(error);
+  }
+});
+
 export { router as agentRoutes };

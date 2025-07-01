@@ -17,5 +17,6 @@ export declare const agentController: {
     createAgent(options: CreateAgentOptions): Promise<Agent>;
     updateAgentStatus(id: string, status: AgentStatus): Promise<Agent>;
     deleteAgent(id: string, removeWorktree?: boolean): Promise<void>;
+    updateAgentConfig(id: string, config: Record<string, unknown>): Promise<void>;
 };
 //# sourceMappingURL=agentController.d.ts.map
