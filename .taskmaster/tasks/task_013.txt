@@ -1,0 +1,11 @@
+# Task ID: 13
+# Title: Enhance Agent Creation Form with Project Selection
+# Status: pending
+# Dependencies: 8, 12
+# Priority: medium
+# Description: Upgrade existing agent creation form to include project selection, git branch management, and validation
+# Details:
+Modify AgentCreateForm to include DirectoryBrowser integration for project selection. Add git branch selection dropdown with create-new-branch option. Implement real-time validation for project path, branch names, and agent IDs. Add project metadata display (repo name, current branch, last commit). Include form steps/wizard pattern for better UX. Add preview of what will be created before submission.
+
+# Test Strategy:
+Test project selection updates available branches, branch validation prevents invalid names, form wizard guides users through process, preview shows accurate information, submission creates agents correctly

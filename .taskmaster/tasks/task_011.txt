@@ -1,0 +1,11 @@
+# Task ID: 11
+# Title: Implement Backend Project Discovery API
+# Status: done
+# Dependencies: 10
+# Priority: high
+# Description: Create API endpoints for discovering and validating local git repositories, including directory browsing, git repo detection, and project metadata extraction
+# Details:
+Build REST endpoints: GET /api/projects/discover (browse directories), GET /api/projects/validate (validate git repos), GET /api/projects/metadata (extract repo info). Implement secure directory browsing with path validation. Add git repository detection using isomorphic-git or child_process. Extract project metadata like branches, remotes, TaskMaster config. Include comprehensive error handling and security measures to prevent directory traversal attacks.
+
+# Test Strategy:
+Test directory browsing works securely, git repository detection identifies valid repos, metadata extraction returns correct branch/remote info, path validation prevents security issues, API handles errors gracefully

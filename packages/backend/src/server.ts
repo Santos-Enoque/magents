@@ -37,7 +37,10 @@ app.use('/api/tmux', tmuxRoutes);
 app.use('/api/taskmaster', taskMasterRoutes);
 
 // WebSocket setup
-setupWebSocket(io);
+const websocketService = setupWebSocket(io);
+
+// Export WebSocket service for use in controllers
+export { websocketService };
 
 // Error handling middleware (must be last)
 app.use(errorHandler);

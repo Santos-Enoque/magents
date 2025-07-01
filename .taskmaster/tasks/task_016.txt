@@ -1,0 +1,11 @@
+# Task ID: 16
+# Title: Add Advanced Agent Configuration Options
+# Status: pending
+# Dependencies: 13
+# Priority: low
+# Description: Implement GUI controls for Docker settings, environment variables, and advanced agent options
+# Details:
+Create AdvancedConfigPanel component with Docker configuration (enable/disable, image selection, network settings). Add environment variable editor with key-value pairs. Implement port allocation settings with conflict detection. Add Claude settings customization (auto-accept, model selection). Include MCP configuration editor. Add configuration templates and presets for common setups.
+
+# Test Strategy:
+Test Docker configuration correctly sets up containers, environment variables are properly passed to agents, port allocation prevents conflicts, Claude settings override defaults correctly, configuration templates apply settings properly

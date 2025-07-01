@@ -128,4 +128,63 @@ router.post('/:id/assign-task', async (req, res, next) => {
   }
 });
 
+// PUT /api/agents/:id/project - Assign agent to project
+router.put('/:id/project', async (req, res, next) => {
+  try {
+    const { projectId } = req.body;
+    
+    if (!projectId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Project ID is required'
+      });
+    }
+    
+    const agent = await agentController.assignAgentToProject(req.params.id, projectId);
+    
+    const response: ApiResponse<Agent> = {
+      success: true,
+      message: 'Agent assigned to project successfully',
+      data: agent
+    };
+    
+    res.json(response);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// DELETE /api/agents/:id/project - Remove agent from project
+router.delete('/:id/project', async (req, res, next) => {
+  try {
+    const agent = await agentController.unassignAgentFromProject(req.params.id);
+    
+    const response: ApiResponse<Agent> = {
+      success: true,
+      message: 'Agent removed from project successfully',
+      data: agent
+    };
+    
+    res.json(response);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// GET /api/agents/project/:projectId - Get agents by project
+router.get('/project/:projectId', async (req, res, next) => {
+  try {
+    const agents = await agentController.getAgentsByProject(req.params.projectId);
+    
+    const response: ApiResponse<Agent[]> = {
+      success: true,
+      data: agents
+    };
+    
+    res.json(response);
+  } catch (error) {
+    next(error);
+  }
+});
+
 export { router as agentRoutes };

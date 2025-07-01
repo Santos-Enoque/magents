@@ -1,0 +1,113 @@
+# GUI Agent Creation Workflow - Product Requirements Document
+
+## Problem Statement
+
+The current GUI treats agents as standalone entities, but every agent is intrinsically tied to a project (git repository) and potentially to specific TaskMaster tasks. Users cannot properly create agents from the GUI because:
+
+1. Agent creation requires selecting/browsing local directories
+2. Directory must be validated as a git repository
+3. Branch selection and validation is needed
+4. TaskMaster integration is not available in GUI
+5. Project association is missing
+6. Advanced configuration options are not accessible
+
+## Solution Overview
+
+Create a comprehensive GUI workflow that matches CLI functionality while providing enhanced UX for:
+- Directory browsing and git repo validation
+- Project management and association
+- TaskMaster integration and task assignment
+- Advanced agent configuration options
+- Progress tracking for complex operations
+
+## Core Features Required
+
+### 1. Project Management System
+- Project discovery and registration from local file system
+- Git repository validation and metadata extraction
+- Project-agent relationship management
+- TaskMaster configuration detection and integration
+
+### 2. Enhanced Agent Creation Flow
+- Multi-step wizard with directory selection
+- Git branch browsing and creation
+- TaskMaster task selection and assignment
+- Advanced configuration options (Docker, environment, etc.)
+- Real-time validation and progress feedback
+
+### 3. TaskMaster Integration
+- Automatic TaskMaster environment detection
+- Task browsing and selection interface
+- Task preview with details and requirements
+- Automatic task briefing and context setup
+- GitHub issue integration (optional)
+
+### 4. Advanced Configuration Management
+- Docker container options
+- Environment variable configuration
+- Port allocation and management
+- Claude settings inheritance and customization
+- MCP configuration management
+
+## Success Criteria
+
+1. Users can browse and select local directories from GUI
+2. Git repositories are automatically validated and configured
+3. TaskMaster tasks can be browsed and assigned to agents
+4. Agent creation matches CLI functionality with enhanced UX
+5. All advanced options available in CLI are accessible in GUI
+6. Progress tracking shows real-time status of complex operations
+7. Error handling provides clear guidance for resolution
+
+## Technical Requirements
+
+### Backend APIs
+- Project discovery and validation endpoints
+- Directory browsing API with git repository detection
+- TaskMaster integration API (task listing, details, assignment)
+- Enhanced agent creation API with full option support
+- Configuration validation and inheritance APIs
+
+### Frontend Components
+- File system browser component
+- Multi-step agent creation wizard
+- Project management interface
+- TaskMaster task browser and selector
+- Advanced configuration forms
+- Progress tracking and status components
+
+### Integration Points
+- Git repository validation and branch management
+- TaskMaster CLI integration for task operations
+- Docker container management (if enabled)
+- Claude configuration copying and inheritance
+- MCP configuration setup and validation
+
+## Implementation Phases
+
+### Phase 1: Foundation (Project Management)
+- Backend project discovery and validation
+- Frontend directory browser component
+- Git repository detection and metadata extraction
+- Basic project-agent association
+
+### Phase 2: Agent Creation Enhancement
+- Multi-step agent creation wizard
+- Git branch selection and creation
+- Basic TaskMaster integration
+- Progress tracking for operations
+
+### Phase 3: TaskMaster Integration
+- Complete TaskMaster API integration
+- Task browsing and selection interface
+- Automatic environment setup
+- Task briefing and context generation
+
+### Phase 4: Advanced Features
+- Docker configuration options
+- Environment variable management
+- Port allocation and management
+- GitHub integration and issue creation
+- Batch operations and templates
+
+This comprehensive approach will provide a GUI experience that surpasses CLI capabilities while maintaining full compatibility with existing workflows.

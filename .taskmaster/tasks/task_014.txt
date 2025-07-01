@@ -1,0 +1,11 @@
+# Task ID: 14
+# Title: Implement TaskMaster Integration API
+# Status: done
+# Dependencies: 11
+# Priority: medium
+# Description: Create backend endpoints for TaskMaster task discovery, assignment, and environment setup for agents
+# Details:
+Build API endpoints: GET /api/taskmaster/detect (check if TM configured), GET /api/taskmaster/tasks (list available tasks), GET /api/taskmaster/:taskId (get task details), POST /api/agents/:id/assign-task (assign task to agent). Implement TaskMaster CLI integration using child_process to execute task-master commands. Add automatic TaskMaster environment setup during agent creation. Include task briefing generation and context file creation.
+
+# Test Strategy:
+Test TaskMaster detection works in configured projects, task listing returns available tasks, task assignment creates proper environment, briefing files are generated correctly, CLI integration executes commands successfully

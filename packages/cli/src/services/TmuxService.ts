@@ -112,4 +112,55 @@ export class TmuxService {
       return [];
     }
   }
+
+  public getSessionWindows(sessionName: string): string[] {
+    try {
+      const result = execSync(`tmux list-windows -t "${sessionName}" -F "#{window_name}"`, {
+        encoding: 'utf8',
+        stdio: 'pipe'
+      });
+      return result.trim().split('\n').filter(line => line.trim());
+    } catch {
+      return [];
+    }
+  }
+
+  public capturePane(sessionName: string, windowName?: string, lines: number = 100): string {
+    try {
+      const target = windowName ? `${sessionName}:${windowName}` : sessionName;
+      const result = execSync(`tmux capture-pane -t "${target}" -p -S -${lines}`, {
+        encoding: 'utf8',
+        stdio: 'pipe'
+      });
+      return result;
+    } catch (error) {
+      throw new Error(`Failed to capture tmux pane: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  public getSessionInfo(sessionName: string): { windows: string[], activeWindow: string } | null {
+    try {
+      const windows = this.getSessionWindows(sessionName);
+      const activeWindowResult = execSync(`tmux display-message -t "${sessionName}" -p "#{window_name}"`, {
+        encoding: 'utf8',
+        stdio: 'pipe'
+      });
+      
+      return {
+        windows,
+        activeWindow: activeWindowResult.trim()
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  public sendCommand(sessionName: string, command: string, windowName?: string): void {
+    try {
+      const target = windowName ? `${sessionName}:${windowName}` : sessionName;
+      execSync(`tmux send-keys -t "${target}" "${command}" Enter`, { stdio: 'pipe' });
+    } catch (error) {
+      throw new Error(`Failed to send command to tmux: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
 }

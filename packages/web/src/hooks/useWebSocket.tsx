@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { WebSocketMessage, AgentEvent } from '@magents/shared';
+import { WebSocketMessage, AgentEvent, AgentCreationProgress } from '@magents/shared';
 import { toast } from 'react-toastify';
 
 interface WebSocketContextType {
@@ -8,6 +8,7 @@ interface WebSocketContextType {
   isConnected: boolean;
   subscribe: (event: string) => void;
   unsubscribe: (event: string) => void;
+  agentProgress: Record<string, AgentCreationProgress>;
 }
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined);
@@ -19,6 +20,7 @@ interface WebSocketProviderProps {
 export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [agentProgress, setAgentProgress] = useState<Record<string, AgentCreationProgress>>({});
 
   useEffect(() => {
     const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:3001';
@@ -72,6 +74,17 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
       toast.info('Configuration updated');
     });
 
+    newSocket.on('agent:progress', (message: WebSocketMessage<AgentCreationProgress>) => {
+      console.log('Agent progress:', message);
+      const { agentId, data } = message;
+      if (agentId) {
+        setAgentProgress(prev => ({
+          ...prev,
+          [agentId]: data
+        }));
+      }
+    });
+
     // Health check ping
     const pingInterval = setInterval(() => {
       if (newSocket.connected) {
@@ -104,7 +117,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
   };
 
   return (
-    <WebSocketContext.Provider value={{ socket, isConnected, subscribe, unsubscribe }}>
+    <WebSocketContext.Provider value={{ socket, isConnected, subscribe, unsubscribe, agentProgress }}>
       {children}
     </WebSocketContext.Provider>
   );

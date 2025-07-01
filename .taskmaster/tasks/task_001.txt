@@ -1,0 +1,43 @@
+# Task ID: 1
+# Title: Setup Monorepo Structure with npm Workspaces
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Transform current single-package project into workspace-based monorepo with packages/cli, packages/shared, packages/backend, packages/web
+# Details:
+Create root package.json with workspaces configuration. Setup directory structure: packages/cli (move existing src/), packages/shared (types and utilities), packages/backend (Express server), packages/web (React app). Update root package.json with workspace dependencies and scripts. Configure TypeScript project references in root tsconfig.json for cross-package compilation.
+
+# Test Strategy:
+Verify workspace structure created correctly, npm install works from root, TypeScript compilation works across packages, existing CLI functionality preserved
+
+# Subtasks:
+## 1. Create root workspace configuration and directory structure [done]
+### Dependencies: None
+### Description: Set up the basic monorepo structure with npm workspaces configuration and create all necessary package directories
+### Details:
+Create root package.json with workspaces field pointing to packages/*. Create packages/ directory with subdirectories: cli, shared, backend, web. Initialize each package directory with basic package.json files containing name, version, and appropriate dependencies.
+
+## 2. Move existing CLI code to packages/cli [done]
+### Dependencies: 1.1
+### Description: Migrate current src/ directory and related files to packages/cli workspace
+### Details:
+Move existing src/ directory to packages/cli/src/. Update packages/cli/package.json with proper dependencies, bin entry, and scripts. Update import paths if necessary. Move CLI-specific configuration files like tsconfig.json to packages/cli/.
+
+## 3. Setup packages/shared for common types and utilities [done]
+### Dependencies: 1.1
+### Description: Create shared package with TypeScript types and utility functions used across other packages
+### Details:
+Create packages/shared/src/ with index.ts export file. Move common types, interfaces, and utility functions from CLI to shared package. Set up package.json with TypeScript compilation scripts. Configure as a TypeScript library with proper exports.
+
+## 4. Initialize packages/backend and packages/web scaffolding [done]
+### Dependencies: 1.1, 1.3
+### Description: Create basic Express backend and React web application scaffolds in their respective packages
+### Details:
+Set up packages/backend with Express server boilerplate, basic routing, and dependency on packages/shared. Initialize packages/web with React application scaffold using create-react-app or Vite, also depending on packages/shared. Configure package.json files with appropriate scripts and dependencies.
+
+## 5. Configure TypeScript project references and root scripts [done]
+### Dependencies: 1.2, 1.3, 1.4
+### Description: Set up TypeScript project references for cross-package compilation and configure root-level scripts for workspace management
+### Details:
+Create root tsconfig.json with project references to all packages. Update each package's tsconfig.json with appropriate references and composite: true. Add root package.json scripts for building all packages, running tests, and development workflows. Configure workspace dependency management.
+

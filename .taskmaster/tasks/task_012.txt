@@ -1,0 +1,11 @@
+# Task ID: 12
+# Title: Create Frontend Directory Browser Component
+# Status: done
+# Dependencies: 11
+# Priority: high
+# Description: Build React component for browsing local file system and selecting project directories from the GUI
+# Details:
+Create DirectoryBrowser component with tree-view interface for navigating local directories. Implement folder expansion/collapse, file filtering (show only directories), and visual indicators for git repositories. Add search functionality for quick directory location. Include breadcrumb navigation and favorite/recent directories. Integrate with backend project discovery API. Use virtual scrolling for performance with large directory trees.
+
+# Test Strategy:
+Test directory navigation works smoothly, git repositories are visually indicated, search functionality finds directories quickly, component handles large directory structures efficiently, integration with backend API is seamless

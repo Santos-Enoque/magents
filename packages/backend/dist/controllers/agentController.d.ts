@@ -18,5 +18,9 @@ export declare const agentController: {
     updateAgentStatus(id: string, status: AgentStatus): Promise<Agent>;
     deleteAgent(id: string, removeWorktree?: boolean): Promise<void>;
     updateAgentConfig(id: string, config: Record<string, unknown>): Promise<void>;
+    assignAgentToProject(agentId: string, projectId: string): Promise<Agent>;
+    unassignAgentFromProject(agentId: string): Promise<Agent>;
+    getAgentsByProject(projectId: string): Promise<Agent[]>;
+    assignTaskToAgent(agentId: string, taskId: string): Promise<Agent>;
 };
 //# sourceMappingURL=agentController.d.ts.map

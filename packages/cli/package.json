@@ -16,7 +16,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@magents/shared": "workspace:*",
+    "@magents/shared": "file:../shared",
     "boxen": "^8.0.1",
     "chalk": "^5.3.0",
     "cli-spinners": "^3.2.0",

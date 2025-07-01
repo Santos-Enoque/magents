@@ -1,0 +1,43 @@
+# Task ID: 2
+# Title: Extract Shared Types and Utilities Package
+# Status: done
+# Dependencies: 1
+# Priority: high
+# Description: Create packages/shared with all existing types from src/types/index.ts and common utilities
+# Details:
+Move Agent, AgentRecord, CreateAgentOptions, and all other types from src/types/index.ts to packages/shared/src/types.ts. Extract common utility functions and constants. Create proper package.json with TypeScript exports. Setup TypeScript declarations and build configuration. Ensure proper module exports for consumption by other packages.
+
+# Test Strategy:
+Verify types are properly exported from shared package, can be imported by other packages, TypeScript compilation works, no circular dependencies
+
+# Subtasks:
+## 1. Create packages/shared directory structure and package.json [done]
+### Dependencies: None
+### Description: Initialize the shared package with proper directory structure and TypeScript configuration
+### Details:
+Create packages/shared directory with src/, dist/, and package.json. Configure package.json with proper name (@magents/shared), version, main/types exports, and TypeScript as devDependency. Setup tsconfig.json for compilation and create initial index.ts barrel export file.
+
+## 2. Move all types from src/types/index.ts to packages/shared/src/types.ts [done]
+### Dependencies: 2.1
+### Description: Extract Agent, AgentRecord, CreateAgentOptions and all other type definitions to the shared package
+### Details:
+Copy all type definitions from src/types/index.ts to packages/shared/src/types.ts. Maintain all existing interfaces, types, and enums. Update packages/shared/src/index.ts to re-export all types from types.ts file.
+
+## 3. Extract common utility functions and constants [done]
+### Dependencies: 2.2
+### Description: Identify and move reusable utility functions and constants to the shared package
+### Details:
+Scan codebase for utility functions that could be shared across packages. Create packages/shared/src/utils.ts and packages/shared/src/constants.ts. Move functions like validation helpers, formatting utilities, and shared constants. Update barrel exports in index.ts.
+
+## 4. Setup TypeScript build configuration and declarations [done]
+### Dependencies: 2.3
+### Description: Configure TypeScript compilation to generate proper .d.ts files and build artifacts
+### Details:
+Configure tsconfig.json for declaration generation, set outDir to dist/, include all src files. Add build script to package.json using tsc. Ensure proper module resolution and export maps for both CommonJS and ESM. Generate type declarations in dist/ directory.
+
+## 5. Update main project to use shared package and verify integration [done]
+### Dependencies: 2.4
+### Description: Replace local type imports with shared package imports and ensure everything works correctly
+### Details:
+Update src/types/index.ts to re-export from @magents/shared instead of defining types locally. Update all import statements throughout the codebase to use the shared package. Add @magents/shared as dependency in main package.json. Test that all existing functionality continues to work.
+

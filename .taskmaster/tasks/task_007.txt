@@ -1,0 +1,43 @@
+# Task ID: 7
+# Title: Implement Agent Dashboard with Real-time Status
+# Status: done
+# Dependencies: 5, 6
+# Priority: medium
+# Description: Create agent list dashboard showing current agents with real-time status updates via WebSocket
+# Details:
+Create AgentDashboard component displaying agent list in table/card format. Show agent ID, branch, status, creation time, and actions. Integrate WebSocket client to receive real-time status updates. Implement status indicators (RUNNING/green, STOPPED/yellow, ERROR/red). Add auto-refresh capability and connection status indicator. Style with responsive design.
+
+# Test Strategy:
+Verify dashboard displays current agents correctly, real-time updates work when agent status changes, WebSocket connection is stable, responsive design works on mobile and desktop
+
+# Subtasks:
+## 1. Create AgentDashboard Component Structure [done]
+### Dependencies: None
+### Description: Build the basic AgentDashboard React component with table/card layout for displaying agent information
+### Details:
+Create AgentDashboard.tsx component with responsive table structure. Include columns for agent ID, branch, status, creation time, and actions. Implement toggle between table and card views for mobile responsiveness. Add basic styling with CSS modules or styled-components. Create mock data structure for initial development.
+
+## 2. Implement Status Indicators and Styling [done]
+### Dependencies: 7.1
+### Description: Add visual status indicators with color coding and responsive design elements
+### Details:
+Create StatusIndicator component with color-coded badges (RUNNING/green, STOPPED/yellow, ERROR/red). Implement responsive CSS for mobile/desktop layouts. Add loading states and empty state handling. Include icons for different statuses using a icon library like React Icons or Lucide.
+
+## 3. Create WebSocket Client Service [done]
+### Dependencies: None
+### Description: Build WebSocket client service for real-time agent status updates
+### Details:
+Create WebSocketService class to handle connection, message parsing, and reconnection logic. Implement event handlers for agent status updates. Add connection state management (connecting, connected, disconnected, error). Include exponential backoff for reconnection attempts and heartbeat mechanism.
+
+## 4. Integrate Real-time Updates with Component State [done]
+### Dependencies: 7.1, 7.3
+### Description: Connect WebSocket service to AgentDashboard component for live status updates
+### Details:
+Integrate WebSocketService with AgentDashboard using React hooks (useEffect, useState). Implement agent data state management with real-time updates. Add connection status indicator in the UI. Handle message parsing and state updates when receiving agent status changes. Implement proper cleanup on component unmount.
+
+## 5. Add Auto-refresh and Action Handlers [done]
+### Dependencies: 7.2, 7.4
+### Description: Implement auto-refresh capability and action buttons for agent management
+### Details:
+Add manual refresh button and auto-refresh toggle with configurable intervals. Implement action buttons for each agent (start, stop, restart, delete). Add confirmation dialogs for destructive actions. Include error handling and user feedback for failed actions. Add keyboard shortcuts for common actions.
+

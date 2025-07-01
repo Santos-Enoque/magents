@@ -1,0 +1,43 @@
+# Task ID: 10
+# Title: Configure Build System and Cross-Package Dependencies
+# Status: done
+# Dependencies: 3, 4, 6
+# Priority: medium
+# Description: Setup workspace-aware build processes with TypeScript project references and development scripts
+# Details:
+Configure TypeScript project references in root and package tsconfigs for proper cross-package imports. Setup concurrent build scripts for all packages. Create development scripts for running backend and frontend simultaneously. Configure module resolution and ensure proper dependency management. Add build validation and testing scripts for entire monorepo.
+
+# Test Strategy:
+Verify TypeScript compilation works across all packages, development scripts start all services correctly, cross-package imports resolve properly, build process produces working artifacts for all packages
+
+# Subtasks:
+## 1. Configure TypeScript Project References [done]
+### Dependencies: None
+### Description: Setup TypeScript project references in root tsconfig and all package tsconfigs to enable proper cross-package imports and incremental compilation
+### Details:
+Create root tsconfig.json with composite project references pointing to all packages. Update each package's tsconfig.json to extend base config and set composite: true. Configure path mapping for @magents/* packages and ensure proper module resolution between packages.
+
+## 2. Setup Concurrent Build Scripts [done]
+### Dependencies: 10.1
+### Description: Create build scripts that can compile all packages in the correct dependency order with support for parallel builds where possible
+### Details:
+Add npm scripts for building all packages using tsc --build with project references. Create scripts for clean builds, incremental builds, and watch mode. Use tools like concurrently or npm-run-all for parallel execution where dependencies allow.
+
+## 3. Create Development Scripts [done]
+### Dependencies: 10.2
+### Description: Setup development scripts for running backend and frontend simultaneously with hot reload and proper environment configuration
+### Details:
+Create npm scripts that start both backend server and frontend development server concurrently. Configure environment variables, proxy settings, and hot reload. Ensure proper cleanup and error handling when stopping development servers.
+
+## 4. Configure Module Resolution and Dependencies [done]
+### Dependencies: 10.1
+### Description: Ensure proper module resolution for cross-package imports and validate dependency management across the monorepo
+### Details:
+Configure package.json workspaces, update import paths to use @magents/* aliases, ensure all cross-package dependencies are properly declared. Setup proper exports in package.json files and validate no circular dependencies exist.
+
+## 5. Add Build Validation and Testing Scripts [done]
+### Dependencies: 10.2, 10.3, 10.4
+### Description: Create comprehensive scripts for validating builds and running tests across the entire monorepo
+### Details:
+Add scripts for running all tests, linting all packages, type checking the entire codebase, and validating builds. Create CI-ready scripts that exit with proper error codes. Include scripts for checking package integrity and dependency consistency.
+

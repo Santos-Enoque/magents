@@ -1,0 +1,43 @@
+# Task ID: 4
+# Title: Setup Backend API Foundation with Express.js
+# Status: done
+# Dependencies: 2
+# Priority: high
+# Description: Create packages/backend with Express.js server exposing AgentManager functionality via REST API
+# Details:
+Create Express.js server in packages/backend/src/. Import existing services from CLI package. Implement core REST endpoints: GET /api/agents (list agents), POST /api/agents (create agent), DELETE /api/agents/:id (remove agent), GET /api/agents/:id (agent details). Add CORS middleware for web frontend. Setup TypeScript configuration and build process. Add error handling and validation middleware.
+
+# Test Strategy:
+Test all API endpoints with curl/Postman, verify agent creation actually creates tmux sessions and git worktrees, confirm existing AgentManager integration works correctly
+
+# Subtasks:
+## 1. Initialize Backend Package Structure and TypeScript Configuration [done]
+### Dependencies: None
+### Description: Create the backend package directory structure and setup TypeScript configuration with proper build tooling
+### Details:
+Create packages/backend/ directory with src/, dist/, and config subdirectories. Setup package.json with Express.js, TypeScript, and build dependencies. Configure tsconfig.json with proper module resolution for importing from CLI package. Setup build scripts and dev server with nodemon for hot reload.
+
+## 2. Setup Express.js Server with Middleware Foundation [done]
+### Dependencies: 4.1
+### Description: Initialize Express.js server with essential middleware including CORS, error handling, and request validation
+### Details:
+Create src/server.ts with Express app initialization. Add CORS middleware configured for web frontend. Implement global error handling middleware with proper error response formatting. Add request logging middleware. Setup JSON body parsing and request validation middleware using express-validator.
+
+## 3. Import and Adapt CLI Services for API Usage [done]
+### Dependencies: 4.2
+### Description: Import AgentManager and related services from CLI package and adapt them for API server usage
+### Details:
+Import AgentManager, ConfigManager, and other core services from packages/cli/src/. Create service adapters in src/services/ to handle API-specific concerns like async responses and error formatting. Ensure proper dependency injection and service lifecycle management for server environment.
+
+## 4. Implement Core Agent Management REST Endpoints [done]
+### Dependencies: 4.3
+### Description: Create REST API endpoints for agent management operations with proper request/response handling
+### Details:
+Create src/routes/agents.ts with GET /api/agents (list with pagination), POST /api/agents (create with validation), GET /api/agents/:id (details), DELETE /api/agents/:id (remove). Implement request validation schemas for each endpoint. Add proper HTTP status codes and error responses. Include route-level error handling.
+
+## 5. Setup Build Process and Production Configuration [done]
+### Dependencies: 4.4
+### Description: Configure production build process, environment management, and server deployment preparation
+### Details:
+Setup build scripts in package.json for production compilation. Configure environment variable management for API keys and server configuration. Add start scripts for production and development modes. Setup health check endpoint. Configure proper logging for production environment.
+

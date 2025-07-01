@@ -1,0 +1,43 @@
+# Task ID: 15
+# Title: Build TaskMaster Task Browser Interface
+# Status: pending
+# Dependencies: 14
+# Priority: medium
+# Description: Create React components for browsing, selecting, and previewing TaskMaster tasks in the GUI
+# Details:
+Create TaskBrowser component with task list, search, and filtering capabilities. Implement TaskPreview component showing task details, dependencies, and requirements. Add task assignment interface with validation. Include task status indicators and progress tracking. Implement drag-and-drop task assignment to agents. Add task creation wizard for creating new tasks from GUI.
+
+# Test Strategy:
+Test task browsing shows all available tasks, search and filtering work correctly, task preview displays complete information, assignment interface validates properly, drag-and-drop functionality works smoothly
+
+# Subtasks:
+## 1. Create TaskBrowser Component with List View [pending]
+### Dependencies: None
+### Description: Build the main TaskBrowser component with a list view for displaying all TaskMaster tasks
+### Details:
+Create TaskBrowser.tsx component that fetches and displays tasks from the TaskMaster API. Implement a list view with task cards showing ID, title, status, priority, and brief description. Add pagination or virtual scrolling for large task lists. Include loading states and error handling. Style with Tailwind CSS to match the existing UI design.
+
+## 2. Implement Task Search and Filtering [pending]
+### Dependencies: 15.1
+### Description: Add search functionality and filters to the TaskBrowser for finding specific tasks
+### Details:
+Add search input field with real-time filtering by task title, description, and ID. Implement filter controls for task status (pending, in-progress, done), priority levels, and dependency status. Add sorting options (by ID, priority, status, title). Store filter state in URL params for shareable views. Implement keyboard shortcuts for common filters.
+
+## 3. Build TaskPreview Component [pending]
+### Dependencies: 15.1
+### Description: Create a detailed preview component for displaying full task information
+### Details:
+Create TaskPreview.tsx component that shows complete task details including description, implementation details, test strategy, dependencies graph, subtasks tree, and metadata. Add syntax highlighting for code snippets in task descriptions. Include collapsible sections for better organization. Show task relationships and dependency chains visually.
+
+## 4. Add Task Assignment Interface with Drag-and-Drop [pending]
+### Dependencies: 15.1, 15.3
+### Description: Implement drag-and-drop functionality for assigning tasks to agents
+### Details:
+Implement drag-and-drop using react-beautiful-dnd or similar library. Make task cards draggable from the browser to agent panels. Add visual feedback during drag operations (ghost image, drop zones). Validate task assignments (check dependencies, agent capabilities). Show confirmation dialog for task assignment. Update both task and agent states after successful assignment.
+
+## 5. Create Task Creation Wizard [pending]
+### Dependencies: 15.1, 15.3
+### Description: Build a wizard interface for creating new TaskMaster tasks from the GUI
+### Details:
+Create multi-step wizard for task creation with fields for title, description, priority, dependencies, implementation details, and test strategy. Add dependency picker with search functionality. Include task template selection for common task types. Implement form validation and preview before submission. Add ability to create subtasks within the wizard. Integrate with TaskMaster API to save new tasks.
+

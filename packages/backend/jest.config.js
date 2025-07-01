@@ -6,9 +6,6 @@ module.exports = {
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
-  moduleNameMapping: {
-    '^@magents/shared$': '<rootDir>/../shared/src/types',
-  },
   setupFilesAfterEnv: [],
   collectCoverageFrom: [
     'src/**/*.ts',
@@ -17,5 +14,5 @@ module.exports = {
     '!src/server.ts'
   ],
   coverageDirectory: 'coverage',
-  coverageReporters: ['text', 'lcov', 'html'],
+  coverageReporters: ['text', 'lcov', 'html']
 };

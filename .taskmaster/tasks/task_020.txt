@@ -1,0 +1,11 @@
+# Task ID: 20
+# Title: Implement GUI Agent Creation Integration Testing
+# Status: pending
+# Dependencies: 19
+# Priority: high
+# Description: Create comprehensive end-to-end tests for GUI agent creation workflow covering all features and edge cases
+# Details:
+Build E2E test suite using Playwright covering: project discovery and selection, git repository validation, branch creation and selection, TaskMaster task assignment, agent creation with various configurations, error handling and recovery. Include performance tests for large directory structures. Add integration tests for CLI equivalence verification. Implement automated testing of complex scenarios.
+
+# Test Strategy:
+Test suite covers all user workflows, performance tests validate responsiveness, integration tests verify CLI compatibility, error scenarios are properly handled, complex configurations work correctly

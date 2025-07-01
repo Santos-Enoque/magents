@@ -1,0 +1,43 @@
+# Task ID: 3
+# Title: Migrate CLI to packages/cli
+# Status: done
+# Dependencies: 2
+# Priority: high
+# Description: Move existing CLI code to packages/cli while preserving all functionality and global binary access
+# Details:
+Move all src/ code to packages/cli/src/. Update imports to use packages/shared for types. Configure package.json with bin field for magents binary. Update TypeScript configuration for project references. Ensure all existing services (AgentManager, GitService, TmuxService, ConfigManager, UIService) work properly. Update build scripts and ensure global installation works.
+
+# Test Strategy:
+Run all existing CLI commands (create, list, attach, dashboard, monitor, task-create), verify magents binary works globally, all tests pass, functionality identical to original
+
+# Subtasks:
+## 1. Create packages/cli directory structure and move source code [done]
+### Dependencies: None
+### Description: Create the new packages/cli directory structure and move all existing src/ code to packages/cli/src/
+### Details:
+Create packages/cli directory with src/, dist/, and tests/ subdirectories. Move all files from src/ to packages/cli/src/. Update any internal relative imports within the CLI code to reflect the new structure.
+
+## 2. Update imports to use packages/shared for shared types [done]
+### Dependencies: 3.1
+### Description: Refactor all imports in the CLI code to use packages/shared for shared types and utilities
+### Details:
+Identify all imports that should reference shared types from packages/shared. Update import statements to use relative paths to packages/shared or configure proper module resolution. Ensure types like AgentConfig, GitConfig, etc. are imported from shared package.
+
+## 3. Configure package.json with bin field and dependencies [done]
+### Dependencies: 3.2
+### Description: Create packages/cli/package.json with proper bin field configuration for global magents binary
+### Details:
+Create package.json in packages/cli with bin field pointing to compiled CLI entry point. Configure dependencies including packages/shared. Set up proper npm scripts for build, test, and dev. Ensure the binary name 'magents' is properly configured.
+
+## 4. Update TypeScript configuration for project references [done]
+### Dependencies: 3.3
+### Description: Configure TypeScript project references and compilation settings for the CLI package
+### Details:
+Create tsconfig.json in packages/cli with proper project references to packages/shared. Update root tsconfig.json to include packages/cli in references. Configure proper output directories and module resolution. Ensure proper build order between packages.
+
+## 5. Update build scripts and verify all services functionality [done]
+### Dependencies: 3.4
+### Description: Update build scripts and thoroughly test that all services (AgentManager, GitService, TmuxService, ConfigManager, UIService) work properly after migration
+### Details:
+Update root package.json build scripts to build CLI package. Test global installation with npm install -g. Verify all core services work: AgentManager can create/manage agents, GitService handles git operations, TmuxService manages tmux sessions, ConfigManager handles configuration, UIService provides proper UI feedback. Test CLI commands end-to-end.
+

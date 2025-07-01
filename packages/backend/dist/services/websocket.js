@@ -67,6 +67,16 @@ const setupWebSocket = (io) => {
                 timestamp: Date.now()
             };
             io.emit('config:change', message);
+        },
+        // Broadcast agent creation progress
+        broadcastAgentProgress: (agentId, progress) => {
+            const message = {
+                type: shared_1.WS_EVENTS.AGENT_PROGRESS,
+                data: progress,
+                timestamp: Date.now(),
+                agentId
+            };
+            io.to('agents').emit('agent:progress', message);
         }
     };
 };

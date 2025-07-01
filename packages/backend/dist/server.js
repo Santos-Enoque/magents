@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.server = exports.io = exports.app = void 0;
+exports.server = exports.io = exports.app = exports.websocketService = void 0;
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const http_1 = require("http");
@@ -42,7 +42,8 @@ app.use(shared_1.API_ENDPOINTS.CONFIG, config_1.configRoutes);
 app.use('/api/tmux', tmux_1.tmuxRoutes);
 app.use('/api/taskmaster', taskmaster_1.taskMasterRoutes);
 // WebSocket setup
-(0, websocket_1.setupWebSocket)(io);
+const websocketService = (0, websocket_1.setupWebSocket)(io);
+exports.websocketService = websocketService;
 // Error handling middleware (must be last)
 app.use(errorHandler_1.errorHandler);
 // Start server

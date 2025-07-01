@@ -97,6 +97,24 @@ class ApiService {
     });
   }
 
+  async assignAgentToProject(agentId: string, projectId: string) {
+    return this.request<Agent>(`/api/agents/${agentId}/project`, {
+      method: 'PUT',
+      body: JSON.stringify({ projectId }),
+    });
+  }
+
+  async unassignAgentFromProject(agentId: string) {
+    return this.request<Agent>(`/api/agents/${agentId}/project`, {
+      method: 'DELETE',
+    });
+  }
+
+  async getAgentsByProject(projectId: string) {
+    const response = await this.request<Agent[]>(`/api/agents/project/${projectId}`);
+    return Array.isArray(response) ? response : [];
+  }
+
   // Projects
   async getProjects() {
     const response = await this.request<Project[]>('/api/projects');
@@ -125,6 +143,32 @@ class ApiService {
     return this.request<void>(`/api/projects/${id}`, {
       method: 'DELETE',
     });
+  }
+
+  async addAgentToProject(projectId: string, agentId: string) {
+    return this.request<Project>(`/api/projects/${projectId}/agents/${agentId}`, {
+      method: 'POST',
+    });
+  }
+
+  async removeAgentFromProject(projectId: string, agentId: string) {
+    return this.request<Project>(`/api/projects/${projectId}/agents/${agentId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async getProjectStats(id: string) {
+    return this.request<any>(`/api/projects/${id}/stats`);
+  }
+
+  async searchProjects(query: string) {
+    const response = await this.request<Project[]>(`/api/projects/search/${encodeURIComponent(query)}`);
+    return Array.isArray(response) ? response : [];
+  }
+
+  async getProjectsByStatus(status: 'ACTIVE' | 'INACTIVE') {
+    const response = await this.request<Project[]>(`/api/projects/status/${status}`);
+    return Array.isArray(response) ? response : [];
   }
 
   // Project Discovery

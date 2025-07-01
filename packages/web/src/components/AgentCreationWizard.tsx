@@ -19,6 +19,14 @@ export interface WizardStep {
   isOptional?: boolean;
 }
 
+// MCP Server interface
+interface MCPServer {
+  name: string;
+  command: string;
+  args: string[];
+  env?: Record<string, string>;
+}
+
 // Form data interface
 export interface WizardFormData {
   // Step 1: Project Selection
@@ -33,12 +41,42 @@ export interface WizardFormData {
   taskMasterEnabled: boolean;
   selectedTasks: string[];
   
-  // Step 4: Advanced Configuration
+  // Step 4: Advanced Configuration - Extended to match AdvancedConfigPanel
+  // Security & Automation
   autoAccept: boolean;
+  claudeModel?: string;
+  
+  // Docker Configuration
   useDocker: boolean;
   dockerImage?: string;
+  dockerNetwork?: string;
+  dockerVolumes?: string[];
+  
+  // Port Management
   portRange?: string;
+  reservedPorts?: number[];
+  
+  // Environment Variables
   environment?: Record<string, string>;
+  
+  // MCP Configuration
+  mcpEnabled: boolean;
+  mcpServers?: MCPServer[];
+  
+  // Claude Settings
+  claudeSettings: {
+    maxTokens?: number;
+    temperature?: number;
+    topP?: number;
+    customInstructions?: string;
+  };
+  
+  // Advanced Settings
+  isolationMode: 'none' | 'process' | 'container';
+  resourceLimits?: {
+    memory?: string;
+    cpu?: number;
+  };
   
   // Step 5: Preview & Create (no form data, just display)
 }
@@ -97,11 +135,28 @@ export const AgentCreationWizard: React.FC<AgentCreationWizardProps> = ({
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<WizardFormData>({
+    // Step 2: Branch Management
     branch: '',
-    autoAccept: true,
-    useDocker: false,
+    
+    // Step 3: TaskMaster Integration
     taskMasterEnabled: false,
-    selectedTasks: []
+    selectedTasks: [],
+    
+    // Step 4: Advanced Configuration
+    // Security & Automation
+    autoAccept: true,
+    
+    // Docker Configuration
+    useDocker: false,
+    
+    // MCP Configuration
+    mcpEnabled: false,
+    
+    // Claude Settings
+    claudeSettings: {},
+    
+    // Advanced Settings
+    isolationMode: 'none'
   });
 
   // Define wizard steps with dynamic validation

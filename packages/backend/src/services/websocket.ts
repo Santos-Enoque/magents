@@ -1,5 +1,5 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
-import { WebSocketMessage, AgentEvent, WS_EVENTS } from '@magents/shared';
+import { WebSocketMessage, AgentEvent, AgentCreationProgress, WS_EVENTS } from '@magents/shared';
 
 export const setupWebSocket = (io: SocketIOServer) => {
   io.on('connection', (socket: Socket) => {
@@ -79,6 +79,18 @@ export const setupWebSocket = (io: SocketIOServer) => {
       };
       
       io.emit('config:change', message);
+    },
+    
+    // Broadcast agent creation progress
+    broadcastAgentProgress: (agentId: string, progress: AgentCreationProgress) => {
+      const message: WebSocketMessage<AgentCreationProgress> = {
+        type: WS_EVENTS.AGENT_PROGRESS,
+        data: progress,
+        timestamp: Date.now(),
+        agentId
+      };
+      
+      io.to('agents').emit('agent:progress', message);
     }
   };
 };

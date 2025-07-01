@@ -1,0 +1,43 @@
+# Task ID: 8
+# Title: Build Agent Creation Form with Branch Selection
+# Status: done
+# Dependencies: 4, 6
+# Priority: medium
+# Description: Create web form for agent creation with branch selection and validation
+# Details:
+Create AgentCreateForm component with branch input field and validation. Integrate with backend POST /api/agents endpoint. Add form validation for branch names and required fields. Implement success/error handling and user feedback. Add loading states during agent creation. Ensure form submission creates actual tmux sessions and git worktrees like CLI.
+
+# Test Strategy:
+Test form submission creates working agents, validation prevents invalid inputs, success/error messages display correctly, created agents appear in dashboard immediately, tmux sessions are accessible
+
+# Subtasks:
+## 1. Create AgentCreateForm component structure [done]
+### Dependencies: None
+### Description: Build the basic form component with input fields for agent name, branch selection, and submit button
+### Details:
+Create AgentCreateForm.tsx component with form fields for agent name (text input), branch selection (dropdown/combobox), and submit button. Use controlled components with useState for form state management. Include proper TypeScript interfaces for form data.
+
+## 2. Implement form validation logic [done]
+### Dependencies: 8.1
+### Description: Add client-side validation for required fields and branch name format validation
+### Details:
+Implement validation rules for agent name (required, alphanumeric with hyphens/underscores) and branch name (required, valid git branch format). Add error state management and display validation messages. Use form validation library like react-hook-form or custom validation functions.
+
+## 3. Create API integration service [done]
+### Dependencies: 8.2
+### Description: Build service layer to handle POST requests to /api/agents endpoint with proper error handling
+### Details:
+Create agentService.ts with createAgent function that posts to /api/agents endpoint. Include proper TypeScript types for request/response. Implement error handling for network failures, validation errors, and server errors. Add request/response logging.
+
+## 4. Implement loading states and user feedback [done]
+### Dependencies: 8.3
+### Description: Add loading indicators, success messages, and error handling with appropriate UI feedback
+### Details:
+Add loading state during form submission with spinner/disabled button. Implement success feedback (toast notification or success message) and error handling with user-friendly error messages. Add form reset functionality after successful submission.
+
+## 5. Integrate form with backend tmux/git worktree functionality [done]
+### Dependencies: 8.4
+### Description: Ensure form submission triggers actual tmux session creation and git worktree setup like CLI implementation
+### Details:
+Verify backend integration creates tmux sessions and git worktrees correctly. Add validation that submitted data matches expected backend format. Implement proper error handling for tmux/git operations. Add success verification that agent is actually created and running.
+

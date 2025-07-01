@@ -1,0 +1,43 @@
+# Task ID: 9
+# Title: Add Basic Agent Management Actions
+# Status: done
+# Dependencies: 7, 8
+# Priority: medium
+# Description: Implement basic agent management actions (start, stop, view details, delete) in web interface
+# Details:
+Add action buttons/menus to agent dashboard for basic operations. Implement agent deletion with confirmation dialog. Add agent details modal/page showing full agent information. Integrate with backend API endpoints for each action. Add proper error handling and user feedback. Ensure actions update dashboard in real-time.
+
+# Test Strategy:
+Test all agent actions work correctly (delete removes agent and tmux session), confirmation dialogs prevent accidental actions, error handling displays appropriate messages, real-time updates reflect changes immediately
+
+# Subtasks:
+## 1. Create Agent Action Components [done]
+### Dependencies: None
+### Description: Design and implement reusable UI components for agent management actions including buttons, menus, and confirmation dialogs
+### Details:
+Create ActionButton, ActionMenu, and ConfirmationDialog components. Style them consistently with existing UI. Include icons for start, stop, view, and delete actions. Implement proper loading states and disabled states for each action type.
+
+## 2. Implement Agent Details Modal [done]
+### Dependencies: 9.1
+### Description: Create a modal component that displays comprehensive agent information including status, configuration, logs, and metadata
+### Details:
+Build AgentDetailsModal component with tabs or sections for different information types. Include agent status, creation date, configuration parameters, recent activity logs, and performance metrics. Add close and edit functionality.
+
+## 3. Integrate Backend API Endpoints [done]
+### Dependencies: 9.1
+### Description: Connect frontend actions to backend API endpoints for start, stop, delete, and get details operations
+### Details:
+Create API service methods for each agent operation. Implement proper request/response handling with TypeScript types. Add authentication headers and error response parsing. Include retry logic for failed requests.
+
+## 4. Add Error Handling and User Feedback [done]
+### Dependencies: 9.2, 9.3
+### Description: Implement comprehensive error handling with user-friendly feedback messages and loading states for all agent actions
+### Details:
+Add toast notifications or alert components for success/error messages. Implement loading spinners during API calls. Create specific error messages for different failure scenarios. Add timeout handling and network error recovery.
+
+## 5. Implement Real-time Dashboard Updates [done]
+### Dependencies: 9.4
+### Description: Add real-time synchronization to update the agent dashboard immediately after any management action is performed
+### Details:
+Implement WebSocket connection or polling mechanism to refresh agent list after actions. Update local state optimistically for immediate feedback. Handle concurrent updates from multiple users. Add visual indicators for recently updated agents.
+

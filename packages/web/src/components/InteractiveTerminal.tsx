@@ -74,8 +74,8 @@ export const InteractiveTerminal: React.FC<InteractiveTerminalProps> = ({ agent 
         const content = data.data.content;
         if (content.trim()) {
           // Split content into lines and add as output
-          const contentLines = content.split('\n').filter(line => line.trim());
-          contentLines.forEach(line => {
+          const contentLines = content.split('\n').filter((line: string) => line.trim());
+          contentLines.forEach((line: string) => {
             if (line.trim()) {
               addLine(line, 'output');
             }
@@ -130,7 +130,7 @@ export const InteractiveTerminal: React.FC<InteractiveTerminalProps> = ({ agent 
             if (contentData.success) {
               // Get the last few lines that might be new output
               const newContent = contentData.data.content.split('\n').slice(-3);
-              newContent.forEach(line => {
+              newContent.forEach((line: string) => {
                 if (line.trim() && !line.includes(`$ ${command}`)) {
                   addLine(line, 'output');
                 }

@@ -1,68 +1,59 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.projectController = void 0;
-const shared_1 = require("@magents/shared");
-// In-memory storage for scaffolding
-const projects = [];
+const ProjectManager_1 = require("../services/ProjectManager");
+const projectManager = ProjectManager_1.ProjectManager.getInstance();
 exports.projectController = {
     async listProjects() {
-        return projects;
+        return await projectManager.listProjects();
     },
     async getProject(id) {
-        const project = projects.find(p => p.id === id);
-        if (!project) {
-            throw new Error(`Project with id ${id} not found`);
-        }
-        return project;
+        return await projectManager.getProject(id);
     },
     async createProject(options) {
-        const projectId = (0, shared_1.generateId)('proj');
-        // Check if project with same name exists
-        const existingProject = projects.find(p => p.name === options.name);
-        if (existingProject) {
-            throw new Error(`Project with name ${options.name} already exists`);
-        }
-        const project = {
-            id: projectId,
-            name: options.name || `project-${projectId}`,
-            path: process.cwd(), // This would be properly computed
-            agents: [],
-            status: 'ACTIVE',
-            createdAt: new Date()
-        };
-        if (options.ports) {
-            const [start, end] = options.ports.split('-').map(Number);
-            project.portRange = [start, end];
-        }
-        if (options.docker) {
-            project.dockerNetwork = `magents-${projectId}`;
-        }
-        projects.push(project);
-        return project;
+        return await projectManager.createProject(options);
     },
     async updateProject(id, updates) {
-        const project = await this.getProject(id);
-        // Update allowed fields
-        if (updates.name)
-            project.name = updates.name;
-        if (updates.status)
-            project.status = updates.status;
-        if (updates.portRange)
-            project.portRange = updates.portRange;
-        if (updates.dockerNetwork)
-            project.dockerNetwork = updates.dockerNetwork;
-        return project;
+        return await projectManager.updateProject(id, updates);
     },
     async deleteProject(id) {
-        const projectIndex = projects.findIndex(p => p.id === id);
-        if (projectIndex === -1) {
-            throw new Error(`Project with id ${id} not found`);
-        }
-        // In a real implementation, this would:
-        // 1. Stop all agents in the project
-        // 2. Clean up docker networks
-        // 3. Remove worktrees
-        projects.splice(projectIndex, 1);
+        return await projectManager.deleteProject(id);
+    },
+    async addAgentToProject(projectId, agentId) {
+        return await projectManager.addAgentToProject(projectId, agentId);
+    },
+    async removeAgentFromProject(projectId, agentId) {
+        return await projectManager.removeAgentFromProject(projectId, agentId);
+    },
+    async getProjectStats(id) {
+        return await projectManager.getProjectStats(id);
+    },
+    async searchProjects(query) {
+        return await projectManager.searchProjects(query);
+    },
+    async getProjectsByStatus(status) {
+        return await projectManager.getProjectsByStatus(status);
+    },
+    async getProjectSettings(id) {
+        return await projectManager.getProjectSettings(id);
+    },
+    async updateProjectSettings(id, settings) {
+        return await projectManager.updateProjectSettings(id, settings);
+    },
+    async resetProjectSettings(id) {
+        return await projectManager.resetProjectSettings(id);
+    },
+    async createProjectFromTemplate(templateName, options) {
+        return await projectManager.createProjectFromTemplate(templateName, options);
+    },
+    async getProjectTemplate(templateName) {
+        return await projectManager.getProjectTemplate(templateName);
+    },
+    async saveProjectTemplate(templateName, template) {
+        return await projectManager.saveProjectTemplate(templateName, template);
+    },
+    async listProjectTemplates() {
+        return await projectManager.listProjectTemplates();
     }
 };
 //# sourceMappingURL=projectController.js.map

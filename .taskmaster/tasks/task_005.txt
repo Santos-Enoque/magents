@@ -1,0 +1,43 @@
+# Task ID: 5
+# Title: Implement WebSocket Server for Real-time Updates
+# Status: done
+# Dependencies: 4
+# Priority: medium
+# Description: Add WebSocket server to backend for real-time agent status updates and monitoring
+# Details:
+Integrate Socket.IO or ws library into Express server. Create WebSocket endpoints for agent status events. Hook into existing agent status tracking to emit real-time updates when agents change state (RUNNING, STOPPED, ERROR). Implement connection management and event broadcasting. Add authentication/authorization if needed.
+
+# Test Strategy:
+Test WebSocket connection establishment, verify real-time events are emitted when agent status changes, test multiple client connections, ensure stable connection handling
+
+# Subtasks:
+## 1. Set up WebSocket library and server configuration [done]
+### Dependencies: None
+### Description: Install and configure Socket.IO or ws library with the existing Express server
+### Details:
+Install Socket.IO package, create WebSocket server instance that shares the same HTTP server as Express, configure CORS settings for WebSocket connections, and set up basic connection handling with logging
+
+## 2. Implement connection management and authentication [done]
+### Dependencies: 5.1
+### Description: Create connection management system with optional authentication for WebSocket clients
+### Details:
+Implement connection tracking, add authentication middleware if needed (JWT token validation), create connection pools or rooms for different types of clients, handle connection cleanup on disconnect
+
+## 3. Define WebSocket event schema and endpoints [done]
+### Dependencies: 5.2
+### Description: Create standardized event schema for agent status updates and define WebSocket event endpoints
+### Details:
+Design event payload structure for agent status changes (agent_id, status, timestamp, metadata), define event types (agent_status_changed, agent_error, agent_metrics), create event validation schemas, implement event emitters and listeners
+
+## 4. Integrate with existing agent status tracking [done]
+### Dependencies: 5.3
+### Description: Hook WebSocket events into the current agent monitoring system to emit real-time updates
+### Details:
+Identify existing agent status update points in the codebase, inject WebSocket event emissions at status change locations, ensure events are emitted for all status transitions (RUNNING, STOPPED, ERROR), add error handling for failed event emissions
+
+## 5. Implement event broadcasting and client notification system [done]
+### Dependencies: 5.4
+### Description: Create broadcasting logic to send agent status updates to appropriate WebSocket clients
+### Details:
+Implement room-based or targeted broadcasting (clients can subscribe to specific agents or all agents), add event queuing for disconnected clients if needed, implement rate limiting for high-frequency updates, add logging for event broadcasting
+
