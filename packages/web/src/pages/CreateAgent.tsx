@@ -1,53 +1,83 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { ArrowLeft } from 'lucide-react';
-import { AgentCreateForm, AgentFormData } from '../components/AgentCreateForm';
+import { AgentCreationWizard } from '../components/AgentCreationWizard';
+import { AgentCreationProgress } from '../components/AgentCreationProgress';
 import { apiService } from '../services/api';
+import { useWebSocket } from '../hooks/useWebSocket';
 import { CreateAgentOptions } from '@magents/shared';
 
 export const CreateAgent: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { agentProgress, subscribe, unsubscribe } = useWebSocket();
   const [isCreating, setIsCreating] = useState(false);
+  const [currentAgentId, setCurrentAgentId] = useState<string | null>(null);
 
-  const handleCreateAgent = async (formData: AgentFormData) => {
+  // Fetch projects and tasks for the wizard
+  const { data: projects = [] } = useQuery({
+    queryKey: ['projects'],
+    queryFn: apiService.getProjects,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  const { data: tasks = [] } = useQuery({
+    queryKey: ['taskmaster-tasks'],
+    queryFn: async () => {
+      try {
+        // Use project root path - for now hardcode, but in future could be dynamic based on selected project
+        const currentPath = '/Users/santossafrao/Development/personal/magents';
+        return await apiService.getTaskMasterTasks(currentPath);
+      } catch (error) {
+        // TaskMaster might not be available, return empty array
+        console.warn('TaskMaster not available:', error);
+        return [];
+      }
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Subscribe to agent events when component mounts
+  useEffect(() => {
+    subscribe('agents');
+    return () => unsubscribe('agents');
+  }, [subscribe, unsubscribe]);
+
+  // Handle progress completion
+  useEffect(() => {
+    if (currentAgentId && agentProgress[currentAgentId]) {
+      const progress = agentProgress[currentAgentId];
+      if (progress.percentage === 100 && !progress.error) {
+        // Agent creation completed successfully
+        setTimeout(() => {
+          setIsCreating(false);
+          setCurrentAgentId(null);
+          navigate('/agents');
+        }, 1000);
+      } else if (progress.error) {
+        // Agent creation failed
+        setIsCreating(false);
+        setCurrentAgentId(null);
+      }
+    }
+  }, [currentAgentId, agentProgress, navigate]);
+
+  const handleCreateAgent = async (options: CreateAgentOptions) => {
     setIsCreating(true);
 
     try {
-      // Transform form data to CreateAgentOptions
-      const createOptions: CreateAgentOptions = {
-        branch: formData.branch.trim(),
-        agentId: formData.agentId.trim() || undefined,
-        autoAccept: formData.autoAccept,
-        useDocker: formData.useDocker,
-        projectId: formData.projectId?.trim() || undefined,
-        // Include project path if provided
-        projectPath: formData.projectPath?.trim() || undefined,
-      };
+      // Set the agent ID for progress tracking
+      const agentId = options.agentId || `agent-${Date.now()}`;
+      setCurrentAgentId(agentId);
 
       // Create the agent
-      const createdAgent = await apiService.createAgent(createOptions);
+      await apiService.createAgent(options);
 
-      // Show success toast
-      toast.success(`Agent "${createdAgent.id}" created successfully!`, {
-        position: 'top-right',
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-
+      // Don't show success toast or navigate immediately - let progress tracker handle it
       // Invalidate queries to refresh agent list
       await queryClient.invalidateQueries({ queryKey: ['agents'] });
-
-      // Navigate to agents page with the new agent
-      navigate('/agents', {
-        state: { highlightAgentId: createdAgent.id }
-      });
 
     } catch (error) {
       console.error('Failed to create agent:', error);
@@ -67,10 +97,12 @@ export const CreateAgent: React.FC = () => {
         progress: undefined,
       });
 
+      // Reset state on error
+      setIsCreating(false);
+      setCurrentAgentId(null);
+
       // Re-throw to let the form handle it as well
       throw error;
-    } finally {
-      setIsCreating(false);
     }
   };
 
@@ -97,11 +129,23 @@ export const CreateAgent: React.FC = () => {
         </p>
       </div>
 
-      {/* Form */}
-      <AgentCreateForm
+      {/* Progress Tracker - Show when creating agent */}
+      {isCreating && currentAgentId && agentProgress[currentAgentId] && (
+        <div className="mb-6">
+          <AgentCreationProgress 
+            progress={agentProgress[currentAgentId]} 
+            agentId={currentAgentId}
+          />
+        </div>
+      )}
+
+      {/* Wizard */}
+      <AgentCreationWizard
         onSubmit={handleCreateAgent}
         onCancel={handleCancel}
         isLoading={isCreating}
+        projects={projects}
+        tasks={tasks}
       />
 
       {/* Additional Information */}
