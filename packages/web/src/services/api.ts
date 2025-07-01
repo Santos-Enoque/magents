@@ -1,4 +1,4 @@
-import { Agent, Project, MagentsConfig, ApiResponse, PaginatedResponse, CreateAgentOptions, DirectoryItem, ProjectValidationResult, GitRepositoryInfo, ProjectDiscoveryOptions } from '@magents/shared';
+import { Agent, Project, MagentsConfig, ApiResponse, PaginatedResponse, CreateAgentOptions, DirectoryItem, ProjectValidationResult, GitRepositoryInfo, ProjectDiscoveryOptions, TaskMasterTask } from '@magents/shared';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
@@ -164,6 +164,49 @@ class ApiService {
     return this.request<MagentsConfig>('/api/config/reset', {
       method: 'POST',
     });
+  }
+
+  // TaskMaster
+  async detectTaskMaster(path: string) {
+    const queryParams = new URLSearchParams({ path });
+    return this.request<any>(`/api/taskmaster/detect?${queryParams}`);
+  }
+
+  async getTaskMasterTasks(path: string) {
+    const queryParams = new URLSearchParams({ path });
+    return this.request<TaskMasterTask[]>(`/api/taskmaster/tasks?${queryParams}`);
+  }
+
+  async getTaskMasterTask(path: string, taskId: string) {
+    const queryParams = new URLSearchParams({ path });
+    return this.request<TaskMasterTask>(`/api/taskmaster/tasks/${taskId}?${queryParams}`);
+  }
+
+  async createTaskMasterTask(path: string, title: string, description?: string, priority?: string) {
+    return this.request<TaskMasterTask>('/api/taskmaster/tasks', {
+      method: 'POST',
+      body: JSON.stringify({ path, title, description, priority }),
+    });
+  }
+
+  async updateTaskMasterStatus(path: string, taskId: string, status: string) {
+    const queryParams = new URLSearchParams({ path });
+    return this.request<void>(`/api/taskmaster/tasks/${taskId}/status?${queryParams}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    });
+  }
+
+  async assignTaskToAgent(agentId: string, taskId: string, projectPath: string) {
+    return this.request<any>(`/api/agents/${agentId}/assign-task`, {
+      method: 'POST',
+      body: JSON.stringify({ taskId, projectPath }),
+    });
+  }
+
+  async getTaskMasterStatistics(path: string) {
+    const queryParams = new URLSearchParams({ path });
+    return this.request<any>(`/api/taskmaster/statistics?${queryParams}`);
   }
 }
 

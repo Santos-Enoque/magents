@@ -23,6 +23,8 @@ export const CreateAgent: React.FC = () => {
         autoAccept: formData.autoAccept,
         useDocker: formData.useDocker,
         projectId: formData.projectId?.trim() || undefined,
+        // Include project path if provided
+        projectPath: formData.projectPath?.trim() || undefined,
       };
 
       // Create the agent

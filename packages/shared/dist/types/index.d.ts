@@ -36,6 +36,7 @@ export interface AgentContext {
 export interface CreateAgentOptions {
     branch: string;
     agentId?: string;
+    projectPath?: string;
     autoAccept?: boolean;
     environment?: Partial<AgentEnvironment>;
     context?: AgentContext;

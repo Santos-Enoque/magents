@@ -41,11 +41,16 @@ export class AgentManager {
         };
       }
 
-      const repoRoot = this.gitService.getRepoRoot();
+      // Use provided project path or fall back to current repo root
+      const repoRoot = options.projectPath || this.gitService.getRepoRoot();
       const worktreePath = path.join(path.dirname(repoRoot), agentId);
       const tmuxSession = `${config.TMUX_SESSION_PREFIX}-${agentId}`;
 
-      // Prepare branch
+      // Prepare branch (with specific repo if projectPath provided)
+      if (options.projectPath) {
+        // When using a specific project path, we need to work within that directory
+        process.chdir(repoRoot);
+      }
       await this.gitService.prepareBranch(options.branch, config.DEFAULT_BASE_BRANCH);
 
       // Create worktree

@@ -99,6 +99,56 @@ class TmuxService {
             return [];
         }
     }
+    getSessionWindows(sessionName) {
+        try {
+            const result = (0, child_process_1.execSync)(`tmux list-windows -t "${sessionName}" -F "#{window_name}"`, {
+                encoding: 'utf8',
+                stdio: 'pipe'
+            });
+            return result.trim().split('\n').filter(line => line.trim());
+        }
+        catch {
+            return [];
+        }
+    }
+    capturePane(sessionName, windowName, lines = 100) {
+        try {
+            const target = windowName ? `${sessionName}:${windowName}` : sessionName;
+            const result = (0, child_process_1.execSync)(`tmux capture-pane -t "${target}" -p -S -${lines}`, {
+                encoding: 'utf8',
+                stdio: 'pipe'
+            });
+            return result;
+        }
+        catch (error) {
+            throw new Error(`Failed to capture tmux pane: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
+    getSessionInfo(sessionName) {
+        try {
+            const windows = this.getSessionWindows(sessionName);
+            const activeWindowResult = (0, child_process_1.execSync)(`tmux display-message -t "${sessionName}" -p "#{window_name}"`, {
+                encoding: 'utf8',
+                stdio: 'pipe'
+            });
+            return {
+                windows,
+                activeWindow: activeWindowResult.trim()
+            };
+        }
+        catch {
+            return null;
+        }
+    }
+    sendCommand(sessionName, command, windowName) {
+        try {
+            const target = windowName ? `${sessionName}:${windowName}` : sessionName;
+            (0, child_process_1.execSync)(`tmux send-keys -t "${target}" "${command}" Enter`, { stdio: 'pipe' });
+        }
+        catch (error) {
+            throw new Error(`Failed to send command to tmux: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
 }
 exports.TmuxService = TmuxService;
 //# sourceMappingURL=TmuxService.js.map

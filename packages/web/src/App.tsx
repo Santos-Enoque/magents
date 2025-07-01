@@ -11,6 +11,8 @@ import { Projects } from './pages/Projects';
 import { Settings } from './pages/Settings';
 import { AgentDetail } from './pages/AgentDetail';
 import { ProjectDetail } from './pages/ProjectDetail';
+import { Tasks } from './pages/Tasks';
+import { TaskAssignment } from './pages/TaskAssignment';
 import { WebSocketProvider } from './hooks/useWebSocket';
 import './App.css';
 import 'react-toastify/dist/ReactToastify.css';
@@ -39,6 +41,8 @@ function App() {
                 <Route path="/agents/:id" element={<AgentDetail />} />
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/projects/:id" element={<ProjectDetail />} />
+                <Route path="/tasks" element={<Tasks />} />
+                <Route path="/tasks/assign" element={<TaskAssignment />} />
                 <Route path="/settings" element={<Settings />} />
               </Routes>
             </Layout>
