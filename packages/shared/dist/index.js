@@ -14,7 +14,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PACKAGE_INFO = exports.VERSION = exports.API_ENDPOINTS = exports.WS_EVENTS = exports.ERROR_CODES = exports.TASK_PRIORITY = exports.TASK_STATUS = exports.PROJECT_STATUS = exports.AGENT_STATUS = exports.DEFAULT_CONFIG = exports.getRelativeTime = exports.formatDate = exports.deepMerge = exports.retry = exports.delay = exports.createErrorResult = exports.createSuccessResult = exports.sanitizeBranchName = exports.generateAgentId = exports.generateId = exports.EventTypeSchema = exports.EntityIdSchema = exports.DATABASE_VERSION = exports.MIGRATIONS = exports.INDEXES = exports.TABLE_SCHEMAS = exports.isUnifiedEventData = exports.isUnifiedConfigData = exports.isUnifiedTaskData = exports.isUnifiedProjectData = exports.isUnifiedAgentData = exports.UnifiedDataValidator = exports.UnifiedEventDataSchema = exports.UnifiedConfigDataSchema = exports.UnifiedTaskDataSchema = exports.UnifiedProjectDataSchema = exports.UnifiedAgentDataSchema = void 0;
+exports.PACKAGE_INFO = exports.VERSION = exports.API_ENDPOINTS = exports.WS_EVENTS = exports.ERROR_CODES = exports.TASK_PRIORITY = exports.TASK_STATUS = exports.PROJECT_STATUS = exports.AGENT_STATUS = exports.DEFAULT_CONFIG = exports.getRelativeTime = exports.formatDate = exports.deepMerge = exports.retry = exports.delay = exports.createErrorResult = exports.createSuccessResult = exports.sanitizeBranchName = exports.generateAgentId = exports.generateId = exports.runMigration = exports.createMigrator = exports.ConfigMigrator = exports.EventTypeSchema = exports.EntityIdSchema = exports.DATABASE_VERSION = exports.MIGRATIONS = exports.INDEXES = exports.TABLE_SCHEMAS = exports.isUnifiedEventData = exports.isUnifiedConfigData = exports.isUnifiedTaskData = exports.isUnifiedProjectData = exports.isUnifiedAgentData = exports.UnifiedDataValidator = exports.UnifiedEventDataSchema = exports.UnifiedConfigDataSchema = exports.UnifiedTaskDataSchema = exports.UnifiedProjectDataSchema = exports.UnifiedAgentDataSchema = void 0;
 // Export all types
 __exportStar(require("./types"), exports);
 // Export unified types with explicit naming to avoid conflicts
@@ -38,6 +38,15 @@ Object.defineProperty(exports, "EntityIdSchema", { enumerable: true, get: functi
 Object.defineProperty(exports, "EventTypeSchema", { enumerable: true, get: function () { return unified_1.EventTypeSchema; } });
 // Export all utilities
 __exportStar(require("./utils"), exports);
+// Export database functionality
+__exportStar(require("./database"), exports);
+// Export services
+__exportStar(require("./services/DataSync"), exports);
+// Export migration tools with explicit re-exports to avoid naming conflicts
+var ConfigMigrator_1 = require("./migration/ConfigMigrator");
+Object.defineProperty(exports, "ConfigMigrator", { enumerable: true, get: function () { return ConfigMigrator_1.ConfigMigrator; } });
+Object.defineProperty(exports, "createMigrator", { enumerable: true, get: function () { return ConfigMigrator_1.createMigrator; } });
+Object.defineProperty(exports, "runMigration", { enumerable: true, get: function () { return ConfigMigrator_1.runMigration; } });
 // Export constants
 __exportStar(require("./constants"), exports);
 // Re-export specific commonly used items for convenience

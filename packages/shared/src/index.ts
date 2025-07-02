@@ -48,6 +48,21 @@ export * from './database';
 // Export services
 export * from './services/DataSync';
 
+// Export migration tools with explicit re-exports to avoid naming conflicts
+export {
+  ConfigMigrator,
+  LegacyAgentConfig,
+  LegacyProjectConfig,
+  LegacyTaskConfig,
+  LegacyGlobalConfig,
+  MigrationOptions,
+  createMigrator,
+  runMigration,
+} from './migration/ConfigMigrator';
+
+// Re-export MigrationResult with different name to avoid conflict
+export { MigrationResult as ConfigMigrationResult } from './migration/ConfigMigrator';
+
 // Export constants
 export * from './constants';
 

@@ -17,7 +17,9 @@ const zod_1 = require("zod");
 // ============================================================================
 // Core Entity IDs
 // ============================================================================
-exports.EntityIdSchema = zod_1.z.string().min(1);
+exports.EntityIdSchema = zod_1.z.string().min(1).refine((val) => val.trim().length > 0, {
+    message: "Entity ID cannot be empty or whitespace only"
+});
 // ============================================================================
 // Unified Agent Data Schema
 // ============================================================================
@@ -172,6 +174,13 @@ exports.UnifiedConfigDataSchema = zod_1.z.object({
             memory: zod_1.z.string().default('1G'),
             cpu: zod_1.z.number().default(1),
         }),
+    }).default({
+        enabled: true,
+        defaultImage: 'magents:latest',
+        resourceLimits: {
+            memory: '1G',
+            cpu: 1,
+        },
     }),
     // Port management
     ports: zod_1.z.object({
@@ -180,19 +189,29 @@ exports.UnifiedConfigDataSchema = zod_1.z.object({
             end: zod_1.z.number().default(3999),
         }),
         reservedPorts: zod_1.z.array(zod_1.z.number()).default([]),
+    }).default({
+        defaultRange: {
+            start: 3000,
+            end: 3999,
+        },
+        reservedPorts: [],
     }),
     // Task Master integration
     taskMaster: zod_1.z.object({
         enabled: zod_1.z.boolean().default(true),
         autoSync: zod_1.z.boolean().default(true),
         syncInterval: zod_1.z.number().default(30000), // milliseconds
+    }).default({
+        enabled: true,
+        autoSync: true,
+        syncInterval: 30000,
     }),
     // Paths and directories
     paths: zod_1.z.object({
         workspace: zod_1.z.string().optional(),
         dataDir: zod_1.z.string().optional(),
         tempDir: zod_1.z.string().optional(),
-    }),
+    }).default({}),
     // Metadata
     version: zod_1.z.string(),
     createdAt: zod_1.z.coerce.date(),
@@ -207,6 +226,7 @@ exports.EventTypeSchema = zod_1.z.enum([
     'agent.stopped',
     'agent.error',
     'agent.updated',
+    'agent.deleted',
     'project.created',
     'project.updated',
     'project.deleted',
@@ -214,6 +234,7 @@ exports.EventTypeSchema = zod_1.z.enum([
     'task.assigned',
     'task.completed',
     'task.updated',
+    'task.deleted',
     'config.updated',
     'sync.started',
     'sync.completed',
@@ -233,7 +254,7 @@ exports.UnifiedEventDataSchema = zod_1.z.object({
     data: zod_1.z.record(zod_1.z.string(), zod_1.z.any()).default({}),
     previousData: zod_1.z.record(zod_1.z.string(), zod_1.z.any()).optional(),
     // Source information
-    source: zod_1.z.enum(['cli', 'gui', 'system', 'external']),
+    source: zod_1.z.enum(['cli', 'gui', 'api', 'system', 'external']),
     userId: zod_1.z.string().optional(),
     // Metadata
     metadata: zod_1.z.record(zod_1.z.string(), zod_1.z.any()).default({}),
