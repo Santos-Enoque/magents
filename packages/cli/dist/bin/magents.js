@@ -1053,6 +1053,7 @@ program
     .argument('[action]', 'Action: switch, show, recommend')
     .argument('[mode]', 'Target mode: simple, standard, advanced')
     .option('--no-preserve', 'Do not preserve data when switching modes')
+    .option('--dry-run', 'Preview mode switch without making changes')
     .action(async (action, mode, options) => {
     const { modeManager } = await Promise.resolve().then(() => __importStar(require('../commands/mode')));
     switch (action) {
@@ -1061,7 +1062,7 @@ program
                 UIService_1.ui.error('Please specify a valid mode: simple, standard, or advanced');
                 process.exit(1);
             }
-            await modeManager.switchMode(mode, options?.preserve !== false);
+            await modeManager.switchMode(mode, options?.preserve !== false, options?.dryRun);
             break;
         case 'show':
             const currentMode = modeManager.getCurrentMode();
@@ -2127,6 +2128,7 @@ program
     .option('--detach', 'Run in detached mode')
     .option('--logs', 'Show container logs after starting')
     .option('--shell', 'Open shell in container after starting')
+    .option('--dry-run', 'Preview what would be started without actually starting')
     .action(async (agentId, options) => {
     const { startCommand } = await Promise.resolve().then(() => __importStar(require('../commands/start')));
     await startCommand.execute(agentId, {
@@ -2144,7 +2146,8 @@ program
         restart: options.restart,
         detach: options.detach,
         logs: options.logs,
-        shell: options.shell
+        shell: options.shell,
+        dryRun: options.dryRun
     });
 });
 // Override help to show our custom styling

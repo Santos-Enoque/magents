@@ -15,6 +15,7 @@ export interface StartOptions {
     detach?: boolean;
     logs?: boolean;
     shell?: boolean;
+    dryRun?: boolean;
 }
 export interface ContainerStatus {
     id: string;

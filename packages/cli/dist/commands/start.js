@@ -176,6 +176,36 @@ class StartCommand {
         }
     }
     async startAgent(agent, options) {
+        if (options.dryRun) {
+            UIService_1.ui.header('Dry Run - Agent Start Preview');
+            UIService_1.ui.keyValue('Agent ID', agent.id);
+            UIService_1.ui.keyValue('Agent Branch', agent.branch);
+            UIService_1.ui.keyValue('Mode', agent.useDocker || options.docker ? 'Docker' : 'tmux');
+            if (agent.useDocker || options.docker) {
+                UIService_1.ui.keyValue('Container Name', `magents-${agent.id}`);
+                UIService_1.ui.keyValue('Docker Image', this.configManager.loadConfig().DOCKER_IMAGE || 'magents/agent:latest');
+                if (options.resources?.cpu)
+                    UIService_1.ui.keyValue('CPU Limit', options.resources.cpu);
+                if (options.resources?.memory)
+                    UIService_1.ui.keyValue('Memory Limit', options.resources.memory);
+                if (options.network)
+                    UIService_1.ui.keyValue('Network', options.network);
+                if (options.volumes && options.volumes.length > 0) {
+                    UIService_1.ui.keyValue('Additional Volumes', options.volumes.join(', '));
+                }
+                if (options.env && options.env.length > 0) {
+                    UIService_1.ui.keyValue('Environment Variables', options.env.join(', '));
+                }
+                if (options.restart)
+                    UIService_1.ui.keyValue('Restart Policy', options.restart);
+            }
+            else {
+                UIService_1.ui.keyValue('Tmux Session', agent.tmuxSession);
+                UIService_1.ui.keyValue('Working Directory', agent.worktreePath);
+            }
+            UIService_1.ui.info('Use without --dry-run to start the agent');
+            return;
+        }
         const spinner = UIService_1.ui.spinner(`Starting agent '${agent.id}'...`);
         spinner.start();
         try {

@@ -76,7 +76,7 @@ export class ModeManager {
     return this.currentMode;
   }
 
-  public async switchMode(newMode: 'simple' | 'standard' | 'advanced', preserveData: boolean = true): Promise<void> {
+  public async switchMode(newMode: 'simple' | 'standard' | 'advanced', preserveData: boolean = true, dryRun: boolean = false): Promise<void> {
     const oldMode = this.currentMode.mode;
     
     if (oldMode === newMode) {
@@ -89,6 +89,21 @@ export class ModeManager {
     
     // Show what will change
     this.showModeComparison(oldMode, newMode);
+    
+    if (dryRun) {
+      ui.header('Dry Run - Mode Switch Preview');
+      ui.keyValue('Current Mode', oldMode);
+      ui.keyValue('Target Mode', newMode);
+      ui.keyValue('Data Preservation', preserveData ? 'Yes' : 'No');
+      
+      if (preserveData) {
+        const backupDir = path.join(this.configManager.getAgentsDir(), '.mode-backups');
+        ui.keyValue('Config Backup Location', backupDir);
+      }
+      
+      ui.info('Use without --dry-run to switch modes');
+      return;
+    }
     
     // Confirm the switch
     const confirm = await inquirer.prompt([{
