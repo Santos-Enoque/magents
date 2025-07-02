@@ -45,6 +45,9 @@ export * from './utils';
 // Export database functionality
 export * from './database';
 
+// Export services
+export * from './services/DataSync';
+
 // Export constants
 export * from './constants';
 

@@ -277,6 +277,7 @@ export const EventTypeSchema = z.enum([
   'agent.stopped',
   'agent.error',
   'agent.updated',
+  'agent.deleted',
   'project.created',
   'project.updated',
   'project.deleted',
@@ -284,6 +285,7 @@ export const EventTypeSchema = z.enum([
   'task.assigned',
   'task.completed',
   'task.updated',
+  'task.deleted',
   'config.updated',
   'sync.started',
   'sync.completed',
@@ -310,7 +312,7 @@ export const UnifiedEventDataSchema = z.object({
   previousData: z.record(z.string(), z.any()).optional(),
   
   // Source information
-  source: z.enum(['cli', 'gui', 'system', 'external']),
+  source: z.enum(['cli', 'gui', 'api', 'system', 'external']),
   userId: z.string().optional(),
   
   // Metadata
