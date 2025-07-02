@@ -65,11 +65,11 @@ RUN apt-get update && apt-get install -y \
     valgrind \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Node.js debugging tools
-RUN npm install -g node-inspector nodemon
+# Install Node.js debugging tools (modern alternatives)
+RUN npm install -g nodemon
 
-# Enable Node.js debugging
-ENV NODE_OPTIONS="--inspect=0.0.0.0:9229"
+# Note: Node.js has built-in debugging with --inspect flag
+# node-inspector is deprecated and incompatible with Node.js 20+
 
 # Switch back to magents user
 USER magents

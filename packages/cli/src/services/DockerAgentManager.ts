@@ -27,6 +27,7 @@ export class DockerAgentManager {
     this.gitService = new GitService();
     this.activeAgentsFile = path.join(this.configManager.getAgentsDir(), 'docker_agents.json');
     const config = this.configManager.loadConfig();
+    // Always check for Claude auth volume to determine image
     this.dockerImage = config.DOCKER_IMAGE || 'magents/agent:latest';
   }
 
@@ -299,6 +300,26 @@ export class DockerAgentManager {
       ? `-v ${bridgeSocket}:/host/claude-bridge.sock`
       : '';
 
+    // Check if Claude authentication volume exists
+    const hasClaudeAuth = this.checkClaudeAuthVolume();
+    const claudeAuthVolume = hasClaudeAuth 
+      ? `-v claude-container-auth:/home/magents`
+      : '';
+
+    // Only set bridge socket if we don't have Claude auth
+    const bridgeEnv = !hasClaudeAuth && bridgeMount
+      ? `-e CLAUDE_BRIDGE_SOCKET=/host/claude-bridge.sock`
+      : '';
+
+    // Use Claude-enabled image if auth volume exists
+    const dockerImage = hasClaudeAuth ? 'magents/claude:dev' : this.dockerImage;
+    
+    // For Claude image, we need to override the entrypoint
+    const entrypointOverride = hasClaudeAuth ? '--entrypoint /bin/bash' : '';
+    
+    // Command to keep container running
+    const runCommand = hasClaudeAuth ? '-c "while true; do sleep 3600; done"' : 'tail -f /dev/null';
+
     return `docker run -d \
       --name ${options.containerName} \
       --label magents.agent.id=${options.agentId} \
@@ -306,13 +327,15 @@ export class DockerAgentManager {
       -v "${options.repoRoot}:/workspace" \
       -v "${options.sharedConfigDir}:/shared" \
       -v "${options.agentStateDir}:/agent" \
+      ${claudeAuthVolume} \
       ${bridgeMount} \
       -e AGENT_ID="${options.agentId}" \
       -e AGENT_BRANCH="${options.branch}" \
-      -e CLAUDE_BRIDGE_SOCKET=/host/claude-bridge.sock \
+      ${bridgeEnv} \
       ${envVars} \
-      ${this.dockerImage} \
-      tail -f /dev/null`;
+      ${entrypointOverride} \
+      ${dockerImage} \
+      ${runCommand}`;
   }
 
   private getApiKeys(): Record<string, string> {
@@ -403,13 +426,30 @@ export class DockerAgentManager {
     
     while (Date.now() - start < timeout) {
       try {
-        const health = execSync(
-          `docker inspect ${containerName} --format='{{.State.Health.Status}}'`,
+        // First check if container is running
+        const status = execSync(
+          `docker inspect ${containerName} --format='{{.State.Status}}'`,
           { encoding: 'utf8', stdio: 'pipe' }
         ).trim();
         
-        if (health === 'healthy' || health === '') {
-          // No health check or healthy
+        if (status !== 'running') {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          continue;
+        }
+        
+        // Then check health if available
+        try {
+          const health = execSync(
+            `docker inspect ${containerName} --format='{{.State.Health.Status}}'`,
+            { encoding: 'utf8', stdio: 'pipe' }
+          ).trim();
+          
+          // If healthy, we're good
+          if (health === 'healthy') {
+            return;
+          }
+        } catch (healthError) {
+          // No health check configured - that's OK, container is running
           return;
         }
       } catch {
@@ -447,6 +487,28 @@ export class DockerAgentManager {
     if (agent) {
       agent.status = status as AgentStatus;
       fs.writeFileSync(this.activeAgentsFile, JSON.stringify(agents, null, 2));
+    }
+  }
+
+  private checkClaudeAuthVolume(): boolean {
+    try {
+      const result = execSync('docker volume ls --format "{{.Name}}" | grep -q "^claude-container-auth$"', {
+        stdio: 'pipe'
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private checkClaudeAuthVolumeStatic(): boolean {
+    try {
+      const result = execSync('docker volume ls --format "{{.Name}}" | grep -q "^claude-container-auth$"', {
+        stdio: 'pipe'
+      });
+      return true;
+    } catch {
+      return false;
     }
   }
 }
