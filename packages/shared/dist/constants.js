@@ -9,6 +9,8 @@ exports.DEFAULT_CONFIG = {
     MAX_AGENTS: 10,
     CLAUDE_CODE_PATH: 'claude',
     CLAUDE_AUTO_ACCEPT: true,
+    DOCKER_ENABLED: false,
+    DOCKER_IMAGE: 'node:18-alpine',
 };
 // Port ranges
 exports.PORT_RANGES = {

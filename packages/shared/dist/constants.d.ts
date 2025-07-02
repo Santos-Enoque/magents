@@ -5,6 +5,8 @@ export declare const DEFAULT_CONFIG: {
     readonly MAX_AGENTS: 10;
     readonly CLAUDE_CODE_PATH: "claude";
     readonly CLAUDE_AUTO_ACCEPT: true;
+    readonly DOCKER_ENABLED: false;
+    readonly DOCKER_IMAGE: "node:18-alpine";
 };
 export declare const PORT_RANGES: {
     readonly DEFAULT_START: 3000;

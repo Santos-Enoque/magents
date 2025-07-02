@@ -54,7 +54,7 @@ export declare const UnifiedAgentDataSchema: z.ZodObject<{
     id: string;
     name: string;
     projectId: string;
-    status: "CREATED" | "STARTING" | "RUNNING" | "STOPPING" | "STOPPED" | "ERROR" | "SUSPENDED";
+    status: "RUNNING" | "STOPPED" | "ERROR" | "CREATED" | "STARTING" | "STOPPING" | "SUSPENDED";
     createdAt: Date;
     updatedAt: Date;
     mode: "tmux" | "docker" | "hybrid";
@@ -84,7 +84,7 @@ export declare const UnifiedAgentDataSchema: z.ZodObject<{
     id: string;
     name: string;
     projectId: string;
-    status: "CREATED" | "STARTING" | "RUNNING" | "STOPPING" | "STOPPED" | "ERROR" | "SUSPENDED";
+    status: "RUNNING" | "STOPPED" | "ERROR" | "CREATED" | "STARTING" | "STOPPING" | "SUSPENDED";
     createdAt: Date;
     updatedAt: Date;
     mode: "tmux" | "docker" | "hybrid";
@@ -304,7 +304,7 @@ export declare const UnifiedTaskDataSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     id: string;
     projectId: string;
-    status: "pending" | "assigned" | "in-progress" | "done" | "blocked" | "cancelled" | "deferred";
+    status: "pending" | "in-progress" | "done" | "blocked" | "cancelled" | "assigned" | "deferred";
     createdAt: Date;
     updatedAt: Date;
     tags: string[];
@@ -333,7 +333,7 @@ export declare const UnifiedTaskDataSchema: z.ZodObject<{
 }, {
     id: string;
     projectId: string;
-    status: "pending" | "assigned" | "in-progress" | "done" | "blocked" | "cancelled" | "deferred";
+    status: "pending" | "in-progress" | "done" | "blocked" | "cancelled" | "assigned" | "deferred";
     createdAt: Date;
     updatedAt: Date;
     title: string;

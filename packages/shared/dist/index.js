@@ -17,6 +17,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PACKAGE_INFO = exports.VERSION = exports.API_ENDPOINTS = exports.WS_EVENTS = exports.ERROR_CODES = exports.TASK_PRIORITY = exports.TASK_STATUS = exports.PROJECT_STATUS = exports.AGENT_STATUS = exports.DEFAULT_CONFIG = exports.getRelativeTime = exports.formatDate = exports.deepMerge = exports.retry = exports.delay = exports.createErrorResult = exports.createSuccessResult = exports.sanitizeBranchName = exports.generateAgentId = exports.generateId = exports.runMigration = exports.createMigrator = exports.ConfigMigrator = exports.EventTypeSchema = exports.EntityIdSchema = exports.DATABASE_VERSION = exports.MIGRATIONS = exports.INDEXES = exports.TABLE_SCHEMAS = exports.isUnifiedEventData = exports.isUnifiedConfigData = exports.isUnifiedTaskData = exports.isUnifiedProjectData = exports.isUnifiedAgentData = exports.UnifiedDataValidator = exports.UnifiedEventDataSchema = exports.UnifiedConfigDataSchema = exports.UnifiedTaskDataSchema = exports.UnifiedProjectDataSchema = exports.UnifiedAgentDataSchema = void 0;
 // Export all types
 __exportStar(require("./types"), exports);
+// Export error handling system
+__exportStar(require("./errors"), exports);
 // Export unified types with explicit naming to avoid conflicts
 var unified_1 = require("./types/unified");
 Object.defineProperty(exports, "UnifiedAgentDataSchema", { enumerable: true, get: function () { return unified_1.UnifiedAgentDataSchema; } });

@@ -1,4 +1,5 @@
 export * from './types';
+export * from './errors';
 export { UnifiedAgentData, UnifiedAgentDataSchema, UnifiedProjectData, UnifiedProjectDataSchema, UnifiedTaskData, UnifiedTaskDataSchema, UnifiedConfigData, UnifiedConfigDataSchema, UnifiedEventData, UnifiedEventDataSchema, UnifiedDataValidator, isUnifiedAgentData, isUnifiedProjectData, isUnifiedTaskData, isUnifiedConfigData, isUnifiedEventData, TABLE_SCHEMAS, INDEXES, MIGRATIONS, DATABASE_VERSION, MigrationDefinition, EntityId, EntityIdSchema, EventType, EventTypeSchema, } from './types/unified';
 export { AgentStatus as UnifiedAgentStatus, AgentMode, ProjectStatus as UnifiedProjectStatus, TaskStatus as UnifiedTaskStatus, TaskPriority as UnifiedTaskPriority, } from './types/unified';
 export * from './utils';

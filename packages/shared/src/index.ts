@@ -1,6 +1,9 @@
 // Export all types
 export * from './types';
 
+// Export error handling system
+export * from './errors';
+
 // Export unified types with explicit naming to avoid conflicts
 export {
   UnifiedAgentData,

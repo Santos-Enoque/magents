@@ -2,6 +2,18 @@ import { Agent, Project, MagentsConfig, ApiResponse, PaginatedResponse, CreateAg
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
+// Enhanced error interface for frontend
+export interface EnhancedError extends Error {
+  code?: string;
+  severity?: string;
+  suggestions?: string[];
+  recoverable?: boolean;
+  autoFixAttempted?: boolean;
+  autoFixSuggestions?: Record<string, any>;
+  learnMoreUrl?: string;
+  requestId?: string;
+}
+
 class ApiService {
   private async request<T>(url: string, options?: RequestInit): Promise<T> {
     const response = await fetch(`${API_BASE_URL}${url}`, {
@@ -13,8 +25,24 @@ class ApiService {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Request failed' }));
-      throw new Error(error.message || `HTTP ${response.status}`);
+      const errorData = await response.json().catch(() => ({ message: 'Request failed' }));
+      
+      // Check if it's an enhanced error response
+      if (errorData.error && typeof errorData.error === 'object') {
+        const enhancedError = new Error(errorData.error.userMessage || errorData.message || 'Request failed') as EnhancedError;
+        enhancedError.code = errorData.error.code;
+        enhancedError.severity = errorData.error.severity;
+        enhancedError.suggestions = errorData.error.suggestions || [];
+        enhancedError.recoverable = errorData.error.recoverable;
+        enhancedError.autoFixAttempted = errorData.error.autoFixAttempted;
+        enhancedError.autoFixSuggestions = errorData.error.autoFixSuggestions;
+        enhancedError.learnMoreUrl = errorData.error.learnMoreUrl;
+        enhancedError.requestId = errorData.error.requestId;
+        throw enhancedError;
+      }
+      
+      // Fallback to original error handling
+      throw new Error(errorData.message || `HTTP ${response.status}`);
     }
 
     const data: ApiResponse<T> = await response.json();
@@ -24,6 +52,31 @@ class ApiService {
     }
 
     return data.data as T;
+  }
+
+  // Helper to format enhanced error for display
+  formatError(error: EnhancedError): string {
+    let message = error.message;
+    
+    if (error.suggestions && error.suggestions.length > 0) {
+      message += '\n\nSuggestions:\n';
+      error.suggestions.forEach((suggestion, index) => {
+        message += `${index + 1}. ${suggestion}\n`;
+      });
+    }
+    
+    if (error.autoFixSuggestions) {
+      message += '\nAuto-fix suggestions:\n';
+      Object.entries(error.autoFixSuggestions).forEach(([key, value]) => {
+        message += `• ${key}: ${value}\n`;
+      });
+    }
+    
+    if (error.learnMoreUrl) {
+      message += `\nLearn more: ${error.learnMoreUrl}`;
+    }
+    
+    return message;
   }
 
   // Health
@@ -88,6 +141,18 @@ class ApiService {
     return this.request<Agent>(`/api/agents/${id}/status`, {
       method: 'PUT',
       body: JSON.stringify({ status }),
+    });
+  }
+
+  async startAgent(id: string) {
+    return this.request<Agent>(`/api/agents/${id}/start`, {
+      method: 'POST',
+    });
+  }
+
+  async stopAgent(id: string) {
+    return this.request<Agent>(`/api/agents/${id}/stop`, {
+      method: 'POST',
     });
   }
 

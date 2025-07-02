@@ -7,6 +7,13 @@ export interface MagentsConfig {
     CLAUDE_AUTO_ACCEPT: boolean;
     DOCKER_ENABLED: boolean;
     DOCKER_IMAGE: string;
+    MODE?: 'simple' | 'standard' | 'advanced';
+    TASK_MASTER_ENABLED?: boolean;
+    GITHUB_INTEGRATION?: boolean;
+    MCP_ENABLED?: boolean;
+    CUSTOM_COMMANDS_ENABLED?: boolean;
+    MCP_DEVELOPMENT_MODE?: boolean;
+    ADVANCED_DOCKER_CONFIG?: boolean;
 }
 export interface Agent {
     id: string;
