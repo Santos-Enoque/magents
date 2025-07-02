@@ -1,7 +1,7 @@
 #!/bin/bash
-# Build the Magents CLI with Docker mode support
+# Build the Magents CLI with tmux session creation fixes
 
-echo "Building Magents CLI with Docker mode support..."
+echo "🔨 Building Magents CLI with tmux session creation fixes..."
 
 # Save current directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -14,7 +14,7 @@ cd "$SHARED_DIR"
 npm run build 2>/dev/null || npx tsc
 
 # Build CLI package
-echo "2. Building @magents/cli..."
+echo "2. Building @magents/cli with tmux fixes..."
 cd "$CLI_DIR"
 npm run build
 
@@ -22,10 +22,15 @@ npm run build
 if [ -f "$CLI_DIR/dist/bin/magents.js" ]; then
     echo "✅ Build successful!"
     echo ""
-    echo "To use the updated CLI:"
-    echo "  npx magents config --docker    # Enable Docker mode"
-    echo "  npx magents config --no-docker # Disable Docker mode"
-    echo "  npx magents doctor             # Check Docker setup"
+    echo "🔧 Fixed Issues:"
+    echo "   - Tmux session creation with named first window"
+    echo "   - Improved error handling and cleanup"
+    echo "   - Added session existence verification"
+    echo ""
+    echo "🚀 Ready to test:"
+    echo "   magents create auth-system"
+    echo "   magents create user-dashboard --mode standard"
+    echo "   magents create api-refactor --mode advanced --dry-run"
 else
     echo "❌ Build failed!"
     exit 1

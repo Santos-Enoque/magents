@@ -4,11 +4,13 @@ import { MagentsConfig } from '../types';
 export class TmuxService {
   public async createSession(sessionName: string, workingDir: string, config: MagentsConfig): Promise<void> {
     try {
-      // Create new session
-      execSync(`tmux new-session -d -s "${sessionName}" -c "${workingDir}"`, { stdio: 'pipe' });
+      // Create new session with named first window
+      execSync(`tmux new-session -d -s "${sessionName}" -n "main" -c "${workingDir}"`, { stdio: 'pipe' });
       
-      // Rename first window
-      execSync(`tmux rename-window -t "${sessionName}:0" "main"`, { stdio: 'pipe' });
+      // Verify session was created successfully
+      if (!this.sessionExists(sessionName)) {
+        throw new Error(`Session ${sessionName} was not created successfully`);
+      }
       
       // Create claude window
       execSync(`tmux new-window -t "${sessionName}" -n "claude" -c "${workingDir}"`, { stdio: 'pipe' });
@@ -18,6 +20,9 @@ export class TmuxService {
       
       // Build Claude Code command with skip permissions flag
       const claudeCmd = `${config.CLAUDE_CODE_PATH} --dangerously-skip-permissions`;
+      
+      // Wait a moment for windows to be fully created
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       // Start Claude Code in the claude window
       execSync(`tmux send-keys -t "${sessionName}:claude" "cd '${workingDir}' && ${claudeCmd}" Enter`, { stdio: 'pipe' });
@@ -40,7 +45,17 @@ export class TmuxService {
       execSync(`tmux select-window -t "${sessionName}:claude"`, { stdio: 'pipe' });
       
     } catch (error) {
-      throw new Error(`Failed to create tmux session: ${error instanceof Error ? error.message : String(error)}`);
+      // Clean up partial session if it exists
+      try {
+        if (this.sessionExists(sessionName)) {
+          await this.killSession(sessionName);
+        }
+      } catch (cleanupError) {
+        // Ignore cleanup errors
+      }
+      
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to create tmux session: ${errorMessage}`);
     }
   }
 

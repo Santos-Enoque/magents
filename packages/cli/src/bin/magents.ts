@@ -583,7 +583,7 @@ program
           'experiment': 'experiment'
         };
         
-        const prefix = branchPrefixes[projectType] || 'feature';
+        const prefix = branchPrefixes[projectType as keyof typeof branchPrefixes] || 'feature';
         branchName = `${prefix}/${sanitizedName}`;
       }
       
