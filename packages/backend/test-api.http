@@ -1,0 +1,39 @@
+### Test MagentsTaskManager API Endpoints
+### You can use this file with REST Client extension in VS Code or similar tools
+
+@baseUrl = http://localhost:3001/api/magents-tasks
+@testProjectPath = /Users/santossafrao/Development/personal/magents
+
+### 1. Quick Start Task Master
+POST {{baseUrl}}/quick-start
+Content-Type: application/json
+
+{
+  "projectPath": "{{testProjectPath}}",
+  "projectName": "Magents Test Project",
+  "autoDetectType": true
+}
+
+### 2. Get Simplified Tasks
+GET {{baseUrl}}/tasks?projectPath={{testProjectPath}}
+
+### 3. Get Next Task
+GET {{baseUrl}}/next-task?projectPath={{testProjectPath}}
+
+### 4. Create Simple Task
+POST {{baseUrl}}/tasks
+Content-Type: application/json
+
+{
+  "projectPath": "{{testProjectPath}}",
+  "title": "Add user authentication system",
+  "priority": "high"
+}
+
+### 5. Auto Analyze Project
+POST {{baseUrl}}/auto-analyze
+Content-Type: application/json
+
+{
+  "projectPath": "{{testProjectPath}}"
+}
