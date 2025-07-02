@@ -1,0 +1,882 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Setup Monorepo Structure with npm Workspaces",
+        "description": "Transform current single-package project into workspace-based monorepo with packages/cli, packages/shared, packages/backend, packages/web",
+        "details": "Create root package.json with workspaces configuration. Setup directory structure: packages/cli (move existing src/), packages/shared (types and utilities), packages/backend (Express server), packages/web (React app). Update root package.json with workspace dependencies and scripts. Configure TypeScript project references in root tsconfig.json for cross-package compilation.",
+        "testStrategy": "Verify workspace structure created correctly, npm install works from root, TypeScript compilation works across packages, existing CLI functionality preserved",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create root workspace configuration and directory structure",
+            "description": "Set up the basic monorepo structure with npm workspaces configuration and create all necessary package directories",
+            "dependencies": [],
+            "details": "Create root package.json with workspaces field pointing to packages/*. Create packages/ directory with subdirectories: cli, shared, backend, web. Initialize each package directory with basic package.json files containing name, version, and appropriate dependencies.",
+            "status": "done",
+            "testStrategy": "Verify workspace structure with 'npm ls --workspaces' and ensure all packages are recognized"
+          },
+          {
+            "id": 2,
+            "title": "Move existing CLI code to packages/cli",
+            "description": "Migrate current src/ directory and related files to packages/cli workspace",
+            "dependencies": [
+              1
+            ],
+            "details": "Move existing src/ directory to packages/cli/src/. Update packages/cli/package.json with proper dependencies, bin entry, and scripts. Update import paths if necessary. Move CLI-specific configuration files like tsconfig.json to packages/cli/.",
+            "status": "done",
+            "testStrategy": "Test CLI functionality by running commands from packages/cli to ensure migration was successful"
+          },
+          {
+            "id": 3,
+            "title": "Setup packages/shared for common types and utilities",
+            "description": "Create shared package with TypeScript types and utility functions used across other packages",
+            "dependencies": [
+              1
+            ],
+            "details": "Create packages/shared/src/ with index.ts export file. Move common types, interfaces, and utility functions from CLI to shared package. Set up package.json with TypeScript compilation scripts. Configure as a TypeScript library with proper exports.",
+            "status": "done",
+            "testStrategy": "Verify shared package builds correctly and exports are accessible from other packages"
+          },
+          {
+            "id": 4,
+            "title": "Initialize packages/backend and packages/web scaffolding",
+            "description": "Create basic Express backend and React web application scaffolds in their respective packages",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Set up packages/backend with Express server boilerplate, basic routing, and dependency on packages/shared. Initialize packages/web with React application scaffold using create-react-app or Vite, also depending on packages/shared. Configure package.json files with appropriate scripts and dependencies.",
+            "status": "done",
+            "testStrategy": "Start both backend and web applications to verify basic functionality and shared package imports"
+          },
+          {
+            "id": 5,
+            "title": "Configure TypeScript project references and root scripts",
+            "description": "Set up TypeScript project references for cross-package compilation and configure root-level scripts for workspace management",
+            "dependencies": [
+              2,
+              3,
+              4
+            ],
+            "details": "Create root tsconfig.json with project references to all packages. Update each package's tsconfig.json with appropriate references and composite: true. Add root package.json scripts for building all packages, running tests, and development workflows. Configure workspace dependency management.",
+            "status": "done",
+            "testStrategy": "Run 'npm run build' from root to verify all packages compile correctly with proper cross-references"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Extract Shared Types and Utilities Package",
+        "description": "Create packages/shared with all existing types from src/types/index.ts and common utilities",
+        "details": "Move Agent, AgentRecord, CreateAgentOptions, and all other types from src/types/index.ts to packages/shared/src/types.ts. Extract common utility functions and constants. Create proper package.json with TypeScript exports. Setup TypeScript declarations and build configuration. Ensure proper module exports for consumption by other packages.",
+        "testStrategy": "Verify types are properly exported from shared package, can be imported by other packages, TypeScript compilation works, no circular dependencies",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create packages/shared directory structure and package.json",
+            "description": "Initialize the shared package with proper directory structure and TypeScript configuration",
+            "dependencies": [],
+            "details": "Create packages/shared directory with src/, dist/, and package.json. Configure package.json with proper name (@magents/shared), version, main/types exports, and TypeScript as devDependency. Setup tsconfig.json for compilation and create initial index.ts barrel export file.",
+            "status": "done",
+            "testStrategy": "Verify package structure matches monorepo conventions and package.json has correct export paths"
+          },
+          {
+            "id": 2,
+            "title": "Move all types from src/types/index.ts to packages/shared/src/types.ts",
+            "description": "Extract Agent, AgentRecord, CreateAgentOptions and all other type definitions to the shared package",
+            "dependencies": [
+              1
+            ],
+            "details": "Copy all type definitions from src/types/index.ts to packages/shared/src/types.ts. Maintain all existing interfaces, types, and enums. Update packages/shared/src/index.ts to re-export all types from types.ts file.",
+            "status": "done",
+            "testStrategy": "Ensure all types are properly exported and accessible when importing from @magents/shared"
+          },
+          {
+            "id": 3,
+            "title": "Extract common utility functions and constants",
+            "description": "Identify and move reusable utility functions and constants to the shared package",
+            "dependencies": [
+              2
+            ],
+            "details": "Scan codebase for utility functions that could be shared across packages. Create packages/shared/src/utils.ts and packages/shared/src/constants.ts. Move functions like validation helpers, formatting utilities, and shared constants. Update barrel exports in index.ts.",
+            "status": "done",
+            "testStrategy": "Test that utilities work correctly when imported and maintain same functionality as original locations"
+          },
+          {
+            "id": 4,
+            "title": "Setup TypeScript build configuration and declarations",
+            "description": "Configure TypeScript compilation to generate proper .d.ts files and build artifacts",
+            "dependencies": [
+              3
+            ],
+            "details": "Configure tsconfig.json for declaration generation, set outDir to dist/, include all src files. Add build script to package.json using tsc. Ensure proper module resolution and export maps for both CommonJS and ESM. Generate type declarations in dist/ directory.",
+            "status": "done",
+            "testStrategy": "Run build process and verify .d.ts files are generated correctly with proper type exports"
+          },
+          {
+            "id": 5,
+            "title": "Update main project to use shared package and verify integration",
+            "description": "Replace local type imports with shared package imports and ensure everything works correctly",
+            "dependencies": [
+              4
+            ],
+            "details": "Update src/types/index.ts to re-export from @magents/shared instead of defining types locally. Update all import statements throughout the codebase to use the shared package. Add @magents/shared as dependency in main package.json. Test that all existing functionality continues to work.",
+            "status": "done",
+            "testStrategy": "Run existing tests to ensure no regressions, verify TypeScript compilation passes, and check that all imports resolve correctly"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Migrate CLI to packages/cli",
+        "description": "Move existing CLI code to packages/cli while preserving all functionality and global binary access",
+        "details": "Move all src/ code to packages/cli/src/. Update imports to use packages/shared for types. Configure package.json with bin field for magents binary. Update TypeScript configuration for project references. Ensure all existing services (AgentManager, GitService, TmuxService, ConfigManager, UIService) work properly. Update build scripts and ensure global installation works.",
+        "testStrategy": "Run all existing CLI commands (create, list, attach, dashboard, monitor, task-create), verify magents binary works globally, all tests pass, functionality identical to original",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create packages/cli directory structure and move source code",
+            "description": "Create the new packages/cli directory structure and move all existing src/ code to packages/cli/src/",
+            "dependencies": [],
+            "details": "Create packages/cli directory with src/, dist/, and tests/ subdirectories. Move all files from src/ to packages/cli/src/. Update any internal relative imports within the CLI code to reflect the new structure.",
+            "status": "done",
+            "testStrategy": "Verify all files are moved correctly and no files are lost in the migration"
+          },
+          {
+            "id": 2,
+            "title": "Update imports to use packages/shared for shared types",
+            "description": "Refactor all imports in the CLI code to use packages/shared for shared types and utilities",
+            "dependencies": [
+              1
+            ],
+            "details": "Identify all imports that should reference shared types from packages/shared. Update import statements to use relative paths to packages/shared or configure proper module resolution. Ensure types like AgentConfig, GitConfig, etc. are imported from shared package.",
+            "status": "done",
+            "testStrategy": "Run TypeScript compilation to verify all imports resolve correctly"
+          },
+          {
+            "id": 3,
+            "title": "Configure package.json with bin field and dependencies",
+            "description": "Create packages/cli/package.json with proper bin field configuration for global magents binary",
+            "dependencies": [
+              2
+            ],
+            "details": "Create package.json in packages/cli with bin field pointing to compiled CLI entry point. Configure dependencies including packages/shared. Set up proper npm scripts for build, test, and dev. Ensure the binary name 'magents' is properly configured.",
+            "status": "done",
+            "testStrategy": "Test local npm link to verify binary is accessible globally"
+          },
+          {
+            "id": 4,
+            "title": "Update TypeScript configuration for project references",
+            "description": "Configure TypeScript project references and compilation settings for the CLI package",
+            "dependencies": [
+              3
+            ],
+            "details": "Create tsconfig.json in packages/cli with proper project references to packages/shared. Update root tsconfig.json to include packages/cli in references. Configure proper output directories and module resolution. Ensure proper build order between packages.",
+            "status": "done",
+            "testStrategy": "Run tsc --build to verify TypeScript compilation works correctly"
+          },
+          {
+            "id": 5,
+            "title": "Update build scripts and verify all services functionality",
+            "description": "Update build scripts and thoroughly test that all services (AgentManager, GitService, TmuxService, ConfigManager, UIService) work properly after migration",
+            "dependencies": [
+              4
+            ],
+            "details": "Update root package.json build scripts to build CLI package. Test global installation with npm install -g. Verify all core services work: AgentManager can create/manage agents, GitService handles git operations, TmuxService manages tmux sessions, ConfigManager handles configuration, UIService provides proper UI feedback. Test CLI commands end-to-end.",
+            "status": "done",
+            "testStrategy": "Run full CLI test suite and manual testing of all major commands to ensure no functionality is broken"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Setup Backend API Foundation with Express.js",
+        "description": "Create packages/backend with Express.js server exposing AgentManager functionality via REST API",
+        "details": "Create Express.js server in packages/backend/src/. Import existing services from CLI package. Implement core REST endpoints: GET /api/agents (list agents), POST /api/agents (create agent), DELETE /api/agents/:id (remove agent), GET /api/agents/:id (agent details). Add CORS middleware for web frontend. Setup TypeScript configuration and build process. Add error handling and validation middleware.",
+        "testStrategy": "Test all API endpoints with curl/Postman, verify agent creation actually creates tmux sessions and git worktrees, confirm existing AgentManager integration works correctly",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Initialize Backend Package Structure and TypeScript Configuration",
+            "description": "Create the backend package directory structure and setup TypeScript configuration with proper build tooling",
+            "dependencies": [],
+            "details": "Create packages/backend/ directory with src/, dist/, and config subdirectories. Setup package.json with Express.js, TypeScript, and build dependencies. Configure tsconfig.json with proper module resolution for importing from CLI package. Setup build scripts and dev server with nodemon for hot reload.",
+            "status": "done",
+            "testStrategy": "Verify TypeScript compilation works and basic package structure is correct"
+          },
+          {
+            "id": 2,
+            "title": "Setup Express.js Server with Middleware Foundation",
+            "description": "Initialize Express.js server with essential middleware including CORS, error handling, and request validation",
+            "dependencies": [
+              1
+            ],
+            "details": "Create src/server.ts with Express app initialization. Add CORS middleware configured for web frontend. Implement global error handling middleware with proper error response formatting. Add request logging middleware. Setup JSON body parsing and request validation middleware using express-validator.",
+            "status": "done",
+            "testStrategy": "Test server startup, CORS headers, and error handling with basic requests"
+          },
+          {
+            "id": 3,
+            "title": "Import and Adapt CLI Services for API Usage",
+            "description": "Import AgentManager and related services from CLI package and adapt them for API server usage",
+            "dependencies": [
+              2
+            ],
+            "details": "Import AgentManager, ConfigManager, and other core services from packages/cli/src/. Create service adapters in src/services/ to handle API-specific concerns like async responses and error formatting. Ensure proper dependency injection and service lifecycle management for server environment.",
+            "status": "done",
+            "testStrategy": "Unit tests for service adapters and integration tests for service imports"
+          },
+          {
+            "id": 4,
+            "title": "Implement Core Agent Management REST Endpoints",
+            "description": "Create REST API endpoints for agent management operations with proper request/response handling",
+            "dependencies": [
+              3
+            ],
+            "details": "Create src/routes/agents.ts with GET /api/agents (list with pagination), POST /api/agents (create with validation), GET /api/agents/:id (details), DELETE /api/agents/:id (remove). Implement request validation schemas for each endpoint. Add proper HTTP status codes and error responses. Include route-level error handling.",
+            "status": "done",
+            "testStrategy": "API integration tests for each endpoint covering success and error scenarios"
+          },
+          {
+            "id": 5,
+            "title": "Setup Build Process and Production Configuration",
+            "description": "Configure production build process, environment management, and server deployment preparation",
+            "dependencies": [
+              4
+            ],
+            "details": "Setup build scripts in package.json for production compilation. Configure environment variable management for API keys and server configuration. Add start scripts for production and development modes. Setup health check endpoint. Configure proper logging for production environment.",
+            "status": "done",
+            "testStrategy": "Test production build process and verify server runs correctly in production mode"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Implement WebSocket Server for Real-time Updates",
+        "description": "Add WebSocket server to backend for real-time agent status updates and monitoring",
+        "details": "Integrate Socket.IO or ws library into Express server. Create WebSocket endpoints for agent status events. Hook into existing agent status tracking to emit real-time updates when agents change state (RUNNING, STOPPED, ERROR). Implement connection management and event broadcasting. Add authentication/authorization if needed.",
+        "testStrategy": "Test WebSocket connection establishment, verify real-time events are emitted when agent status changes, test multiple client connections, ensure stable connection handling",
+        "priority": "medium",
+        "dependencies": [
+          4
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up WebSocket library and server configuration",
+            "description": "Install and configure Socket.IO or ws library with the existing Express server",
+            "dependencies": [],
+            "details": "Install Socket.IO package, create WebSocket server instance that shares the same HTTP server as Express, configure CORS settings for WebSocket connections, and set up basic connection handling with logging",
+            "status": "done",
+            "testStrategy": "Test WebSocket server starts successfully, accepts connections, and handles basic connect/disconnect events"
+          },
+          {
+            "id": 2,
+            "title": "Implement connection management and authentication",
+            "description": "Create connection management system with optional authentication for WebSocket clients",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement connection tracking, add authentication middleware if needed (JWT token validation), create connection pools or rooms for different types of clients, handle connection cleanup on disconnect",
+            "status": "done",
+            "testStrategy": "Test authenticated and unauthenticated connections, verify connection tracking works correctly, test cleanup on disconnect"
+          },
+          {
+            "id": 3,
+            "title": "Define WebSocket event schema and endpoints",
+            "description": "Create standardized event schema for agent status updates and define WebSocket event endpoints",
+            "dependencies": [
+              2
+            ],
+            "details": "Design event payload structure for agent status changes (agent_id, status, timestamp, metadata), define event types (agent_status_changed, agent_error, agent_metrics), create event validation schemas, implement event emitters and listeners",
+            "status": "done",
+            "testStrategy": "Test event schema validation, verify event payload structure matches specification, test event emission and reception"
+          },
+          {
+            "id": 4,
+            "title": "Integrate with existing agent status tracking",
+            "description": "Hook WebSocket events into the current agent monitoring system to emit real-time updates",
+            "dependencies": [
+              3
+            ],
+            "details": "Identify existing agent status update points in the codebase, inject WebSocket event emissions at status change locations, ensure events are emitted for all status transitions (RUNNING, STOPPED, ERROR), add error handling for failed event emissions",
+            "status": "done",
+            "testStrategy": "Test that status changes trigger WebSocket events, verify all agent state transitions emit appropriate events, test event emission doesn't break existing functionality"
+          },
+          {
+            "id": 5,
+            "title": "Implement event broadcasting and client notification system",
+            "description": "Create broadcasting logic to send agent status updates to appropriate WebSocket clients",
+            "dependencies": [
+              4
+            ],
+            "details": "Implement room-based or targeted broadcasting (clients can subscribe to specific agents or all agents), add event queuing for disconnected clients if needed, implement rate limiting for high-frequency updates, add logging for event broadcasting",
+            "status": "done",
+            "testStrategy": "Test multiple clients receive broadcasts correctly, verify targeted broadcasting works, test rate limiting prevents spam, verify event delivery to reconnected clients"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Create React Web Frontend Foundation",
+        "description": "Setup packages/web with React application and basic responsive layout",
+        "details": "Create React application using Vite or Create React App in packages/web/. Setup TypeScript configuration with project references. Create basic responsive layout with navigation header and main content area. Setup routing with React Router. Configure build process and development server. Install necessary dependencies (React, TypeScript, routing, HTTP client).",
+        "testStrategy": "Verify React app builds and runs in development, TypeScript compilation works, responsive layout displays correctly on different screen sizes, routing functions properly",
+        "priority": "medium",
+        "dependencies": [
+          2
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Initialize React application with Vite and TypeScript",
+            "description": "Create the React application structure in packages/web/ using Vite bundler with TypeScript template",
+            "dependencies": [],
+            "details": "Run 'npm create vite@latest packages/web -- --template react-ts' to scaffold the application. Configure package.json with proper name, scripts, and dependencies. Setup TypeScript configuration (tsconfig.json) with project references to shared packages if they exist. Install core dependencies: React, React-DOM, TypeScript, and Vite dev dependencies.",
+            "status": "done",
+            "testStrategy": "Verify the development server starts successfully and renders the default React app"
+          },
+          {
+            "id": 2,
+            "title": "Configure TypeScript project references and build setup",
+            "description": "Setup TypeScript configuration with project references and configure the build process",
+            "dependencies": [
+              1
+            ],
+            "details": "Update tsconfig.json to include project references to other packages in the monorepo if they exist. Configure proper module resolution, target ES2020+, and enable strict mode. Setup build scripts in package.json for both development and production. Configure Vite config for proper asset handling and environment variables.",
+            "status": "done",
+            "testStrategy": "Run build command and verify TypeScript compilation succeeds without errors"
+          },
+          {
+            "id": 3,
+            "title": "Install and configure React Router for navigation",
+            "description": "Setup React Router for client-side routing and create basic route structure",
+            "dependencies": [
+              2
+            ],
+            "details": "Install react-router-dom and @types/react-router-dom. Create a Router component with BrowserRouter wrapper. Setup basic routes for home page and placeholder routes for future pages. Create route configuration that can be easily extended. Setup proper TypeScript types for route parameters.",
+            "status": "done",
+            "testStrategy": "Test navigation between routes works correctly and browser back/forward buttons function properly"
+          },
+          {
+            "id": 4,
+            "title": "Create responsive layout components with navigation header",
+            "description": "Build the foundational layout components including navigation header and main content area",
+            "dependencies": [
+              3
+            ],
+            "details": "Create Layout component with responsive design using CSS modules or styled-components. Build Navigation component with header containing logo/title and navigation menu. Create MainContent component for page content with proper spacing and responsive breakpoints. Use CSS Grid or Flexbox for layout structure. Ensure mobile-first responsive design with proper breakpoints (mobile: 320px+, tablet: 768px+, desktop: 1024px+).",
+            "status": "done",
+            "testStrategy": "Test layout responsiveness across different screen sizes and verify navigation is accessible on mobile devices"
+          },
+          {
+            "id": 5,
+            "title": "Setup HTTP client and development environment configuration",
+            "description": "Install and configure HTTP client for API calls and setup development environment",
+            "dependencies": [
+              4
+            ],
+            "details": "Install axios or fetch wrapper for HTTP requests. Create API client configuration with base URL and common headers. Setup environment variable handling for different environments (development, staging, production). Configure development server with proper proxy settings if needed for API calls. Create utility functions for common HTTP operations (GET, POST, PUT, DELETE).",
+            "status": "done",
+            "testStrategy": "Test HTTP client configuration with mock API calls and verify environment variables are properly loaded"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Implement Agent Dashboard with Real-time Status",
+        "description": "Create agent list dashboard showing current agents with real-time status updates via WebSocket",
+        "details": "Create AgentDashboard component displaying agent list in table/card format. Show agent ID, branch, status, creation time, and actions. Integrate WebSocket client to receive real-time status updates. Implement status indicators (RUNNING/green, STOPPED/yellow, ERROR/red). Add auto-refresh capability and connection status indicator. Style with responsive design.",
+        "testStrategy": "Verify dashboard displays current agents correctly, real-time updates work when agent status changes, WebSocket connection is stable, responsive design works on mobile and desktop",
+        "priority": "medium",
+        "dependencies": [
+          5,
+          6
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create AgentDashboard Component Structure",
+            "description": "Build the basic AgentDashboard React component with table/card layout for displaying agent information",
+            "dependencies": [],
+            "details": "Create AgentDashboard.tsx component with responsive table structure. Include columns for agent ID, branch, status, creation time, and actions. Implement toggle between table and card views for mobile responsiveness. Add basic styling with CSS modules or styled-components. Create mock data structure for initial development.",
+            "status": "done",
+            "testStrategy": "Unit tests for component rendering and layout switching between table/card views"
+          },
+          {
+            "id": 2,
+            "title": "Implement Status Indicators and Styling",
+            "description": "Add visual status indicators with color coding and responsive design elements",
+            "dependencies": [
+              1
+            ],
+            "details": "Create StatusIndicator component with color-coded badges (RUNNING/green, STOPPED/yellow, ERROR/red). Implement responsive CSS for mobile/desktop layouts. Add loading states and empty state handling. Include icons for different statuses using a icon library like React Icons or Lucide.",
+            "status": "done",
+            "testStrategy": "Visual regression tests for status indicators and responsive layout testing"
+          },
+          {
+            "id": 3,
+            "title": "Create WebSocket Client Service",
+            "description": "Build WebSocket client service for real-time agent status updates",
+            "dependencies": [],
+            "details": "Create WebSocketService class to handle connection, message parsing, and reconnection logic. Implement event handlers for agent status updates. Add connection state management (connecting, connected, disconnected, error). Include exponential backoff for reconnection attempts and heartbeat mechanism.",
+            "status": "done",
+            "testStrategy": "Unit tests for WebSocket service methods and mock WebSocket server for integration testing"
+          },
+          {
+            "id": 4,
+            "title": "Integrate Real-time Updates with Component State",
+            "description": "Connect WebSocket service to AgentDashboard component for live status updates",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Integrate WebSocketService with AgentDashboard using React hooks (useEffect, useState). Implement agent data state management with real-time updates. Add connection status indicator in the UI. Handle message parsing and state updates when receiving agent status changes. Implement proper cleanup on component unmount.",
+            "status": "done",
+            "testStrategy": "Integration tests for WebSocket message handling and component state updates"
+          },
+          {
+            "id": 5,
+            "title": "Add Auto-refresh and Action Handlers",
+            "description": "Implement auto-refresh capability and action buttons for agent management",
+            "dependencies": [
+              2,
+              4
+            ],
+            "details": "Add manual refresh button and auto-refresh toggle with configurable intervals. Implement action buttons for each agent (start, stop, restart, delete). Add confirmation dialogs for destructive actions. Include error handling and user feedback for failed actions. Add keyboard shortcuts for common actions.",
+            "status": "done",
+            "testStrategy": "End-to-end tests for user interactions, action button functionality, and auto-refresh behavior"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Build Agent Creation Form with Branch Selection",
+        "description": "Create web form for agent creation with branch selection and validation",
+        "details": "Create AgentCreateForm component with branch input field and validation. Integrate with backend POST /api/agents endpoint. Add form validation for branch names and required fields. Implement success/error handling and user feedback. Add loading states during agent creation. Ensure form submission creates actual tmux sessions and git worktrees like CLI.",
+        "testStrategy": "Test form submission creates working agents, validation prevents invalid inputs, success/error messages display correctly, created agents appear in dashboard immediately, tmux sessions are accessible",
+        "priority": "medium",
+        "dependencies": [
+          4,
+          6
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create AgentCreateForm component structure",
+            "description": "Build the basic form component with input fields for agent name, branch selection, and submit button",
+            "dependencies": [],
+            "details": "Create AgentCreateForm.tsx component with form fields for agent name (text input), branch selection (dropdown/combobox), and submit button. Use controlled components with useState for form state management. Include proper TypeScript interfaces for form data.",
+            "status": "done",
+            "testStrategy": "Unit tests for component rendering and form field interactions"
+          },
+          {
+            "id": 2,
+            "title": "Implement form validation logic",
+            "description": "Add client-side validation for required fields and branch name format validation",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement validation rules for agent name (required, alphanumeric with hyphens/underscores) and branch name (required, valid git branch format). Add error state management and display validation messages. Use form validation library like react-hook-form or custom validation functions.",
+            "status": "done",
+            "testStrategy": "Unit tests for validation functions and error message display"
+          },
+          {
+            "id": 3,
+            "title": "Create API integration service",
+            "description": "Build service layer to handle POST requests to /api/agents endpoint with proper error handling",
+            "dependencies": [
+              2
+            ],
+            "details": "Create agentService.ts with createAgent function that posts to /api/agents endpoint. Include proper TypeScript types for request/response. Implement error handling for network failures, validation errors, and server errors. Add request/response logging.",
+            "status": "done",
+            "testStrategy": "Integration tests for API service with mock server responses"
+          },
+          {
+            "id": 4,
+            "title": "Implement loading states and user feedback",
+            "description": "Add loading indicators, success messages, and error handling with appropriate UI feedback",
+            "dependencies": [
+              3
+            ],
+            "details": "Add loading state during form submission with spinner/disabled button. Implement success feedback (toast notification or success message) and error handling with user-friendly error messages. Add form reset functionality after successful submission.",
+            "status": "done",
+            "testStrategy": "UI tests for loading states and user feedback scenarios"
+          },
+          {
+            "id": 5,
+            "title": "Integrate form with backend tmux/git worktree functionality",
+            "description": "Ensure form submission triggers actual tmux session creation and git worktree setup like CLI implementation",
+            "dependencies": [
+              4
+            ],
+            "details": "Verify backend integration creates tmux sessions and git worktrees correctly. Add validation that submitted data matches expected backend format. Implement proper error handling for tmux/git operations. Add success verification that agent is actually created and running.",
+            "status": "done",
+            "testStrategy": "End-to-end tests verifying full agent creation workflow including tmux session and git worktree creation"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Add Basic Agent Management Actions",
+        "description": "Implement basic agent management actions (start, stop, view details, delete) in web interface",
+        "details": "Add action buttons/menus to agent dashboard for basic operations. Implement agent deletion with confirmation dialog. Add agent details modal/page showing full agent information. Integrate with backend API endpoints for each action. Add proper error handling and user feedback. Ensure actions update dashboard in real-time.",
+        "testStrategy": "Test all agent actions work correctly (delete removes agent and tmux session), confirmation dialogs prevent accidental actions, error handling displays appropriate messages, real-time updates reflect changes immediately",
+        "priority": "medium",
+        "dependencies": [
+          7,
+          8
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Agent Action Components",
+            "description": "Design and implement reusable UI components for agent management actions including buttons, menus, and confirmation dialogs",
+            "dependencies": [],
+            "details": "Create ActionButton, ActionMenu, and ConfirmationDialog components. Style them consistently with existing UI. Include icons for start, stop, view, and delete actions. Implement proper loading states and disabled states for each action type.",
+            "status": "done",
+            "testStrategy": "Unit tests for component rendering and prop handling. Visual regression tests for different states."
+          },
+          {
+            "id": 2,
+            "title": "Implement Agent Details Modal",
+            "description": "Create a modal component that displays comprehensive agent information including status, configuration, logs, and metadata",
+            "dependencies": [
+              1
+            ],
+            "details": "Build AgentDetailsModal component with tabs or sections for different information types. Include agent status, creation date, configuration parameters, recent activity logs, and performance metrics. Add close and edit functionality.",
+            "status": "done",
+            "testStrategy": "Component tests for modal behavior and data display. Integration tests with mock agent data."
+          },
+          {
+            "id": 3,
+            "title": "Integrate Backend API Endpoints",
+            "description": "Connect frontend actions to backend API endpoints for start, stop, delete, and get details operations",
+            "dependencies": [
+              1
+            ],
+            "details": "Create API service methods for each agent operation. Implement proper request/response handling with TypeScript types. Add authentication headers and error response parsing. Include retry logic for failed requests.",
+            "status": "done",
+            "testStrategy": "Unit tests for API service methods. Mock API responses for different scenarios including success and error cases."
+          },
+          {
+            "id": 4,
+            "title": "Add Error Handling and User Feedback",
+            "description": "Implement comprehensive error handling with user-friendly feedback messages and loading states for all agent actions",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Add toast notifications or alert components for success/error messages. Implement loading spinners during API calls. Create specific error messages for different failure scenarios. Add timeout handling and network error recovery.",
+            "status": "done",
+            "testStrategy": "Error simulation tests for different failure modes. User experience tests for feedback visibility and timing."
+          },
+          {
+            "id": 5,
+            "title": "Implement Real-time Dashboard Updates",
+            "description": "Add real-time synchronization to update the agent dashboard immediately after any management action is performed",
+            "dependencies": [
+              4
+            ],
+            "details": "Implement WebSocket connection or polling mechanism to refresh agent list after actions. Update local state optimistically for immediate feedback. Handle concurrent updates from multiple users. Add visual indicators for recently updated agents.",
+            "status": "done",
+            "testStrategy": "Integration tests for real-time updates. Performance tests for update frequency and resource usage."
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Configure Build System and Cross-Package Dependencies",
+        "description": "Setup workspace-aware build processes with TypeScript project references and development scripts",
+        "details": "Configure TypeScript project references in root and package tsconfigs for proper cross-package imports. Setup concurrent build scripts for all packages. Create development scripts for running backend and frontend simultaneously. Configure module resolution and ensure proper dependency management. Add build validation and testing scripts for entire monorepo.",
+        "testStrategy": "Verify TypeScript compilation works across all packages, development scripts start all services correctly, cross-package imports resolve properly, build process produces working artifacts for all packages",
+        "priority": "medium",
+        "dependencies": [
+          3,
+          4,
+          6
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Configure TypeScript Project References",
+            "description": "Setup TypeScript project references in root tsconfig and all package tsconfigs to enable proper cross-package imports and incremental compilation",
+            "dependencies": [],
+            "details": "Create root tsconfig.json with composite project references pointing to all packages. Update each package's tsconfig.json to extend base config and set composite: true. Configure path mapping for @magents/* packages and ensure proper module resolution between packages.",
+            "status": "done",
+            "testStrategy": "Verify TypeScript compilation works across packages and imports resolve correctly"
+          },
+          {
+            "id": 2,
+            "title": "Setup Concurrent Build Scripts",
+            "description": "Create build scripts that can compile all packages in the correct dependency order with support for parallel builds where possible",
+            "dependencies": [
+              1
+            ],
+            "details": "Add npm scripts for building all packages using tsc --build with project references. Create scripts for clean builds, incremental builds, and watch mode. Use tools like concurrently or npm-run-all for parallel execution where dependencies allow.",
+            "status": "done",
+            "testStrategy": "Test build scripts produce correct output for all packages and handle dependency changes"
+          },
+          {
+            "id": 3,
+            "title": "Create Development Scripts",
+            "description": "Setup development scripts for running backend and frontend simultaneously with hot reload and proper environment configuration",
+            "dependencies": [
+              2
+            ],
+            "details": "Create npm scripts that start both backend server and frontend development server concurrently. Configure environment variables, proxy settings, and hot reload. Ensure proper cleanup and error handling when stopping development servers.",
+            "status": "done",
+            "testStrategy": "Verify development environment starts correctly and changes trigger appropriate rebuilds"
+          },
+          {
+            "id": 4,
+            "title": "Configure Module Resolution and Dependencies",
+            "description": "Ensure proper module resolution for cross-package imports and validate dependency management across the monorepo",
+            "dependencies": [
+              1
+            ],
+            "details": "Configure package.json workspaces, update import paths to use @magents/* aliases, ensure all cross-package dependencies are properly declared. Setup proper exports in package.json files and validate no circular dependencies exist.",
+            "status": "done",
+            "testStrategy": "Test that all imports resolve correctly and packages can be consumed by other packages"
+          },
+          {
+            "id": 5,
+            "title": "Add Build Validation and Testing Scripts",
+            "description": "Create comprehensive scripts for validating builds and running tests across the entire monorepo",
+            "dependencies": [
+              2,
+              3,
+              4
+            ],
+            "details": "Add scripts for running all tests, linting all packages, type checking the entire codebase, and validating builds. Create CI-ready scripts that exit with proper error codes. Include scripts for checking package integrity and dependency consistency.",
+            "status": "done",
+            "testStrategy": "Verify all validation scripts catch common issues and provide clear error messages"
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Implement Backend Project Discovery API",
+        "description": "Create API endpoints for discovering and validating local git repositories, including directory browsing, git repo detection, and project metadata extraction",
+        "details": "Build REST endpoints: GET /api/projects/discover (browse directories), GET /api/projects/validate (validate git repos), GET /api/projects/metadata (extract repo info). Implement secure directory browsing with path validation. Add git repository detection using isomorphic-git or child_process. Extract project metadata like branches, remotes, TaskMaster config. Include comprehensive error handling and security measures to prevent directory traversal attacks.",
+        "testStrategy": "Test directory browsing works securely, git repository detection identifies valid repos, metadata extraction returns correct branch/remote info, path validation prevents security issues, API handles errors gracefully",
+        "priority": "high",
+        "dependencies": [
+          10
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "Create Frontend Directory Browser Component",
+        "description": "Build React component for browsing local file system and selecting project directories from the GUI",
+        "details": "Create DirectoryBrowser component with tree-view interface for navigating local directories. Implement folder expansion/collapse, file filtering (show only directories), and visual indicators for git repositories. Add search functionality for quick directory location. Include breadcrumb navigation and favorite/recent directories. Integrate with backend project discovery API. Use virtual scrolling for performance with large directory trees.",
+        "testStrategy": "Test directory navigation works smoothly, git repositories are visually indicated, search functionality finds directories quickly, component handles large directory structures efficiently, integration with backend API is seamless",
+        "priority": "high",
+        "dependencies": [
+          11
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 13,
+        "title": "Enhance Agent Creation Form with Project Selection",
+        "description": "Upgrade existing agent creation form to include project selection, git branch management, and validation",
+        "details": "Modify AgentCreateForm to include DirectoryBrowser integration for project selection. Add git branch selection dropdown with create-new-branch option. Implement real-time validation for project path, branch names, and agent IDs. Add project metadata display (repo name, current branch, last commit). Include form steps/wizard pattern for better UX. Add preview of what will be created before submission.",
+        "testStrategy": "Test project selection updates available branches, branch validation prevents invalid names, form wizard guides users through process, preview shows accurate information, submission creates agents correctly",
+        "priority": "medium",
+        "dependencies": [
+          8,
+          12
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 14,
+        "title": "Implement TaskMaster Integration API",
+        "description": "Create backend endpoints for TaskMaster task discovery, assignment, and environment setup for agents",
+        "details": "Build API endpoints: GET /api/taskmaster/detect (check if TM configured), GET /api/taskmaster/tasks (list available tasks), GET /api/taskmaster/:taskId (get task details), POST /api/agents/:id/assign-task (assign task to agent). Implement TaskMaster CLI integration using child_process to execute task-master commands. Add automatic TaskMaster environment setup during agent creation. Include task briefing generation and context file creation.",
+        "testStrategy": "Test TaskMaster detection works in configured projects, task listing returns available tasks, task assignment creates proper environment, briefing files are generated correctly, CLI integration executes commands successfully",
+        "priority": "medium",
+        "dependencies": [
+          11
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 15,
+        "title": "Build TaskMaster Task Browser Interface",
+        "description": "Create React components for browsing, selecting, and previewing TaskMaster tasks in the GUI",
+        "details": "Create TaskBrowser component with task list, search, and filtering capabilities. Implement TaskPreview component showing task details, dependencies, and requirements. Add task assignment interface with validation. Include task status indicators and progress tracking. Implement drag-and-drop task assignment to agents. Add task creation wizard for creating new tasks from GUI.",
+        "testStrategy": "Test task browsing shows all available tasks, search and filtering work correctly, task preview displays complete information, assignment interface validates properly, drag-and-drop functionality works smoothly",
+        "priority": "medium",
+        "dependencies": [
+          14
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create TaskBrowser Component with List View",
+            "description": "Build the main TaskBrowser component with a list view for displaying all TaskMaster tasks",
+            "dependencies": [],
+            "details": "Create TaskBrowser.tsx component that fetches and displays tasks from the TaskMaster API. Implement a list view with task cards showing ID, title, status, priority, and brief description. Add pagination or virtual scrolling for large task lists. Include loading states and error handling. Style with Tailwind CSS to match the existing UI design.",
+            "status": "done",
+            "testStrategy": "Unit tests for component rendering, mock API responses for task list, test pagination/scrolling behavior, verify error states display correctly"
+          },
+          {
+            "id": 2,
+            "title": "Implement Task Search and Filtering",
+            "description": "Add search functionality and filters to the TaskBrowser for finding specific tasks",
+            "dependencies": [
+              1
+            ],
+            "details": "Add search input field with real-time filtering by task title, description, and ID. Implement filter controls for task status (pending, in-progress, done), priority levels, and dependency status. Add sorting options (by ID, priority, status, title). Store filter state in URL params for shareable views. Implement keyboard shortcuts for common filters.",
+            "status": "done",
+            "testStrategy": "Test search filters tasks correctly, verify all filter combinations work, ensure URL params persist filter state, test keyboard shortcuts functionality"
+          },
+          {
+            "id": 3,
+            "title": "Build TaskPreview Component",
+            "description": "Create a detailed preview component for displaying full task information",
+            "dependencies": [
+              1
+            ],
+            "details": "Create TaskPreview.tsx component that shows complete task details including description, implementation details, test strategy, dependencies graph, subtasks tree, and metadata. Add syntax highlighting for code snippets in task descriptions. Include collapsible sections for better organization. Show task relationships and dependency chains visually.",
+            "status": "done",
+            "testStrategy": "Test all task fields display correctly, verify dependency visualization, test collapsible sections, ensure code highlighting works"
+          },
+          {
+            "id": 4,
+            "title": "Add Task Assignment Interface with Drag-and-Drop",
+            "description": "Implement drag-and-drop functionality for assigning tasks to agents",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Implement drag-and-drop using react-beautiful-dnd or similar library. Make task cards draggable from the browser to agent panels. Add visual feedback during drag operations (ghost image, drop zones). Validate task assignments (check dependencies, agent capabilities). Show confirmation dialog for task assignment. Update both task and agent states after successful assignment.",
+            "status": "done",
+            "testStrategy": "Test drag-and-drop mechanics work smoothly, verify assignment validation logic, test state updates after assignment, ensure accessibility compliance"
+          },
+          {
+            "id": 5,
+            "title": "Create Task Creation Wizard",
+            "description": "Build a wizard interface for creating new TaskMaster tasks from the GUI",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Create multi-step wizard for task creation with fields for title, description, priority, dependencies, implementation details, and test strategy. Add dependency picker with search functionality. Include task template selection for common task types. Implement form validation and preview before submission. Add ability to create subtasks within the wizard. Integrate with TaskMaster API to save new tasks.",
+            "status": "done",
+            "testStrategy": "Test wizard flow and navigation, verify form validation works correctly, test task creation API integration, ensure created tasks appear in browser immediately"
+          }
+        ]
+      },
+      {
+        "id": 16,
+        "title": "Add Advanced Agent Configuration Options",
+        "description": "Implement GUI controls for Docker settings, environment variables, and advanced agent options",
+        "details": "Create AdvancedConfigPanel component with Docker configuration (enable/disable, image selection, network settings). Add environment variable editor with key-value pairs. Implement port allocation settings with conflict detection. Add Claude settings customization (auto-accept, model selection). Include MCP configuration editor. Add configuration templates and presets for common setups.",
+        "testStrategy": "Test Docker configuration correctly sets up containers, environment variables are properly passed to agents, port allocation prevents conflicts, Claude settings override defaults correctly, configuration templates apply settings properly",
+        "priority": "low",
+        "dependencies": [
+          13
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 17,
+        "title": "Implement Project Management System",
+        "description": "Create project registration, management, and agent association system for organizing work",
+        "details": "Build Project entity with CRUD operations: create, read, update, delete projects. Implement project-agent relationship management. Add project dashboard showing associated agents and their status. Include project settings for default configurations. Add project templates for common project types. Implement project health monitoring and statistics.",
+        "testStrategy": "Test project CRUD operations work correctly, agent associations are maintained properly, project dashboard displays accurate information, templates create properly configured projects, health monitoring shows correct metrics",
+        "priority": "medium",
+        "dependencies": [
+          11,
+          13
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 18,
+        "title": "Add Agent Creation Progress Tracking",
+        "description": "Implement real-time progress indicators and status updates during complex agent creation operations",
+        "details": "Create ProgressTracker component with step-by-step progress display. Implement WebSocket-based real-time updates for long-running operations. Add detailed status messages for each creation step (git operations, tmux setup, configuration copying). Include error recovery and retry mechanisms. Add operation cancellation capability. Implement progress persistence across page refreshes.",
+        "testStrategy": "Test progress tracking shows accurate status, real-time updates work correctly, error messages are informative, cancellation stops operations cleanly, progress persists across page refreshes",
+        "priority": "medium",
+        "dependencies": [
+          5,
+          13
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 19,
+        "title": "Create Agent Creation Wizard",
+        "description": "Build comprehensive multi-step wizard interface for guided agent creation with validation and preview",
+        "details": "Create AgentCreationWizard component with steps: 1) Project Selection, 2) Branch Management, 3) TaskMaster Integration, 4) Advanced Configuration, 5) Preview & Create. Implement step validation and navigation controls. Add form state persistence across steps. Include comprehensive preview showing all settings before creation. Add wizard templates for common use cases.",
+        "testStrategy": "Test wizard navigation works smoothly, step validation prevents invalid configurations, state persistence maintains data across steps, preview shows accurate information, templates create proper configurations",
+        "priority": "medium",
+        "dependencies": [
+          13,
+          15,
+          16,
+          18
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 20,
+        "title": "Implement GUI Agent Creation Integration Testing",
+        "description": "Create comprehensive end-to-end tests for GUI agent creation workflow covering all features and edge cases",
+        "details": "Build E2E test suite using Playwright covering: project discovery and selection, git repository validation, branch creation and selection, TaskMaster task assignment, agent creation with various configurations, error handling and recovery. Include performance tests for large directory structures. Add integration tests for CLI equivalence verification. Implement automated testing of complex scenarios.",
+        "testStrategy": "Test suite covers all user workflows, performance tests validate responsiveness, integration tests verify CLI compatibility, error scenarios are properly handled, complex configurations work correctly",
+        "priority": "high",
+        "dependencies": [
+          19
+        ],
+        "status": "done",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-06-30T14:18:19.843Z",
+      "updated": "2025-07-01T06:53:39.484Z",
+      "description": "Tasks for master context"
+    }
+  }
+}

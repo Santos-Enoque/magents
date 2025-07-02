@@ -4,12 +4,18 @@ import { Command } from 'commander';
 import inquirer from 'inquirer';
 import fs from 'fs';
 import { AgentManager } from '../services/AgentManager';
+import { DockerAgentManager } from '../services/DockerAgentManager';
 import { ConfigManager } from '../config/ConfigManager';
 import { ui } from '../ui/UIService';
 
 const program = new Command();
-const agentManager = new AgentManager();
 const configManager = ConfigManager.getInstance();
+const config = configManager.loadConfig();
+
+// Use DockerAgentManager if Docker mode is enabled
+const agentManager: AgentManager | DockerAgentManager = config.DOCKER_ENABLED 
+  ? new DockerAgentManager() 
+  : new AgentManager();
 
 // Helper function to parse Task Master output when --json is not supported
 function parseTaskMasterOutput(taskId: string, output: string): any {
@@ -474,7 +480,9 @@ if (process.argv.length === 2) {
   ui.command('magents doctor', 'Check system requirements');
   ui.command('magents init', 'Initialize config');
   ui.command('magents config', 'View/edit config');
+  ui.command('magents config --docker', 'Enable Docker mode');
   ui.divider();
+  ui.info(`Mode: ${config.DOCKER_ENABLED ? 'Docker containers' : 'tmux/git worktrees'}`);
   ui.info('Run "magents --help" for detailed information');
 }
 
@@ -485,15 +493,21 @@ program
   .argument('<branch>', 'Branch name for the agent')
   .argument('[agent-id]', 'Optional agent ID (auto-generated if not provided)')
   .option('--no-auto-accept', 'Disable automatic command acceptance in Claude Code')
-  .action(async (branch: string, agentId?: string, options?: { autoAccept: boolean }) => {
+  .option('--docker', 'Force Docker mode for this agent')
+  .option('--no-docker', 'Force tmux mode for this agent')
+  .action(async (branch: string, agentId?: string, options?: { autoAccept: boolean; docker?: boolean }) => {
     const spinner = ui.spinner('Creating agent...');
     spinner.start();
     
     try {
+      // Determine if we should use Docker for this specific agent
+      const useDocker = options?.docker !== undefined ? options.docker : config.DOCKER_ENABLED;
+      
       const result = await agentManager.createAgent({
         branch,
         agentId,
-        autoAccept: options?.autoAccept
+        autoAccept: options?.autoAccept,
+        useDocker
       });
 
       if (result.success && result.data) {
@@ -505,13 +519,19 @@ program
           worktreePath: result.data.worktreePath,
           tmuxSession: result.data.tmuxSession,
           status: 'Active',
-          createdAt: new Date()
+          createdAt: new Date(),
+          useDocker
         };
         
         ui.agentDetails(agent);
         
         ui.divider('Next Steps');
-        ui.command(`magents attach ${result.data.agentId}`, 'Attach to the agent\'s tmux session');
+        if (useDocker) {
+          ui.command(`magents attach ${result.data.agentId}`, 'Attach to the Docker container');
+          ui.command(`docker logs magents-${result.data.agentId}`, 'View container logs');
+        } else {
+          ui.command(`magents attach ${result.data.agentId}`, 'Attach to the agent\'s tmux session');
+        }
         ui.command(`magents a 1`, 'Or use shorthand with position number');
         ui.command(`magents stop ${result.data.agentId}`, 'Stop the agent when done');
       } else {
@@ -1563,6 +1583,9 @@ program
     
     ui.header('Magents System Check');
     
+    // Load config first
+    const currentConfig = configManager.loadConfig();
+    
     // Check Task Master installation
     try {
       execSync('which task-master', { stdio: 'ignore' });
@@ -1595,7 +1618,7 @@ program
       execSync('which tmux', { stdio: 'ignore' });
       ui.success('Tmux: Installed');
     } catch {
-      ui.warning('Tmux: Not installed (required for agent sessions)');
+      ui.warning('Tmux: Not installed (required for non-Docker agent sessions)');
     }
     
     // Check Claude Code
@@ -1606,11 +1629,40 @@ program
       ui.warning('Claude Code: Not found in PATH');
     }
     
+    // Check Docker
+    try {
+      execSync('docker --version', { stdio: 'ignore' });
+      ui.success('Docker: Installed');
+      
+      // Check if Docker daemon is running
+      try {
+        execSync('docker ps', { stdio: 'ignore' });
+        ui.success('Docker daemon: Running');
+      } catch {
+        ui.warning('Docker daemon: Not running (start with: docker desktop or systemctl start docker)');
+      }
+      
+      // Check if our Docker image exists
+      if (currentConfig.DOCKER_ENABLED) {
+        try {
+          execSync(`docker image inspect ${currentConfig.DOCKER_IMAGE}`, { stdio: 'ignore' });
+          ui.success(`Docker image: ${currentConfig.DOCKER_IMAGE} exists`);
+        } catch {
+          ui.warning(`Docker image: ${currentConfig.DOCKER_IMAGE} not found (build with: cd packages/cli/docker && ./build.sh)`);
+        }
+      }
+    } catch {
+      ui.warning('Docker: Not installed (required for Docker mode)');
+    }
+    
     ui.divider('Configuration');
-    const config = configManager.loadConfig();
     ui.keyValue('Config file', configManager.getConfigPath());
     ui.keyValue('Agents directory', configManager.getAgentsDir());
-    ui.keyValue('Max agents', config.MAX_AGENTS.toString());
+    ui.keyValue('Max agents', currentConfig.MAX_AGENTS.toString());
+    ui.keyValue('Docker mode', currentConfig.DOCKER_ENABLED ? 'Enabled' : 'Disabled');
+    if (currentConfig.DOCKER_ENABLED) {
+      ui.keyValue('Docker image', currentConfig.DOCKER_IMAGE);
+    }
     
     // Check for Task Master configuration in current project
     const fs = require('fs');
@@ -1871,8 +1923,18 @@ program
   .command('config')
   .description('View or edit configuration')
   .option('-e, --edit', 'Edit configuration interactively')
-  .action(async (options: { edit?: boolean }) => {
+  .option('--docker', 'Enable Docker mode for agents')
+  .option('--no-docker', 'Disable Docker mode (use tmux/worktrees)')
+  .action(async (options: { edit?: boolean; docker?: boolean }) => {
     const config = configManager.loadConfig();
+    
+    // Handle docker mode toggle
+    if (options.docker !== undefined) {
+      configManager.updateConfig({ DOCKER_ENABLED: options.docker });
+      ui.success(`Docker mode ${options.docker ? 'enabled' : 'disabled'}`);
+      ui.info(`Agents will now be created using ${options.docker ? 'Docker containers' : 'tmux sessions and git worktrees'}`);
+      return;
+    }
     
     if (options.edit) {
       ui.header('Edit Configuration');
@@ -1907,6 +1969,19 @@ program
           name: 'MAX_AGENTS',
           message: 'Maximum number of agents:',
           default: config.MAX_AGENTS
+        },
+        {
+          type: 'confirm',
+          name: 'DOCKER_ENABLED',
+          message: 'Use Docker for agents:',
+          default: config.DOCKER_ENABLED
+        },
+        {
+          type: 'input',
+          name: 'DOCKER_IMAGE',
+          message: 'Docker image for agents:',
+          default: config.DOCKER_IMAGE,
+          when: (answers) => answers.DOCKER_ENABLED
         }
       ]);
       

@@ -69,6 +69,8 @@ WORKTREE_PREFIX=agent
 MAX_AGENTS=5
 CLAUDE_CODE_PATH=claude
 CLAUDE_AUTO_ACCEPT=true
+DOCKER_ENABLED=false
+DOCKER_IMAGE=magents/agent:latest
 `;
             fs.writeFileSync(this.configFile, defaultConfig);
         }
@@ -95,12 +97,14 @@ CLAUDE_AUTO_ACCEPT=true
                             config[cleanKey] = parseInt(cleanValue, 10);
                             break;
                         case 'CLAUDE_AUTO_ACCEPT':
+                        case 'DOCKER_ENABLED':
                             config[cleanKey] = cleanValue.toLowerCase() === 'true';
                             break;
                         case 'DEFAULT_BASE_BRANCH':
                         case 'TMUX_SESSION_PREFIX':
                         case 'WORKTREE_PREFIX':
                         case 'CLAUDE_CODE_PATH':
+                        case 'DOCKER_IMAGE':
                             config[cleanKey] = cleanValue;
                             break;
                     }
@@ -115,6 +119,8 @@ CLAUDE_AUTO_ACCEPT=true
             MAX_AGENTS: config.MAX_AGENTS || 5,
             CLAUDE_CODE_PATH: config.CLAUDE_CODE_PATH || 'claude',
             CLAUDE_AUTO_ACCEPT: config.CLAUDE_AUTO_ACCEPT !== undefined ? config.CLAUDE_AUTO_ACCEPT : true,
+            DOCKER_ENABLED: config.DOCKER_ENABLED !== undefined ? config.DOCKER_ENABLED : false,
+            DOCKER_IMAGE: config.DOCKER_IMAGE || 'magents/agent:latest',
         };
         return this.config;
     }
@@ -129,6 +135,8 @@ CLAUDE_AUTO_ACCEPT=true
             `MAX_AGENTS=${newConfig.MAX_AGENTS}`,
             `CLAUDE_CODE_PATH=${newConfig.CLAUDE_CODE_PATH}`,
             `CLAUDE_AUTO_ACCEPT=${newConfig.CLAUDE_AUTO_ACCEPT}`,
+            `DOCKER_ENABLED=${newConfig.DOCKER_ENABLED}`,
+            `DOCKER_IMAGE=${newConfig.DOCKER_IMAGE}`,
         ];
         fs.writeFileSync(this.configFile, configLines.join('\n') + '\n');
         this.config = newConfig;

@@ -1,0 +1,11 @@
+# Task ID: 28
+# Title: Progressive Complexity Modes
+# Status: pending
+# Dependencies: 24, 25
+# Priority: medium
+# Description: Implement three-tier complexity system for different user expertise levels
+# Details:
+Create Simple mode with only essential options (name, project path). Build Standard mode with common configurations exposed. Implement Advanced mode with full Task Master and MCP access. Add mode switching without data loss. Create guided upgrade path from simple to advanced. Build contextual help for each mode level.
+
+# Test Strategy:
+Test each mode shows appropriate options. Verify mode switching preserves all data. Test guided upgrade suggestions appear correctly. Validate help content matches mode complexity. Test feature discovery in each mode.

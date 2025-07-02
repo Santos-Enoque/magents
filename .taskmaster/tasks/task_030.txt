@@ -1,0 +1,11 @@
+# Task ID: 30
+# Title: Cloud Deployment Support
+# Status: pending
+# Dependencies: 21, 24
+# Priority: low
+# Description: Enable deployment and management of agents in cloud environments
+# Details:
+Implement 'magents deploy --cloud' command with provider selection. Add state persistence using cloud storage. Create secure tunnel for remote agent access. Build cloud-specific Docker images with smaller footprint. Add support for AWS ECS, Google Cloud Run, and Azure Container Instances. Implement cost estimation before deployment.
+
+# Test Strategy:
+Test deployment to each cloud provider. Verify state persistence and restoration. Test remote access security and performance. Validate cost estimates match actual usage. Test container scaling and resource limits.

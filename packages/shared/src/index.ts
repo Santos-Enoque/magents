@@ -42,6 +42,9 @@ export {
 // Export all utilities
 export * from './utils';
 
+// Export database functionality
+export * from './database';
+
 // Export constants
 export * from './constants';
 

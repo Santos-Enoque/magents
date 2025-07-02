@@ -5,6 +5,8 @@ export interface MagentsConfig {
     MAX_AGENTS: number;
     CLAUDE_CODE_PATH: string;
     CLAUDE_AUTO_ACCEPT: boolean;
+    DOCKER_ENABLED: boolean;
+    DOCKER_IMAGE: string;
 }
 export interface Agent {
     id: string;

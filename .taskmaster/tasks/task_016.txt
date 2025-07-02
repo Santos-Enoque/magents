@@ -1,6 +1,6 @@
 # Task ID: 16
 # Title: Add Advanced Agent Configuration Options
-# Status: pending
+# Status: done
 # Dependencies: 13
 # Priority: low
 # Description: Implement GUI controls for Docker settings, environment variables, and advanced agent options

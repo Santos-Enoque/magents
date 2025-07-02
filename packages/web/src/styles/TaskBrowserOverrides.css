@@ -1,0 +1,135 @@
+/* Dark theme overrides for TaskBrowser component */
+.task-browser-container {
+  background-color: transparent !important;
+}
+
+.task-browser-container .border-b {
+  border-color: var(--border-default) !important;
+}
+
+.task-browser-container input {
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-default) !important;
+  color: var(--text-primary) !important;
+}
+
+.task-browser-container input::placeholder {
+  color: var(--text-tertiary) !important;
+}
+
+.task-browser-container input:focus {
+  border-color: var(--brand-primary) !important;
+  box-shadow: 0 0 0 1px var(--brand-primary) !important;
+}
+
+.task-browser-container select {
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-default) !important;
+  color: var(--text-primary) !important;
+}
+
+.task-browser-container select:focus {
+  border-color: var(--brand-primary) !important;
+  box-shadow: 0 0 0 1px var(--brand-primary) !important;
+}
+
+.task-browser-container label {
+  color: var(--text-secondary) !important;
+}
+
+.task-browser-container button {
+  transition: all 0.2s ease;
+}
+
+/* Hide duplicate header */
+.task-browser-container > div > .p-4:first-child > div:first-child > h2 {
+  display: none !important;
+}
+
+/* Style task cards */
+.task-browser-container .bg-white {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-default) !important;
+}
+
+.task-browser-container .hover\:bg-gray-50:hover {
+  background-color: var(--bg-card-hover) !important;
+}
+
+.task-browser-container .text-gray-900 {
+  color: var(--text-primary) !important;
+}
+
+.task-browser-container .text-gray-700 {
+  color: var(--text-secondary) !important;
+}
+
+.task-browser-container .text-gray-600 {
+  color: var(--text-secondary) !important;
+}
+
+.task-browser-container .text-gray-500 {
+  color: var(--text-tertiary) !important;
+}
+
+.task-browser-container .text-gray-400 {
+  color: var(--text-muted) !important;
+}
+
+/* Button styles */
+.task-browser-container .bg-blue-600 {
+  background-color: var(--brand-primary) !important;
+}
+
+.task-browser-container .hover\:bg-blue-700:hover {
+  background-color: var(--brand-primary-hover) !important;
+}
+
+.task-browser-container .bg-gray-200 {
+  background-color: var(--bg-tertiary) !important;
+}
+
+.task-browser-container .hover\:bg-gray-100:hover {
+  background-color: var(--bg-tertiary) !important;
+}
+
+.task-browser-container .text-blue-600 {
+  color: var(--brand-primary) !important;
+}
+
+/* Status colors */
+.task-browser-container .text-green-600 {
+  color: var(--status-success) !important;
+}
+
+.task-browser-container .text-red-600 {
+  color: var(--status-error) !important;
+}
+
+.task-browser-container .text-yellow-600 {
+  color: var(--status-warning) !important;
+}
+
+.task-browser-container .bg-green-50 {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+}
+
+.task-browser-container .bg-red-50 {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+.task-browser-container .bg-yellow-50 {
+  background-color: rgba(245, 158, 11, 0.1) !important;
+}
+
+.task-browser-container .border-green-200 {
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+.task-browser-container .border-red-200 {
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+.task-browser-container .border-yellow-200 {
+  border-color: rgba(245, 158, 11, 0.3) !important;
+}

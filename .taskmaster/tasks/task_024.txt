@@ -1,0 +1,11 @@
+# Task ID: 24
+# Title: Core CLI Commands Implementation
+# Status: pending
+# Dependencies: 21, 22, 23
+# Priority: high
+# Description: Implement three essential commands with progressive complexity options
+# Details:
+Implement 'magents create <name>' with instant agent creation using defaults. Add 'magents assign' for automatic task generation based on project analysis. Create 'magents start' to launch agents in Docker containers. Add --mode flag supporting simple/standard/advanced modes. Implement --dry-run for preview. Add progress indicators for long operations. Create interactive mode for missing parameters.
+
+# Test Strategy:
+CLI integration tests for all commands. Test mode switching preserves data. Verify dry-run doesn't make changes. Test progress indicators show accurate status. Validate interactive prompts work correctly.

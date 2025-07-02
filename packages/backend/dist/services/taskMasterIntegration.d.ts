@@ -1,4 +1,15 @@
-import { TaskMasterTask, TaskMasterConfig } from '@magents/shared';
+import { TaskMasterConfig } from '@magents/shared';
+export interface TaskMasterTask {
+    id: string;
+    title: string;
+    description?: string;
+    status: 'pending' | 'in-progress' | 'done' | 'blocked' | 'cancelled';
+    priority?: 'low' | 'medium' | 'high';
+    dependencies?: string[];
+    details?: string;
+    testStrategy?: string;
+    subtasks?: TaskMasterTask[];
+}
 export interface TaskMasterDetection {
     isConfigured: boolean;
     configPath?: string;

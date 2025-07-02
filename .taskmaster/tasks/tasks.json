@@ -1022,7 +1022,7 @@
             "title": "Implement SQLite database with migrations",
             "description": "Set up SQLite database for persistent storage. Create migration system for schema changes. Implement database initialization, connection management, and proper cleanup. Add database versioning and automatic migration handling.",
             "details": "",
-            "status": "pending",
+            "status": "in-progress",
             "dependencies": [],
             "parentTaskId": 23
           },
@@ -1145,7 +1145,7 @@
     ],
     "metadata": {
       "created": "2025-06-30T14:18:19.843Z",
-      "updated": "2025-07-02T13:02:32.743Z",
+      "updated": "2025-07-02T13:03:17.007Z",
       "description": "Tasks for master context"
     }
   }

@@ -32,6 +32,7 @@ While Claude Code has built-in subagents capabilities for parallel task executio
 - [Quick Start](#quick-start)
 - [Core Concepts](#core-concepts)
 - [Features](#features)
+- [Docker Mode](#docker-mode)
 - [Commands Reference](#commands-reference)
 - [Task Master Integration](#task-master-integration)
 - [Advanced Usage](#advanced-usage)
@@ -250,6 +251,66 @@ magents env
 magents env --claude-command
 ```
 
+## 🐳 Docker Mode
+
+Magents supports two modes for running AI agents:
+
+### Traditional Mode (Default)
+- Uses tmux sessions and git worktrees
+- Direct Claude CLI access
+- Lower resource usage
+- Requires tmux installation
+
+### Docker Mode
+- Full container isolation
+- API-based agent operation (Task Master with API keys)
+- Better for multi-agent orchestration
+- No Claude bridge complexity
+
+#### Enable Docker Mode
+
+```bash
+# Enable globally
+magents config --docker
+
+# Or per-agent
+magents create feature/ai-task --docker
+
+# Build Docker image
+cd packages/cli/docker && ./build.sh
+```
+
+#### Docker Agent Features
+
+```bash
+# Create Docker agent with API keys
+export ANTHROPIC_API_KEY="your-key"
+export OPENAI_API_KEY="your-key"
+
+magents create feature/research research-agent --docker
+
+# View container logs
+docker logs magents-research-agent
+
+# Execute commands in container
+docker exec magents-research-agent task-master list
+
+# Multi-agent orchestration
+magents task-agents --docker  # Create Docker agents for all tasks
+```
+
+#### Docker vs Traditional Mode
+
+| Feature | Docker Mode | Traditional Mode |
+|---------|------------|------------------|
+| **Isolation** | Full container | Process only |
+| **Claude Access** | API keys only | Direct CLI |
+| **Resource Usage** | Higher | Lower |
+| **Scalability** | Excellent | Good |
+| **Setup** | Docker required | tmux required |
+
+For detailed Docker mode documentation, see [packages/cli/docker/DOCKER-MODE.md](packages/cli/docker/DOCKER-MODE.md).
+
 ## 📚 Commands Reference
 
 ### Agent Management
@@ -328,6 +389,8 @@ magents sync-taskmaster <agent-id>
 # Configuration
 magents config
   -e, --edit             # Edit configuration interactively
+  --docker               # Enable Docker mode
+  --no-docker            # Disable Docker mode (use tmux)
 
 # Initialize configuration
 magents init

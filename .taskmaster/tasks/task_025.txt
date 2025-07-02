@@ -1,0 +1,11 @@
+# Task ID: 25
+# Title: Single-Page Dashboard Implementation
+# Status: pending
+# Dependencies: 23
+# Priority: high
+# Description: Redesign GUI to single-page application with progressive disclosure interface
+# Details:
+Create unified dashboard with agent cards showing live status. Implement collapsible sections for advanced options. Add quick action buttons (Create, Start, Stop, Assign Tasks). Build inline terminal component using xterm.js. Implement real-time updates via Server-Sent Events. Add keyboard shortcuts for power users. Create responsive design for mobile support.
+
+# Test Strategy:
+Component tests for all UI elements. E2E tests for user workflows. Responsive design tests on various screen sizes. Real-time update tests with simulated events. Accessibility tests for keyboard navigation.

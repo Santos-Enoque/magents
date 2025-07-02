@@ -300,8 +300,8 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
       case 0: // Template Selection
         return (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold mb-4">Choose a Task Template</h3>
-            <p className="text-sm text-gray-600 mb-6">
+            <h3 className="text-lg font-semibold mb-4 text-foreground">Choose a Task Template</h3>
+            <p className="text-sm text-foreground-secondary mb-6">
               Select a template to pre-fill common fields, or skip to create a custom task.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -309,10 +309,10 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
                 <button
                   key={template.id}
                   onClick={() => handleTemplateSelect(template)}
-                  className="p-4 border rounded-lg text-left hover:border-blue-500 hover:bg-blue-50 transition-all"
+                  className="p-4 border border-border rounded-lg text-left hover:border-brand hover:bg-brand/10 transition-all bg-background-card"
                 >
-                  <h4 className="font-medium mb-2">{template.name}</h4>
-                  <p className="text-sm text-gray-600">
+                  <h4 className="font-medium mb-2 text-foreground">{template.name}</h4>
+                  <p className="text-sm text-foreground-secondary">
                     Priority: {template.template.priority} • {template.template.subtasks.length} subtasks
                   </p>
                 </button>
@@ -320,7 +320,7 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
             </div>
             <button
               onClick={handleNext}
-              className="w-full mt-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+              className="w-full mt-4 py-2 text-foreground-tertiary hover:text-foreground-secondary transition-colors"
             >
               Skip and create custom task →
             </button>
@@ -330,52 +330,52 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
       case 1: // Basic Information
         return (
           <div className="space-y-6">
-            <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
+            <h3 className="text-lg font-semibold mb-4 text-foreground">Basic Information</h3>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Task Title *
               </label>
               <input
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  validationErrors.title ? 'border-red-500' : ''
+                className={`w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-brand bg-background-card text-foreground placeholder-foreground-tertiary ${
+                  validationErrors.title ? 'border-status-error' : ''
                 }`}
                 placeholder="e.g., Implement user authentication"
               />
               {validationErrors.title && (
-                <p className="mt-1 text-sm text-red-600">{validationErrors.title}</p>
+                <p className="mt-1 text-sm text-status-error">{validationErrors.title}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Description *
               </label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  validationErrors.description ? 'border-red-500' : ''
+                className={`w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-brand bg-background-card text-foreground placeholder-foreground-tertiary ${
+                  validationErrors.description ? 'border-status-error' : ''
                 }`}
                 rows={4}
                 placeholder="Describe what needs to be done..."
               />
               {validationErrors.description && (
-                <p className="mt-1 text-sm text-red-600">{validationErrors.description}</p>
+                <p className="mt-1 text-sm text-status-error">{validationErrors.description}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Priority
               </label>
               <select
                 value={formData.priority}
                 onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value as any }))}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-brand bg-background-card text-foreground"
               >
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
@@ -388,36 +388,36 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
       case 2: // Implementation Details
         return (
           <div className="space-y-6">
-            <h3 className="text-lg font-semibold mb-4">Implementation Details</h3>
+            <h3 className="text-lg font-semibold mb-4 text-foreground">Implementation Details</h3>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Implementation Details
               </label>
               <textarea
                 value={formData.details}
                 onChange={(e) => setFormData(prev => ({ ...prev, details: e.target.value }))}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-brand bg-background-card text-foreground placeholder-foreground-tertiary"
                 rows={6}
                 placeholder="Technical details, approach, considerations..."
               />
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-foreground-tertiary">
                 Provide technical details about how this task should be implemented.
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Test Strategy
               </label>
               <textarea
                 value={formData.testStrategy}
                 onChange={(e) => setFormData(prev => ({ ...prev, testStrategy: e.target.value }))}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-brand bg-background-card text-foreground placeholder-foreground-tertiary"
                 rows={4}
                 placeholder="How should this be tested?"
               />
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-foreground-tertiary">
                 Describe the testing approach for this task.
               </p>
             </div>
@@ -427,10 +427,10 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
       case 3: // Dependencies
         return (
           <div className="space-y-6">
-            <h3 className="text-lg font-semibold mb-4">Task Dependencies</h3>
+            <h3 className="text-lg font-semibold mb-4 text-foreground">Task Dependencies</h3>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 This task depends on:
               </label>
               
@@ -441,17 +441,17 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
                     return (
                       <div
                         key={depId}
-                        className="flex items-center justify-between p-3 bg-gray-50 rounded-md"
+                        className="flex items-center justify-between p-3 bg-background-tertiary rounded-md"
                       >
                         <div>
-                          <span className="font-mono text-sm text-gray-600">#{depId}</span>
+                          <span className="font-mono text-sm text-foreground-tertiary">#{depId}</span>
                           {depTask && (
-                            <span className="ml-2 text-sm">{depTask.title}</span>
+                            <span className="ml-2 text-sm text-foreground">{depTask.title}</span>
                           )}
                         </div>
                         <button
                           onClick={() => handleRemoveDependency(depId)}
-                          className="text-red-600 hover:text-red-700"
+                          className="text-status-error hover:text-status-error/80"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -462,19 +462,19 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
               )}
 
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-foreground-tertiary" />
                 <input
                   type="text"
                   value={dependencySearch}
                   onChange={(e) => setDependencySearch(e.target.value)}
                   onFocus={() => setShowDependencyPicker(true)}
-                  className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-10 pr-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-brand bg-background-card text-foreground placeholder-foreground-tertiary"
                   placeholder="Search tasks by ID or title..."
                 />
               </div>
 
               {showDependencyPicker && dependencySearch && (
-                <div className="mt-2 max-h-60 overflow-y-auto border rounded-md shadow-lg bg-white">
+                <div className="mt-2 max-h-60 overflow-y-auto border border-border rounded-md shadow-lg bg-background-card">
                   {filteredTasks.length > 0 ? (
                     filteredTasks.slice(0, 10).map(task => (
                       <button
@@ -483,23 +483,23 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
                           handleAddDependency(task.id);
                           setShowDependencyPicker(false);
                         }}
-                        className="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center justify-between"
+                        className="w-full px-4 py-2 text-left hover:bg-background-card-hover flex items-center justify-between"
                       >
                         <div>
-                          <span className="font-mono text-sm text-gray-600">#{task.id}</span>
-                          <span className="ml-2 text-sm">{task.title}</span>
+                          <span className="font-mono text-sm text-foreground-tertiary">#{task.id}</span>
+                          <span className="ml-2 text-sm text-foreground">{task.title}</span>
                         </div>
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          task.status === 'done' ? 'bg-green-100 text-green-700' :
-                          task.status === 'in-progress' ? 'bg-blue-100 text-blue-700' :
-                          'bg-yellow-100 text-yellow-700'
+                        <span className={`text-xs px-2 py-1 rounded-full border ${
+                          task.status === 'done' ? 'bg-status-success/20 text-status-success border-status-success/30' :
+                          task.status === 'in-progress' ? 'bg-brand/20 text-brand border-brand/30' :
+                          'bg-status-warning/20 text-status-warning border-status-warning/30'
                         }`}>
                           {task.status}
                         </span>
                       </button>
                     ))
                   ) : (
-                    <div className="px-4 py-3 text-sm text-gray-500">
+                    <div className="px-4 py-3 text-sm text-foreground-tertiary">
                       No matching tasks found
                     </div>
                   )}
@@ -507,7 +507,7 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
               )}
             </div>
 
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-foreground-tertiary">
               Dependencies ensure this task won't be started until the selected tasks are completed.
             </p>
           </div>
@@ -517,10 +517,10 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
         return (
           <div className="space-y-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Subtasks</h3>
+              <h3 className="text-lg font-semibold text-foreground">Subtasks</h3>
               <button
                 onClick={handleAddSubtask}
-                className="flex items-center space-x-2 px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                className="flex items-center space-x-2 px-3 py-1 text-sm bg-brand text-white rounded-md hover:bg-brand-hover"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Subtask</span>
@@ -528,11 +528,11 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
             </div>
 
             {formData.subtasks.length === 0 ? (
-              <div className="text-center py-8 bg-gray-50 rounded-lg">
-                <p className="text-gray-500 mb-4">No subtasks added yet</p>
+              <div className="text-center py-8 bg-background-tertiary rounded-lg">
+                <p className="text-foreground-secondary mb-4">No subtasks added yet</p>
                 <button
                   onClick={handleAddSubtask}
-                  className="text-blue-600 hover:text-blue-700"
+                  className="text-brand hover:text-brand-hover"
                 >
                   Add your first subtask
                 </button>
@@ -540,14 +540,14 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
             ) : (
               <div className="space-y-4">
                 {formData.subtasks.map((subtask, index) => (
-                  <div key={index} className="p-4 border rounded-lg">
+                  <div key={index} className="p-4 border border-border rounded-lg bg-background-card">
                     <div className="flex items-start justify-between mb-3">
-                      <span className="text-sm font-medium text-gray-600">
+                      <span className="text-sm font-medium text-foreground-tertiary">
                         Subtask {index + 1}
                       </span>
                       <button
                         onClick={() => handleRemoveSubtask(index)}
-                        className="text-red-600 hover:text-red-700"
+                        className="text-status-error hover:text-status-error/80"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -563,13 +563,13 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
                             newSubtasks[index].title = e.target.value;
                             setFormData(prev => ({ ...prev, subtasks: newSubtasks }));
                           }}
-                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                            validationErrors.subtasks?.[index]?.title ? 'border-red-500' : ''
+                          className={`w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-brand bg-background text-foreground placeholder-foreground-tertiary ${
+                            validationErrors.subtasks?.[index]?.title ? 'border-status-error' : ''
                           }`}
                           placeholder="Subtask title"
                         />
                         {validationErrors.subtasks?.[index]?.title && (
-                          <p className="mt-1 text-sm text-red-600">
+                          <p className="mt-1 text-sm text-status-error">
                             {validationErrors.subtasks[index].title}
                           </p>
                         )}
@@ -583,14 +583,14 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
                             newSubtasks[index].description = e.target.value;
                             setFormData(prev => ({ ...prev, subtasks: newSubtasks }));
                           }}
-                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                            validationErrors.subtasks?.[index]?.description ? 'border-red-500' : ''
+                          className={`w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-brand bg-background text-foreground placeholder-foreground-tertiary ${
+                            validationErrors.subtasks?.[index]?.description ? 'border-status-error' : ''
                           }`}
                           rows={2}
                           placeholder="Subtask description"
                         />
                         {validationErrors.subtasks?.[index]?.description && (
-                          <p className="mt-1 text-sm text-red-600">
+                          <p className="mt-1 text-sm text-status-error">
                             {validationErrors.subtasks[index].description}
                           </p>
                         )}
@@ -606,49 +606,49 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
       case 5: // Review
         return (
           <div className="space-y-6">
-            <h3 className="text-lg font-semibold mb-4">Review Task Details</h3>
+            <h3 className="text-lg font-semibold mb-4 text-foreground">Review Task Details</h3>
             
             <div className="space-y-4">
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <h4 className="font-medium text-gray-700 mb-2">Basic Information</h4>
+              <div className="p-4 bg-background-tertiary rounded-lg">
+                <h4 className="font-medium text-foreground mb-2">Basic Information</h4>
                 <dl className="space-y-2 text-sm">
                   <div className="flex">
-                    <dt className="font-medium text-gray-600 w-24">Title:</dt>
-                    <dd className="flex-1">{formData.title}</dd>
+                    <dt className="font-medium text-foreground-tertiary w-24">Title:</dt>
+                    <dd className="flex-1 text-foreground">{formData.title}</dd>
                   </div>
                   <div className="flex">
-                    <dt className="font-medium text-gray-600 w-24">Priority:</dt>
+                    <dt className="font-medium text-foreground-tertiary w-24">Priority:</dt>
                     <dd className="flex-1">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        formData.priority === 'high' ? 'bg-red-100 text-red-700' :
-                        formData.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-green-100 text-green-700'
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full border ${
+                        formData.priority === 'high' ? 'bg-status-error/20 text-status-error border-status-error/30' :
+                        formData.priority === 'medium' ? 'bg-status-warning/20 text-status-warning border-status-warning/30' :
+                        'bg-status-success/20 text-status-success border-status-success/30'
                       }`}>
                         {formData.priority}
                       </span>
                     </dd>
                   </div>
                   <div className="flex">
-                    <dt className="font-medium text-gray-600 w-24">Description:</dt>
-                    <dd className="flex-1">{formData.description}</dd>
+                    <dt className="font-medium text-foreground-tertiary w-24">Description:</dt>
+                    <dd className="flex-1 text-foreground">{formData.description}</dd>
                   </div>
                 </dl>
               </div>
 
               {(formData.details || formData.testStrategy) && (
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-medium text-gray-700 mb-2">Implementation</h4>
+                <div className="p-4 bg-background-tertiary rounded-lg">
+                  <h4 className="font-medium text-foreground mb-2">Implementation</h4>
                   <dl className="space-y-2 text-sm">
                     {formData.details && (
                       <div>
-                        <dt className="font-medium text-gray-600 mb-1">Details:</dt>
-                        <dd className="text-gray-700 whitespace-pre-wrap">{formData.details}</dd>
+                        <dt className="font-medium text-foreground-tertiary mb-1">Details:</dt>
+                        <dd className="text-foreground whitespace-pre-wrap">{formData.details}</dd>
                       </div>
                     )}
                     {formData.testStrategy && (
                       <div>
-                        <dt className="font-medium text-gray-600 mb-1">Test Strategy:</dt>
-                        <dd className="text-gray-700 whitespace-pre-wrap">{formData.testStrategy}</dd>
+                        <dt className="font-medium text-foreground-tertiary mb-1">Test Strategy:</dt>
+                        <dd className="text-foreground whitespace-pre-wrap">{formData.testStrategy}</dd>
                       </div>
                     )}
                   </dl>
@@ -656,15 +656,15 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
               )}
 
               {formData.dependencies.length > 0 && (
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-medium text-gray-700 mb-2">Dependencies</h4>
+                <div className="p-4 bg-background-tertiary rounded-lg">
+                  <h4 className="font-medium text-foreground mb-2">Dependencies</h4>
                   <ul className="list-disc list-inside space-y-1 text-sm">
                     {formData.dependencies.map(depId => {
                       const depTask = existingTasks.find(t => t.id === depId);
                       return (
                         <li key={depId}>
-                          <span className="font-mono text-gray-600">#{depId}</span>
-                          {depTask && <span className="ml-2">{depTask.title}</span>}
+                          <span className="font-mono text-foreground-tertiary">#{depId}</span>
+                          {depTask && <span className="ml-2 text-foreground">{depTask.title}</span>}
                         </li>
                       );
                     })}
@@ -673,15 +673,15 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
               )}
 
               {formData.subtasks.length > 0 && (
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-medium text-gray-700 mb-2">
+                <div className="p-4 bg-background-tertiary rounded-lg">
+                  <h4 className="font-medium text-foreground mb-2">
                     Subtasks ({formData.subtasks.length})
                   </h4>
                   <ol className="list-decimal list-inside space-y-2 text-sm">
                     {formData.subtasks.map((subtask, index) => (
                       <li key={index}>
-                        <span className="font-medium">{subtask.title}</span>
-                        <p className="ml-6 text-gray-600">{subtask.description}</p>
+                        <span className="font-medium text-foreground">{subtask.title}</span>
+                        <p className="ml-6 text-foreground-secondary">{subtask.description}</p>
                       </li>
                     ))}
                   </ol>
@@ -690,14 +690,14 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
             </div>
 
             {submitError && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-md flex items-start space-x-3">
-                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-red-700">{submitError}</div>
+              <div className="p-4 bg-status-error/20 border border-status-error/30 rounded-md flex items-start space-x-3">
+                <AlertCircle className="w-5 h-5 text-status-error flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-status-error">{submitError}</div>
               </div>
             )}
 
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
-              <p className="text-sm text-blue-700">
+            <div className="p-4 bg-brand/10 border border-brand/30 rounded-md">
+              <p className="text-sm text-brand">
                 Review the task details above. Click "Create Task" to add this task to your TaskMaster project.
               </p>
             </div>
@@ -711,20 +711,20 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] flex flex-col">
+      <div className="bg-background-card border border-border rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="px-6 py-4 border-b flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Create New Task</h2>
+        <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-foreground">Create New Task</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-foreground-tertiary hover:text-foreground-secondary transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Progress Steps */}
-        <div className="px-6 py-4 border-b">
+        <div className="px-6 py-4 border-b border-border">
           <div className="flex items-center justify-between">
             {steps.map((step, index) => (
               <div
@@ -735,10 +735,10 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                       index < currentStep
-                        ? 'bg-green-600 text-white'
+                        ? 'bg-status-success text-white'
                         : index === currentStep
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-200 text-gray-600'
+                        ? 'bg-brand text-white'
+                        : 'bg-background-tertiary text-foreground-tertiary'
                     }`}
                   >
                     {index < currentStep ? (
@@ -749,7 +749,7 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
                   </div>
                   <span
                     className={`ml-2 text-sm ${
-                      index <= currentStep ? 'text-gray-900' : 'text-gray-500'
+                      index <= currentStep ? 'text-foreground' : 'text-foreground-tertiary'
                     }`}
                   >
                     {step.title}
@@ -758,7 +758,7 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
                 {index < steps.length - 1 && (
                   <div
                     className={`flex-1 h-0.5 mx-4 ${
-                      index < currentStep ? 'bg-green-600' : 'bg-gray-200'
+                      index < currentStep ? 'bg-status-success' : 'bg-background-tertiary'
                     }`}
                   />
                 )}
@@ -773,12 +773,12 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t flex items-center justify-between">
+        <div className="px-6 py-4 border-t border-border flex items-center justify-between">
           <div className="flex items-center space-x-3">
             {currentStep > 0 && (
               <button
                 onClick={handlePrevious}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors flex items-center space-x-2"
+                className="px-4 py-2 text-foreground-tertiary hover:text-foreground-secondary transition-colors flex items-center space-x-2"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Previous</span>
@@ -789,7 +789,7 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
           <div className="flex items-center space-x-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+              className="px-4 py-2 text-foreground-tertiary hover:text-foreground-secondary transition-colors"
             >
               Cancel
             </button>
@@ -797,7 +797,7 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
             {currentStep < steps.length - 1 ? (
               <button
                 onClick={handleNext}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center space-x-2"
+                className="px-4 py-2 bg-brand text-white rounded-md hover:bg-brand-hover transition-colors flex items-center space-x-2"
               >
                 <span>Next</span>
                 <ArrowRight className="w-4 h-4" />
@@ -806,7 +806,7 @@ export const TaskCreationWizard: React.FC<TaskCreationWizardProps> = ({
               <button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-status-success text-white rounded-md hover:bg-status-success/80 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <>

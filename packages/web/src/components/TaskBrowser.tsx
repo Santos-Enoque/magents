@@ -21,28 +21,28 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onSelect, isSelected }) => {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high':
-        return 'text-red-600 bg-red-50 border-red-200';
+        return 'text-status-error bg-status-error/20 border-status-error/30';
       case 'medium':
-        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+        return 'text-status-warning bg-status-warning/20 border-status-warning/30';
       case 'low':
-        return 'text-green-600 bg-green-50 border-green-200';
+        return 'text-status-success bg-status-success/20 border-status-success/30';
       default:
-        return 'text-gray-600 bg-gray-50 border-gray-200';
+        return 'text-foreground-tertiary bg-foreground-tertiary/20 border-foreground-tertiary/30';
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'done':
-        return 'text-green-600';
+        return 'text-status-success';
       case 'in-progress':
-        return 'text-blue-600';
+        return 'text-brand';
       case 'blocked':
-        return 'text-red-600';
+        return 'text-status-error';
       case 'cancelled':
-        return 'text-gray-500';
+        return 'text-foreground-tertiary';
       default:
-        return 'text-yellow-600';
+        return 'text-status-warning';
     }
   };
 
@@ -53,14 +53,14 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onSelect, isSelected }) => {
 
   return (
     <div
-      className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
-        isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
-      }`}
+      className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-background-card-hover ${
+        isSelected ? 'border-brand bg-brand/10' : 'border-border hover:border-border-hover'
+      } bg-background-card`}
       onClick={() => onSelect(task)}
     >
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center space-x-2">
-          <span className="text-sm font-mono text-gray-500">#{task.id}</span>
+          <span className="text-sm font-mono text-foreground-tertiary">#{task.id}</span>
           <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getPriorityColor(task.priority)}`}>
             {task.priority}
           </span>
@@ -70,16 +70,16 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onSelect, isSelected }) => {
         </span>
       </div>
       
-      <h3 className="font-semibold text-gray-900 mb-1">{task.title}</h3>
+      <h3 className="font-semibold text-foreground mb-1">{task.title}</h3>
       
       {task.description && (
-        <p className="text-sm text-gray-600 mb-2">
+        <p className="text-sm text-foreground-secondary mb-2">
           {truncateText(task.description, 150)}
         </p>
       )}
       
       <div className="flex items-center justify-between mt-3">
-        <div className="flex items-center space-x-4 text-xs text-gray-500">
+        <div className="flex items-center space-x-4 text-xs text-foreground-tertiary">
           {task.dependencies && task.dependencies.length > 0 && (
             <span>Deps: {task.dependencies.join(', ')}</span>
           )}
@@ -87,7 +87,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onSelect, isSelected }) => {
             <span>{task.subtasks.length} subtasks</span>
           )}
         </div>
-        <ChevronRight className="w-4 h-4 text-gray-400" />
+        <ChevronRight className="w-4 h-4 text-foreground-tertiary" />
       </div>
     </div>
   );
@@ -289,7 +289,7 @@ export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath, onTaskSel
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-8 h-8 text-gray-400 animate-spin" />
+        <RefreshCw className="w-8 h-8 text-foreground-tertiary animate-spin" />
       </div>
     );
   }
@@ -297,12 +297,12 @@ export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath, onTaskSel
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
-        <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
-        <p className="text-gray-700 font-medium mb-2">Failed to load tasks</p>
-        <p className="text-sm text-gray-500 mb-4">{error}</p>
+        <AlertCircle className="w-12 h-12 text-status-error mb-4" />
+        <p className="text-foreground font-medium mb-2">Failed to load tasks</p>
+        <p className="text-sm text-foreground-secondary mb-4">{error}</p>
         <button
           onClick={fetchTasks}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          className="px-4 py-2 bg-brand text-white rounded-md hover:bg-brand-hover transition-colors"
         >
           Retry
         </button>
@@ -311,15 +311,15 @@ export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath, onTaskSel
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-background">
       {/* Header */}
-      <div className="p-4 border-b">
+      <div className="p-4 border-b border-border bg-background-card">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">TaskMaster Tasks</h2>
+          <h2 className="text-lg font-semibold text-foreground">TaskMaster Tasks</h2>
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setShowCreateWizard(true)}
-              className="px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center space-x-2 text-sm"
+              className="px-3 py-1.5 bg-brand text-white rounded-md hover:bg-brand-hover transition-colors flex items-center space-x-2 text-sm"
               title="Create new task (⌘N)"
             >
               <Plus className="w-4 h-4" />
@@ -331,7 +331,7 @@ export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath, onTaskSel
                 updateUrlParams({ filters: !showFilters ? 'true' : '' });
               }}
               className={`p-2 rounded-md transition-colors ${
-                showFilters ? 'bg-gray-200 text-gray-700' : 'text-gray-500 hover:bg-gray-100'
+                showFilters ? 'bg-background-tertiary text-foreground' : 'text-foreground-tertiary hover:bg-background-tertiary'
               }`}
               title="Toggle filters (⌘F)"
             >
@@ -339,7 +339,7 @@ export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath, onTaskSel
             </button>
             <button
               onClick={fetchTasks}
-              className="p-2 text-gray-500 hover:bg-gray-100 rounded-md transition-colors"
+              className="p-2 text-foreground-tertiary hover:bg-background-tertiary rounded-md transition-colors"
               title="Refresh tasks (⌘R)"
             >
               <RefreshCw className="w-4 h-4" />
@@ -349,7 +349,7 @@ export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath, onTaskSel
 
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-foreground-tertiary" />
           <input
             type="text"
             placeholder="Search tasks by ID, title, or description..."
@@ -358,7 +358,7 @@ export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath, onTaskSel
               setSearchQuery(e.target.value);
               updateUrlParams({ search: e.target.value });
             }}
-            className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-10 pr-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-brand bg-background-card text-foreground placeholder-foreground-tertiary"
           />
         </div>
 
@@ -366,14 +366,14 @@ export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath, onTaskSel
         {showFilters && (
           <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Status</label>
               <select
                 value={statusFilter}
                 onChange={(e) => {
                   setStatusFilter(e.target.value);
                   updateUrlParams({ status: e.target.value });
                 }}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-brand bg-background-card text-foreground"
               >
                 <option value="all">All</option>
                 <option value="pending">Pending</option>
@@ -385,14 +385,14 @@ export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath, onTaskSel
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Priority</label>
               <select
                 value={priorityFilter}
                 onChange={(e) => {
                   setPriorityFilter(e.target.value);
                   updateUrlParams({ priority: e.target.value });
                 }}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-brand bg-background-card text-foreground"
               >
                 <option value="all">All</option>
                 <option value="high">High</option>
@@ -402,14 +402,14 @@ export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath, onTaskSel
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Dependencies</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Dependencies</label>
               <select
                 value={dependencyFilter}
                 onChange={(e) => {
                   setDependencyFilter(e.target.value);
                   updateUrlParams({ deps: e.target.value });
                 }}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-brand bg-background-card text-foreground"
               >
                 <option value="all">All</option>
                 <option value="with">With Dependencies</option>
@@ -418,14 +418,14 @@ export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath, onTaskSel
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Sort By</label>
               <select
                 value={sortBy}
                 onChange={(e) => {
                   setSortBy(e.target.value as any);
                   updateUrlParams({ sort: e.target.value });
                 }}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-brand bg-background-card text-foreground"
               >
                 <option value="id">ID</option>
                 <option value="priority">Priority</option>
@@ -438,10 +438,10 @@ export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath, onTaskSel
       </div>
 
       {/* Task List */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-4 bg-background">
         {filteredTasks.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500">No tasks found</p>
+            <p className="text-foreground-secondary">No tasks found</p>
             {searchQuery || statusFilter !== 'all' || priorityFilter !== 'all' || dependencyFilter !== 'all' ? (
               <button
                 onClick={() => {
@@ -451,7 +451,7 @@ export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath, onTaskSel
                   setDependencyFilter('all');
                   updateUrlParams({ search: '', status: 'all', priority: 'all', deps: 'all' });
                 }}
-                className="mt-2 text-sm text-blue-600 hover:text-blue-700"
+                className="mt-2 text-sm text-brand hover:text-brand-hover"
               >
                 Clear filters
               </button>
@@ -472,12 +472,12 @@ export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath, onTaskSel
       </div>
 
       {/* Task Count and Keyboard Shortcuts */}
-      <div className="p-4 border-t bg-gray-50">
+      <div className="p-4 border-t border-border bg-background-secondary">
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-foreground-secondary">
             Showing {filteredTasks.length} of {tasks.length} tasks
           </p>
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-foreground-tertiary">
             <span className="mr-3">⌘K: Search</span>
             <span className="mr-3">⌘F: Filters</span>
             <span className="mr-3">⌘R: Refresh</span>

@@ -14,9 +14,28 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PACKAGE_INFO = exports.VERSION = exports.API_ENDPOINTS = exports.WS_EVENTS = exports.ERROR_CODES = exports.TASK_PRIORITY = exports.TASK_STATUS = exports.PROJECT_STATUS = exports.AGENT_STATUS = exports.DEFAULT_CONFIG = exports.getRelativeTime = exports.formatDate = exports.deepMerge = exports.retry = exports.delay = exports.createErrorResult = exports.createSuccessResult = exports.sanitizeBranchName = exports.generateAgentId = exports.generateId = void 0;
+exports.PACKAGE_INFO = exports.VERSION = exports.API_ENDPOINTS = exports.WS_EVENTS = exports.ERROR_CODES = exports.TASK_PRIORITY = exports.TASK_STATUS = exports.PROJECT_STATUS = exports.AGENT_STATUS = exports.DEFAULT_CONFIG = exports.getRelativeTime = exports.formatDate = exports.deepMerge = exports.retry = exports.delay = exports.createErrorResult = exports.createSuccessResult = exports.sanitizeBranchName = exports.generateAgentId = exports.generateId = exports.EventTypeSchema = exports.EntityIdSchema = exports.DATABASE_VERSION = exports.MIGRATIONS = exports.INDEXES = exports.TABLE_SCHEMAS = exports.isUnifiedEventData = exports.isUnifiedConfigData = exports.isUnifiedTaskData = exports.isUnifiedProjectData = exports.isUnifiedAgentData = exports.UnifiedDataValidator = exports.UnifiedEventDataSchema = exports.UnifiedConfigDataSchema = exports.UnifiedTaskDataSchema = exports.UnifiedProjectDataSchema = exports.UnifiedAgentDataSchema = void 0;
 // Export all types
 __exportStar(require("./types"), exports);
+// Export unified types with explicit naming to avoid conflicts
+var unified_1 = require("./types/unified");
+Object.defineProperty(exports, "UnifiedAgentDataSchema", { enumerable: true, get: function () { return unified_1.UnifiedAgentDataSchema; } });
+Object.defineProperty(exports, "UnifiedProjectDataSchema", { enumerable: true, get: function () { return unified_1.UnifiedProjectDataSchema; } });
+Object.defineProperty(exports, "UnifiedTaskDataSchema", { enumerable: true, get: function () { return unified_1.UnifiedTaskDataSchema; } });
+Object.defineProperty(exports, "UnifiedConfigDataSchema", { enumerable: true, get: function () { return unified_1.UnifiedConfigDataSchema; } });
+Object.defineProperty(exports, "UnifiedEventDataSchema", { enumerable: true, get: function () { return unified_1.UnifiedEventDataSchema; } });
+Object.defineProperty(exports, "UnifiedDataValidator", { enumerable: true, get: function () { return unified_1.UnifiedDataValidator; } });
+Object.defineProperty(exports, "isUnifiedAgentData", { enumerable: true, get: function () { return unified_1.isUnifiedAgentData; } });
+Object.defineProperty(exports, "isUnifiedProjectData", { enumerable: true, get: function () { return unified_1.isUnifiedProjectData; } });
+Object.defineProperty(exports, "isUnifiedTaskData", { enumerable: true, get: function () { return unified_1.isUnifiedTaskData; } });
+Object.defineProperty(exports, "isUnifiedConfigData", { enumerable: true, get: function () { return unified_1.isUnifiedConfigData; } });
+Object.defineProperty(exports, "isUnifiedEventData", { enumerable: true, get: function () { return unified_1.isUnifiedEventData; } });
+Object.defineProperty(exports, "TABLE_SCHEMAS", { enumerable: true, get: function () { return unified_1.TABLE_SCHEMAS; } });
+Object.defineProperty(exports, "INDEXES", { enumerable: true, get: function () { return unified_1.INDEXES; } });
+Object.defineProperty(exports, "MIGRATIONS", { enumerable: true, get: function () { return unified_1.MIGRATIONS; } });
+Object.defineProperty(exports, "DATABASE_VERSION", { enumerable: true, get: function () { return unified_1.DATABASE_VERSION; } });
+Object.defineProperty(exports, "EntityIdSchema", { enumerable: true, get: function () { return unified_1.EntityIdSchema; } });
+Object.defineProperty(exports, "EventTypeSchema", { enumerable: true, get: function () { return unified_1.EventTypeSchema; } });
 // Export all utilities
 __exportStar(require("./utils"), exports);
 // Export constants

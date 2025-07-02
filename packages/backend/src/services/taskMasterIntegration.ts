@@ -2,7 +2,19 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { TaskMasterTask, TaskMasterConfig } from '@magents/shared';
+import { TaskMasterConfig } from '@magents/shared';
+
+export interface TaskMasterTask {
+  id: string;
+  title: string;
+  description?: string;
+  status: 'pending' | 'in-progress' | 'done' | 'blocked' | 'cancelled';
+  priority?: 'low' | 'medium' | 'high';
+  dependencies?: string[];
+  details?: string;
+  testStrategy?: string;
+  subtasks?: TaskMasterTask[];
+}
 
 const execAsync = promisify(exec);
 

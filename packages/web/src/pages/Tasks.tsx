@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Layout } from '../components/Layout';
 import { TaskBrowser } from '../components/TaskBrowser';
 import { TaskPreview } from '../components/TaskPreview';
 import { TaskMasterTask } from '@magents/shared';
 import { apiService } from '../services/api';
 import { AlertCircle } from 'lucide-react';
+import '../styles/TaskBrowserOverrides.css';
 
 export const Tasks: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<TaskMasterTask | null>(null);
@@ -45,39 +45,34 @@ export const Tasks: React.FC = () => {
 
   if (loading) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center h-full">
-          <p className="text-gray-500">Checking for TaskMaster configuration...</p>
-        </div>
-      </Layout>
+      <div className="flex items-center justify-center h-full">
+        <p className="text-foreground-secondary">Checking for TaskMaster configuration...</p>
+      </div>
     );
   }
 
   if (!hasTaskMaster) {
     return (
-      <Layout>
-        <div className="flex flex-col items-center justify-center h-full text-center p-8">
-          <AlertCircle className="w-16 h-16 text-yellow-500 mb-4" />
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">TaskMaster Not Configured</h2>
-          <p className="text-gray-600 mb-6 max-w-md">
-            This project does not have TaskMaster configured. To use the task browser, 
-            you need to initialize TaskMaster in your project.
+      <div className="flex flex-col items-center justify-center h-full text-center p-8">
+        <AlertCircle className="w-16 h-16 text-status-warning mb-4" />
+        <h2 className="text-2xl font-semibold text-foreground mb-2">TaskMaster Not Configured</h2>
+        <p className="text-foreground-secondary mb-6 max-w-md">
+          This project does not have TaskMaster configured. To use the task browser, 
+          you need to initialize TaskMaster in your project.
+        </p>
+        <div className="bg-background-tertiary rounded-lg p-4 max-w-md border border-border">
+          <p className="font-mono text-sm text-foreground">
+            task-master init
           </p>
-          <div className="bg-gray-100 rounded-lg p-4 max-w-md">
-            <p className="font-mono text-sm text-gray-700">
-              task-master init
-            </p>
-          </div>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <div className="flex h-full">
+    <div className="flex h-full bg-background">
         {/* Task Browser - Left Panel */}
-        <div className="w-1/2 border-r">
+        <div className="w-1/2 border-r border-border bg-background-secondary task-browser-container">
           <TaskBrowser
             projectPath={projectPath}
             onTaskSelect={setSelectedTask}
@@ -85,7 +80,7 @@ export const Tasks: React.FC = () => {
         </div>
 
         {/* Task Details - Right Panel */}
-        <div className="w-1/2">
+        <div className="w-1/2 bg-background">
           {selectedTask ? (
             <TaskPreview 
               task={selectedTask} 
@@ -93,12 +88,11 @@ export const Tasks: React.FC = () => {
               className="h-full"
             />
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-400">
+            <div className="flex items-center justify-center h-full text-foreground-tertiary">
               <p>Select a task to view details</p>
             </div>
           )}
         </div>
       </div>
-    </Layout>
   );
 };

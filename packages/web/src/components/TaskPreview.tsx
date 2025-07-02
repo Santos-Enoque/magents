@@ -45,23 +45,23 @@ const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
   }
 
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <div className="border border-border rounded-lg overflow-hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-between text-left"
+        className="w-full px-4 py-3 bg-background-tertiary hover:bg-background-card-hover transition-colors flex items-center justify-between text-left"
       >
         <div className="flex items-center space-x-2">
           {icon}
-          <h3 className="font-medium text-gray-900">{title}</h3>
+          <h3 className="font-medium text-foreground">{title}</h3>
         </div>
         {isOpen ? (
-          <ChevronDown className="w-4 h-4 text-gray-500" />
+          <ChevronDown className="w-4 h-4 text-foreground-tertiary" />
         ) : (
-          <ChevronRight className="w-4 h-4 text-gray-500" />
+          <ChevronRight className="w-4 h-4 text-foreground-tertiary" />
         )}
       </button>
       {isOpen && (
-        <div className="p-4 bg-white">
+        <div className="p-4 bg-background-card">
           {children}
         </div>
       )}
@@ -74,31 +74,31 @@ const TaskStatusBadge: React.FC<{ status: string }> = ({ status }) => {
     switch (status) {
       case 'done':
         return {
-          color: 'text-green-700 bg-green-100 border-green-200',
+          color: 'text-status-success bg-status-success/20 border-status-success/30',
           icon: CheckCircle,
           text: 'Done'
         };
       case 'in-progress':
         return {
-          color: 'text-blue-700 bg-blue-100 border-blue-200',
+          color: 'text-brand bg-brand/20 border-brand/30',
           icon: Clock,
           text: 'In Progress'
         };
       case 'blocked':
         return {
-          color: 'text-red-700 bg-red-100 border-red-200',
+          color: 'text-status-error bg-status-error/20 border-status-error/30',
           icon: AlertCircle,
           text: 'Blocked'
         };
       case 'cancelled':
         return {
-          color: 'text-gray-500 bg-gray-100 border-gray-200',
+          color: 'text-foreground-tertiary bg-foreground-tertiary/20 border-foreground-tertiary/30',
           icon: X,
           text: 'Cancelled'
         };
       default:
         return {
-          color: 'text-yellow-700 bg-yellow-100 border-yellow-200',
+          color: 'text-status-warning bg-status-warning/20 border-status-warning/30',
           icon: Circle,
           text: 'Pending'
         };
@@ -120,13 +120,13 @@ const TaskPriorityBadge: React.FC<{ priority: string }> = ({ priority }) => {
   const getPriorityConfig = () => {
     switch (priority) {
       case 'high':
-        return 'text-red-700 bg-red-100 border-red-200';
+        return 'text-status-error bg-status-error/20 border-status-error/30';
       case 'medium':
-        return 'text-yellow-700 bg-yellow-100 border-yellow-200';
+        return 'text-status-warning bg-status-warning/20 border-status-warning/30';
       case 'low':
-        return 'text-green-700 bg-green-100 border-green-200';
+        return 'text-status-success bg-status-success/20 border-status-success/30';
       default:
-        return 'text-gray-700 bg-gray-100 border-gray-200';
+        return 'text-foreground-tertiary bg-foreground-tertiary/20 border-foreground-tertiary/30';
     }
   };
 
@@ -138,25 +138,23 @@ const TaskPriorityBadge: React.FC<{ priority: string }> = ({ priority }) => {
 };
 
 const CodeBlock: React.FC<{ code: string; language?: string }> = ({ code, language = 'text' }) => {
-  // Simple syntax highlighting for common patterns
   const highlightCode = (code: string) => {
-    // This is a simplified version - in production, you'd use a proper syntax highlighting library
     return code
       .split('\n')
       .map((line, index) => (
         <div key={index} className="table-row">
-          <span className="table-cell pr-4 text-gray-500 select-none text-xs">{index + 1}</span>
+          <span className="table-cell pr-4 text-foreground-tertiary select-none text-xs">{index + 1}</span>
           <span className="table-cell">
-            <pre className="whitespace-pre font-mono text-sm">{line}</pre>
+            <pre className="whitespace-pre font-mono text-sm text-foreground">{line}</pre>
           </span>
         </div>
       ));
   };
 
   return (
-    <div className="relative rounded-lg bg-gray-900 text-gray-100 overflow-hidden">
+    <div className="relative rounded-lg bg-background-secondary text-foreground overflow-hidden border border-border">
       {language && (
-        <div className="absolute top-2 right-2 text-xs text-gray-400">{language}</div>
+        <div className="absolute top-2 right-2 text-xs text-foreground-tertiary">{language}</div>
       )}
       <div className="p-4 overflow-x-auto">
         <div className="table w-full">
@@ -172,13 +170,13 @@ const DependencyGraph: React.FC<{ task: TaskMasterTask; allTasks?: TaskMasterTas
     const depTask = allTasks.find(t => t.id === depId);
     const status = depTask?.status || 'unknown';
     const statusColor = {
-      'done': 'text-green-600 border-green-300 bg-green-50',
-      'in-progress': 'text-blue-600 border-blue-300 bg-blue-50',
-      'blocked': 'text-red-600 border-red-300 bg-red-50',
-      'pending': 'text-yellow-600 border-yellow-300 bg-yellow-50',
-      'cancelled': 'text-gray-500 border-gray-300 bg-gray-50',
-      'unknown': 'text-gray-500 border-gray-300 bg-gray-50'
-    }[status] || 'text-gray-600 border-gray-300 bg-gray-50';
+      'done': 'text-status-success border-status-success/30 bg-status-success/10',
+      'in-progress': 'text-brand border-brand/30 bg-brand/10',
+      'blocked': 'text-status-error border-status-error/30 bg-status-error/10',
+      'pending': 'text-status-warning border-status-warning/30 bg-status-warning/10',
+      'cancelled': 'text-foreground-tertiary border-foreground-tertiary/30 bg-foreground-tertiary/10',
+      'unknown': 'text-foreground-tertiary border-foreground-tertiary/30 bg-foreground-tertiary/10'
+    }[status] || 'text-foreground-tertiary border-foreground-tertiary/30 bg-foreground-tertiary/10';
 
     return (
       <div key={depId} className={`px-3 py-2 rounded-lg border ${statusColor} flex items-center space-x-2`}>
@@ -192,7 +190,7 @@ const DependencyGraph: React.FC<{ task: TaskMasterTask; allTasks?: TaskMasterTas
   };
 
   if (!task.dependencies || task.dependencies.length === 0) {
-    return <p className="text-gray-500 text-sm">No dependencies</p>;
+    return <p className="text-foreground-tertiary text-sm">No dependencies</p>;
   }
 
   return (
@@ -200,7 +198,7 @@ const DependencyGraph: React.FC<{ task: TaskMasterTask; allTasks?: TaskMasterTas
       <div className="flex flex-wrap gap-2">
         {task.dependencies.map(renderDependency)}
       </div>
-      <div className="mt-4 text-xs text-gray-600">
+      <div className="mt-4 text-xs text-foreground-secondary">
         <p>Task will be blocked until all dependencies are completed.</p>
       </div>
     </div>
@@ -215,17 +213,17 @@ const SubtaskTree: React.FC<{ subtasks: TaskMasterTask[]; level?: number }> = ({
   return (
     <div className={`space-y-1 ${level > 0 ? 'ml-6' : ''}`}>
       {subtasks.map((subtask) => (
-        <div key={subtask.id} className="border rounded-lg p-3 hover:bg-gray-50 transition-colors">
+        <div key={subtask.id} className="border border-border rounded-lg p-3 hover:bg-background-card-hover transition-colors">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Hash className="w-3 h-3 text-gray-400" />
-              <span className="font-mono text-sm text-gray-600">{subtask.id}</span>
-              <span className="font-medium">{subtask.title}</span>
+              <Hash className="w-3 h-3 text-foreground-tertiary" />
+              <span className="font-mono text-sm text-foreground-secondary">{subtask.id}</span>
+              <span className="font-medium text-foreground">{subtask.title}</span>
             </div>
             <TaskStatusBadge status={subtask.status} />
           </div>
           {subtask.description && (
-            <p className="mt-1 text-sm text-gray-600 ml-5">{subtask.description}</p>
+            <p className="mt-1 text-sm text-foreground-secondary ml-5">{subtask.description}</p>
           )}
           {subtask.subtasks && subtask.subtasks.length > 0 && (
             <div className="mt-2">
@@ -241,249 +239,132 @@ const SubtaskTree: React.FC<{ subtasks: TaskMasterTask[]; level?: number }> = ({
 export const TaskPreview: React.FC<TaskPreviewProps> = ({ task, onClose, className = '' }) => {
   const [showRawData, setShowRawData] = useState(false);
 
-  // Format text with code block detection
   const formatText = (text: string) => {
-    // Simple code block detection - looks for backticks
     const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
     const inlineCodeRegex = /`([^`]+)`/g;
     
-    const parts: React.ReactNode[] = [];
+    let parts: React.ReactNode[] = [];
     let lastIndex = 0;
     let match;
 
-    // Process code blocks
-    const tempText = text.replace(codeBlockRegex, (fullMatch, language, code, offset) => {
-      if (offset > lastIndex) {
-        parts.push(
-          <span key={lastIndex}>
-            {text.substring(lastIndex, offset).replace(inlineCodeRegex, (_, code) => (
-              `<code>${code}</code>`
-            ))}
-          </span>
-        );
+    // Handle code blocks first
+    while ((match = codeBlockRegex.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        const beforeText = text.slice(lastIndex, match.index);
+        parts.push(beforeText.replace(inlineCodeRegex, (_, code) => 
+          `<code class="bg-background-tertiary text-foreground px-1 py-0.5 rounded text-sm font-mono">${code}</code>`
+        ));
       }
-      parts.push(
-        <div key={offset} className="my-4">
-          <CodeBlock code={code.trim()} language={language} />
-        </div>
-      );
-      lastIndex = offset + fullMatch.length;
-      return '';
-    });
+      
+      const language = match[1] || 'text';
+      const code = match[2];
+      parts.push(<CodeBlock key={match.index} code={code} language={language} />);
+      lastIndex = match.index + match[0].length;
+    }
 
-    // Add remaining text
     if (lastIndex < text.length) {
-      const remainingText = text.substring(lastIndex);
-      parts.push(
-        <span 
-          key={lastIndex} 
-          dangerouslySetInnerHTML={{ 
-            __html: remainingText.replace(inlineCodeRegex, '<code class="px-1 py-0.5 bg-gray-100 rounded text-sm font-mono">$1</code>')
-          }} 
-        />
-      );
+      const remainingText = text.slice(lastIndex);
+      parts.push(remainingText.replace(inlineCodeRegex, (_, code) => 
+        `<code class="bg-background-tertiary text-foreground px-1 py-0.5 rounded text-sm font-mono">${code}</code>`
+      ));
     }
 
-    return parts.length > 0 ? parts : text;
+    return parts.map((part, index) => 
+      typeof part === 'string' ? (
+        <div key={index} dangerouslySetInnerHTML={{ __html: part }} />
+      ) : part
+    );
   };
-
-  const getCompletionStats = () => {
-    if (!task.subtasks || task.subtasks.length === 0) {
-      return null;
-    }
-
-    const countSubtasks = (tasks: TaskMasterTask[]): { total: number; done: number } => {
-      return tasks.reduce((acc, t) => {
-        acc.total += 1;
-        if (t.status === 'done') acc.done += 1;
-        if (t.subtasks && t.subtasks.length > 0) {
-          const subStats = countSubtasks(t.subtasks);
-          acc.total += subStats.total;
-          acc.done += subStats.done;
-        }
-        return acc;
-      }, { total: 0, done: 0 });
-    };
-
-    const stats = countSubtasks(task.subtasks);
-    const percentage = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0;
-
-    return { ...stats, percentage };
-  };
-
-  const stats = getCompletionStats();
 
   return (
-    <div className={`bg-white rounded-lg shadow-lg overflow-hidden ${className}`}>
+    <div className={`h-full flex flex-col bg-background-card border-l border-border ${className}`}>
       {/* Header */}
-      <div className="bg-gray-50 border-b px-6 py-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="flex items-center space-x-3 mb-2">
-              <span className="text-lg font-mono text-gray-600">#{task.id}</span>
-              <h2 className="text-xl font-semibold text-gray-900">{task.title}</h2>
-            </div>
-            <div className="flex items-center space-x-3">
-              <TaskStatusBadge status={task.status} />
-              <TaskPriorityBadge priority={task.priority} />
-              {stats && (
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <Layers className="w-4 h-4" />
-                  <span>{stats.done}/{stats.total} subtasks ({stats.percentage}%)</span>
-                </div>
-              )}
-            </div>
+      <div className="sticky top-0 z-10 bg-background-card border-b border-border p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <Hash className="w-5 h-5 text-foreground-tertiary" />
+            <h1 className="text-lg font-semibold text-foreground">{task.id}</h1>
+            <TaskStatusBadge status={task.status} />
+            <TaskPriorityBadge priority={task.priority} />
           </div>
           {onClose && (
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
-              aria-label="Close preview"
+              className="p-2 text-foreground-tertiary hover:text-foreground hover:bg-background-tertiary rounded-lg transition-colors"
             >
-              <X className="w-5 h-5 text-gray-500" />
+              <X className="w-4 h-4" />
             </button>
           )}
         </div>
+        <h2 className="text-xl font-bold text-foreground mt-2">{task.title}</h2>
       </div>
 
       {/* Content */}
-      <div className="p-6 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+      <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {/* Description */}
-        {task.description && (
-          <CollapsibleSection 
-            title="Description" 
-            icon={<FileText className="w-4 h-4 text-gray-500" />}
-            defaultOpen={true}
-          >
-            <div className="prose prose-sm max-w-none text-gray-700">
-              {formatText(task.description)}
-            </div>
-          </CollapsibleSection>
-        )}
+        <CollapsibleSection
+          title="Description"
+          icon={<FileText className="w-4 h-4 text-foreground-secondary" />}
+          defaultOpen={true}
+        >
+          <div className="prose prose-sm max-w-none text-foreground-secondary">
+            {task.description ? formatText(task.description) : (
+              <p className="text-foreground-tertiary italic">No description provided</p>
+            )}
+          </div>
+        </CollapsibleSection>
 
         {/* Implementation Details */}
-        {task.details && (
-          <CollapsibleSection 
-            title="Implementation Details" 
-            icon={<Code className="w-4 h-4 text-gray-500" />}
-            defaultOpen={true}
-          >
-            <div className="prose prose-sm max-w-none text-gray-700">
-              {formatText(task.details)}
-            </div>
-          </CollapsibleSection>
-        )}
+        <CollapsibleSection
+          title="Implementation Details"
+          icon={<Code className="w-4 h-4 text-foreground-secondary" />}
+          defaultOpen={false}
+          isEmpty={!task.details}
+        >
+          <div className="prose prose-sm max-w-none text-foreground-secondary">
+            {task.details && formatText(task.details)}
+          </div>
+        </CollapsibleSection>
 
         {/* Test Strategy */}
-        {task.testStrategy && (
-          <CollapsibleSection 
-            title="Test Strategy" 
-            icon={<TestTube className="w-4 h-4 text-gray-500" />}
-            defaultOpen={false}
-          >
-            <div className="prose prose-sm max-w-none text-gray-700">
-              {formatText(task.testStrategy)}
-            </div>
-          </CollapsibleSection>
-        )}
+        <CollapsibleSection
+          title="Test Strategy"
+          icon={<TestTube className="w-4 h-4 text-foreground-secondary" />}
+          defaultOpen={false}
+          isEmpty={!task.testStrategy}
+        >
+          <div className="prose prose-sm max-w-none text-foreground-secondary">
+            {task.testStrategy && formatText(task.testStrategy)}
+          </div>
+        </CollapsibleSection>
 
         {/* Dependencies */}
-        <CollapsibleSection 
-          title="Dependencies" 
-          icon={<GitBranch className="w-4 h-4 text-gray-500" />}
+        <CollapsibleSection
+          title="Dependencies"
+          icon={<GitBranch className="w-4 h-4 text-foreground-secondary" />}
           defaultOpen={true}
-          isEmpty={!task.dependencies || task.dependencies.length === 0}
         >
           <DependencyGraph task={task} />
         </CollapsibleSection>
 
         {/* Subtasks */}
-        <CollapsibleSection 
-          title="Subtasks" 
-          icon={<Layers className="w-4 h-4 text-gray-500" />}
+        <CollapsibleSection
+          title="Subtasks"
+          icon={<Layers className="w-4 h-4 text-foreground-secondary" />}
           defaultOpen={true}
           isEmpty={!task.subtasks || task.subtasks.length === 0}
         >
-          {task.subtasks && task.subtasks.length > 0 ? (
-            <SubtaskTree subtasks={task.subtasks} />
-          ) : (
-            <p className="text-gray-500 text-sm">No subtasks defined</p>
-          )}
+          <SubtaskTree subtasks={task.subtasks || []} />
         </CollapsibleSection>
 
-        {/* Progress Bar */}
-        {stats && stats.total > 0 && (
-          <div className="bg-gray-50 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700">Overall Progress</span>
-              <span className="text-sm text-gray-600">{stats.percentage}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${stats.percentage}%` }}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Raw Data Toggle */}
-        <div className="pt-4 border-t">
-          <button
-            onClick={() => setShowRawData(!showRawData)}
-            className="text-sm text-gray-600 hover:text-gray-900 flex items-center space-x-1"
-          >
-            <Code className="w-4 h-4" />
-            <span>{showRawData ? 'Hide' : 'Show'} Raw Data</span>
-          </button>
-          {showRawData && (
-            <div className="mt-4">
-              <CodeBlock 
-                code={JSON.stringify(task, null, 2)} 
-                language="json" 
-              />
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Standalone preview modal component
-interface TaskPreviewModalProps {
-  task: TaskMasterTask | null;
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export const TaskPreviewModal: React.FC<TaskPreviewModalProps> = ({ task, isOpen, onClose }) => {
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen, onClose]);
-
-  if (!isOpen || !task) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
-        {/* Backdrop */}
-        <div 
-          className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-          onClick={onClose}
-        />
-        
-        {/* Modal */}
-        <div className="relative inline-block w-full max-w-4xl text-left align-bottom bg-white rounded-lg shadow-xl transform transition-all sm:my-8 sm:align-middle">
-          <TaskPreview task={task} onClose={onClose} />
-        </div>
+        {/* Raw Data */}
+        <CollapsibleSection
+          title="Show Raw Data"
+          icon={<Code className="w-4 h-4 text-foreground-secondary" />}
+          defaultOpen={false}
+        >
+          <CodeBlock code={JSON.stringify(task, null, 2)} language="json" />
+        </CollapsibleSection>
       </div>
     </div>
   );

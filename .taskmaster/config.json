@@ -1,21 +1,21 @@
 {
   "models": {
     "main": {
-      "provider": "openai",
-      "modelId": "o3-mini",
-      "maxTokens": 100000,
+      "provider": "claude-code",
+      "modelId": "sonnet",
+      "maxTokens": 64000,
       "temperature": 0.2
     },
     "research": {
-      "provider": "perplexity",
-      "modelId": "sonar-pro",
-      "maxTokens": 8700,
+      "provider": "claude-code",
+      "modelId": "opus",
+      "maxTokens": 32000,
       "temperature": 0.1
     },
     "fallback": {
-      "provider": "anthropic",
-      "modelId": "claude-3-5-sonnet-20240620",
-      "maxTokens": 8192,
+      "provider": "openrouter",
+      "modelId": "openai/gpt-4o-mini",
+      "maxTokens": 100000,
       "temperature": 0.1
     }
   },

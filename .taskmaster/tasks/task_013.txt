@@ -1,6 +1,6 @@
 # Task ID: 13
 # Title: Enhance Agent Creation Form with Project Selection
-# Status: pending
+# Status: done
 # Dependencies: 8, 12
 # Priority: medium
 # Description: Upgrade existing agent creation form to include project selection, git branch management, and validation
