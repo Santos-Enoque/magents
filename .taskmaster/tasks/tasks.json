@@ -1006,7 +1006,7 @@
         "testStrategy": "Schema validation tests for all data operations. Migration tests from old to new format. Concurrent access tests for race conditions. Real-time sync tests between multiple clients. Backup and restore functionality tests.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -1022,7 +1022,7 @@
             "title": "Implement SQLite database with migrations",
             "description": "Set up SQLite database for persistent storage. Create migration system for schema changes. Implement database initialization, connection management, and proper cleanup. Add database versioning and automatic migration handling.",
             "details": "",
-            "status": "in-progress",
+            "status": "done",
             "dependencies": [],
             "parentTaskId": 23
           },
@@ -1031,7 +1031,7 @@
             "title": "Create DataSync service for real-time updates",
             "description": "Build service for real-time synchronization between CLI and GUI. Implement WebSocket or Server-Sent Events for live updates. Handle concurrent access and conflict resolution. Add event-driven updates for data changes.",
             "details": "",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "parentTaskId": 23
           },
@@ -1040,7 +1040,7 @@
             "title": "Build migration tool for existing configurations",
             "description": "Create tool to convert existing agent configurations to new unified format. Handle data transformation from old JSON files to new SQLite schema. Implement backup and rollback capabilities for migrations. Add validation to ensure data integrity during migration.",
             "details": "",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "parentTaskId": 23
           },
@@ -1049,7 +1049,7 @@
             "title": "Implement atomic operations and backup/restore",
             "description": "Add atomic transaction support to prevent race conditions. Implement database backup and restore functionality. Create data validation layer with comprehensive error handling. Add rollback mechanisms for failed operations.",
             "details": "",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "parentTaskId": 23
           }
@@ -1067,7 +1067,64 @@
           22,
           23
         ],
-        "status": "pending"
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement `magents create <name>` command with instant agent creation",
+            "description": "Create the core 'magents create' command that instantly creates agents using smart defaults and minimal user input",
+            "dependencies": [],
+            "details": "Implement the primary agent creation command that accepts a name parameter and creates an agent with intelligent defaults. Include automatic project detection, default branch selection, smart naming conventions, and minimal configuration requirements. The command should work out-of-the-box without requiring extensive setup or configuration from users.",
+            "status": "done",
+            "testStrategy": "Test instant creation with various project types, verify smart defaults are applied correctly, test with and without existing git repositories, validate naming conventions and conflict resolution"
+          },
+          {
+            "id": 2,
+            "title": "Add progressive complexity modes (--mode simple/standard/advanced)",
+            "description": "Implement the --mode flag system that provides different levels of configuration complexity based on user expertise",
+            "dependencies": [
+              1
+            ],
+            "details": "Create a progressive disclosure system with three modes: simple (minimal options, smart defaults), standard (common configurations exposed), and advanced (full feature access). Include mode switching capabilities, data preservation across mode changes, and contextual help for each mode level. Ensure users can upgrade from simple to advanced modes without losing data.",
+            "status": "done",
+            "testStrategy": "Test each mode shows appropriate options, verify mode switching preserves all data, test guided upgrade suggestions, validate help content matches mode complexity"
+          },
+          {
+            "id": 3,
+            "title": "Implement `magents assign` command for automatic task generation",
+            "description": "Create the 'magents assign' command that automatically generates and assigns tasks based on project analysis",
+            "dependencies": [
+              1
+            ],
+            "details": "Build the task assignment command that leverages the MagentsTaskManager wrapper to automatically analyze projects, generate relevant tasks, and assign them to agents. Include project type detection, automatic PRD generation, task prioritization, and intelligent task-to-agent matching. Integrate with TaskMaster functionality while hiding complexity from users.",
+            "status": "done",
+            "testStrategy": "Test automatic task generation for different project types, verify task assignment logic, test integration with TaskMaster, validate project analysis accuracy"
+          },
+          {
+            "id": 4,
+            "title": "Create `magents start` command to launch agents in Docker containers",
+            "description": "Implement the container orchestration command that launches agents in Docker environments with proper resource management",
+            "dependencies": [
+              1
+            ],
+            "details": "Build the agent startup command that creates and manages Docker containers for agents. Include container lifecycle management, volume mounting, network configuration, health monitoring, and resource allocation. Integrate with the Docker runtime implementation and ensure proper container cleanup and restart policies.",
+            "status": "done",
+            "testStrategy": "Test container creation and startup, verify volume mounting and persistence, test health monitoring and auto-restart, validate resource allocation and limits"
+          },
+          {
+            "id": 5,
+            "title": "Add utility features (--dry-run, progress indicators, interactive mode)",
+            "description": "Implement supporting utility features that enhance user experience and provide operational transparency",
+            "dependencies": [
+              2,
+              3,
+              4
+            ],
+            "details": "Add --dry-run functionality for previewing changes without execution, implement real-time progress indicators for long-running operations, create interactive mode for missing parameters with smart prompts and validation. Include operation cancellation, progress persistence across page refreshes, and comprehensive user feedback systems.",
+            "status": "done",
+            "testStrategy": "Test dry-run doesn't make changes, verify progress indicators show accurate status, test interactive prompts work correctly, validate cancellation stops operations cleanly"
+          }
+        ]
       },
       {
         "id": 25,
@@ -1145,7 +1202,7 @@
     ],
     "metadata": {
       "created": "2025-06-30T14:18:19.843Z",
-      "updated": "2025-07-02T13:03:17.007Z",
+      "updated": "2025-07-02T14:44:19.226Z",
       "description": "Tasks for master context"
     }
   }
