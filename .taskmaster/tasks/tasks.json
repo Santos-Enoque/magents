@@ -871,11 +871,234 @@
         ],
         "status": "done",
         "subtasks": []
+      },
+      {
+        "id": 21,
+        "title": "Docker Runtime Implementation",
+        "description": "Create Docker-based runtime for agents with pre-built images including all necessary tools",
+        "details": "Create Dockerfile for magents/agent:latest with Node.js 20, tmux, git, task-master-ai, and claude-code bridge. Implement volume mapping for project files (/workspace) and shared configuration (/shared). Add Docker health checks using HTTP endpoint. Configure auto-restart policies with restart: unless-stopped. Create two variants: magents/agent:latest (production) and magents/agent:dev (with debugging tools). Include entrypoint script for proper signal handling and graceful shutdown.",
+        "testStrategy": "Build Docker image and verify all tools are installed correctly. Test volume persistence across container restarts. Verify health checks respond correctly. Test container lifecycle (start, stop, restart). Validate signal handling for graceful shutdown.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Base Dockerfile with Core Dependencies",
+            "description": "Build the foundational Docker image with Node.js 20, system packages, and base tools",
+            "details": "Create Dockerfile in packages/cli/docker/ directory. Use node:20-slim as base image for smaller size. Install essential system packages: git, tmux, curl, python3, make, g++ for native modules. Set up non-root user for security. Configure working directory as /workspace. Install global npm packages: npm@latest, yarn, pnpm for flexibility.",
+            "testStrategy": "Build image and verify all tools are installed with correct versions. Test that git, tmux, and node commands work. Verify non-root user has proper permissions.",
+            "dependencies": [],
+            "status": "done"
+          },
+          {
+            "id": 2,
+            "title": "Install Task Master and Claude Code Bridge",
+            "description": "Add Task Master AI and create socket-based Claude Code bridge for host communication",
+            "details": "Install task-master-ai globally via npm. Create a Unix domain socket-based bridge system that allows containers to use the host's Claude Code installation. Implementation includes: 1) Create /var/run/claude-code-bridge.sock Unix domain socket on host accessible via volume mount at /host/claude-bridge.sock in containers, 2) Implement lightweight Node.js proxy service (claude-bridge-server) that listens on the socket and forwards commands to host's Claude Code CLI, 3) Create claude-code wrapper script in container that communicates through the socket instead of requiring local Claude Code installation, 4) Handle authentication tokens and session management transparently by proxying ~/.config/claude-code from host, 5) Support multiple concurrent container connections with request queuing and connection pooling, 6) Provide fallback mechanism that detects if bridge is unavailable and shows helpful error message with setup instructions. Configure Task Master to use mounted config directory. Set up environment variables for Task Master configuration including CLAUDE_BRIDGE_SOCKET=/host/claude-bridge.sock.",
+            "testStrategy": "Verify task-master CLI is available and functional. Test claude-code bridge socket connection from container to host. Validate multiple containers can connect simultaneously. Test authentication token passthrough works correctly. Verify fallback error handling when bridge unavailable. Validate Task Master can read/write to mounted volumes and use Claude Code through the bridge.",
+            "dependencies": [
+              1
+            ],
+            "status": "done"
+          },
+          {
+            "id": 3,
+            "title": "Implement Volume Mapping and Persistence",
+            "description": "Configure Docker volumes for project files, shared config, and agent state persistence",
+            "details": "Define volume mount points: /workspace for project files, /shared for shared configuration, /agent for agent-specific state. Create docker-compose.yml template with proper volume definitions. Implement permission handling for mounted volumes. Add .dockerignore to exclude unnecessary files. Create volume initialization scripts.",
+            "testStrategy": "Test file persistence across container restarts. Verify permissions allow read/write from container. Test that changes in container reflect on host. Validate .gitignore patterns work correctly.",
+            "dependencies": [
+              1
+            ],
+            "status": "done"
+          },
+          {
+            "id": 4,
+            "title": "Add Health Checks and Auto-restart Policies",
+            "description": "Implement container health monitoring and automatic recovery mechanisms",
+            "details": "Create health check endpoint using simple HTTP server on port 3999. Implement HEALTHCHECK instruction in Dockerfile with proper intervals. Configure restart policy as 'unless-stopped' in docker-compose. Add graceful shutdown handling for SIGTERM/SIGINT. Create health status script that checks tmux sessions and agent status.",
+            "testStrategy": "Test health endpoint responds correctly. Verify container auto-restarts on failure. Test graceful shutdown preserves work. Monitor resource usage during health checks.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "status": "done"
+          },
+          {
+            "id": 5,
+            "title": "Create Production and Development Image Variants",
+            "description": "Build optimized production image and feature-rich development image with debugging tools",
+            "details": "Create multi-stage Dockerfile with shared base. Production variant: minimal size, no debugging tools, optimized for performance. Development variant: includes vim, htop, strace, tcpdump, node debugger. Use build args to control variant selection. Create GitHub Actions workflow for automated image building and publishing to Docker Hub.",
+            "testStrategy": "Compare image sizes between variants. Test debugging tools work in dev image. Verify production image has no unnecessary packages. Test automated build and publish workflow.",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "status": "done"
+          }
+        ]
+      },
+      {
+        "id": 22,
+        "title": "Task Master Integration Wrapper",
+        "description": "Build transparent wrapper API to hide Task Master complexity while preserving functionality",
+        "details": "Create MagentsTaskManager class with simplified methods: quickStart(), autoAnalyze(), simplifyTasks(). Implement automatic PRD generation from codebase using AST analysis. Add project type detection (package.json for Node.js, requirements.txt for Python, etc.). Create task view simplification that shows only essential information for basic users. Build caching layer to avoid redundant Task Master calls. Add error translation to convert Task Master errors to user-friendly messages.",
+        "testStrategy": "Unit test wrapper methods with mocked Task Master. Integration test with real Task Master installation. Verify PRD generation produces valid output. Test project type detection with various project structures. Validate simplified task view maintains essential information.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create MagentsTaskManager core class with simplified API",
+            "description": "Implement the MagentsTaskManager class with methods quickStart(), autoAnalyze(), and simplifyTasks(). This class will serve as the main interface between Magents and Task Master, providing a simplified API that abstracts Task Master's complexity while maintaining its functionality.",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 22
+          },
+          {
+            "id": 2,
+            "title": "Implement automatic PRD generation and project detection",
+            "description": "Build functionality to automatically generate PRD from codebase using AST analysis. Implement project type detection by checking for package.json (Node.js), requirements.txt (Python), pom.xml (Java), etc. This will enable zero-config project initialization.",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 22
+          },
+          {
+            "id": 3,
+            "title": "Build simplified task view and user interface abstraction",
+            "description": "Create task view simplification layer that shows only essential information for basic users. Implement different view modes (basic, intermediate, advanced) that progressively expose more Task Master functionality. Design clean, intuitive task presentation format.",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 22
+          },
+          {
+            "id": 4,
+            "title": "Implement caching layer and performance optimization",
+            "description": "Build caching layer to avoid redundant Task Master calls and improve performance. Implement smart cache invalidation, task state persistence, and efficient data structures. Add metrics to track cache hit rates and API call reduction.",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 22
+          },
+          {
+            "id": 5,
+            "title": "Create error handling and user-friendly messaging system",
+            "description": "Implement comprehensive error translation to convert Task Master errors to user-friendly messages. Build error recovery mechanisms, helpful suggestions for common issues, and graceful fallbacks. Add logging and debugging features for troubleshooting.",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 22
+          }
+        ]
+      },
+      {
+        "id": 23,
+        "title": "Unified Data Model Implementation",
+        "description": "Create single source of truth for agent and task data shared between CLI and GUI",
+        "details": "Design flattened UnifiedAgentData schema replacing complex nested structures. Implement SQLite database for persistent storage with automatic migrations. Create DataSync service for real-time updates between CLI and GUI. Build migration tool to convert existing agent configurations. Add data validation layer with Zod schemas. Implement atomic operations to prevent race conditions. Create backup/restore functionality.",
+        "testStrategy": "Schema validation tests for all data operations. Migration tests from old to new format. Concurrent access tests for race conditions. Real-time sync tests between multiple clients. Backup and restore functionality tests.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending"
+      },
+      {
+        "id": 24,
+        "title": "Core CLI Commands Implementation",
+        "description": "Implement three essential commands with progressive complexity options",
+        "details": "Implement 'magents create <name>' with instant agent creation using defaults. Add 'magents assign' for automatic task generation based on project analysis. Create 'magents start' to launch agents in Docker containers. Add --mode flag supporting simple/standard/advanced modes. Implement --dry-run for preview. Add progress indicators for long operations. Create interactive mode for missing parameters.",
+        "testStrategy": "CLI integration tests for all commands. Test mode switching preserves data. Verify dry-run doesn't make changes. Test progress indicators show accurate status. Validate interactive prompts work correctly.",
+        "priority": "high",
+        "dependencies": [
+          21,
+          22,
+          23
+        ],
+        "status": "pending"
+      },
+      {
+        "id": 25,
+        "title": "Single-Page Dashboard Implementation",
+        "description": "Redesign GUI to single-page application with progressive disclosure interface",
+        "details": "Create unified dashboard with agent cards showing live status. Implement collapsible sections for advanced options. Add quick action buttons (Create, Start, Stop, Assign Tasks). Build inline terminal component using xterm.js. Implement real-time updates via Server-Sent Events. Add keyboard shortcuts for power users. Create responsive design for mobile support.",
+        "testStrategy": "Component tests for all UI elements. E2E tests for user workflows. Responsive design tests on various screen sizes. Real-time update tests with simulated events. Accessibility tests for keyboard navigation.",
+        "priority": "high",
+        "dependencies": [
+          23
+        ],
+        "status": "pending"
+      },
+      {
+        "id": 26,
+        "title": "GUI-CLI Integration Bridge",
+        "description": "Ensure complete feature parity and real-time synchronization between GUI and CLI",
+        "details": "Share business logic through @magents/core package. Implement unified command execution layer. Create WebSocket/SSE bridge for real-time updates. Add command palette in GUI mapping to CLI commands. Build activity log showing all operations from both interfaces. Implement conflict resolution for concurrent operations.",
+        "testStrategy": "Integration tests for CLI commands executed from GUI. Verify real-time sync with parallel CLI/GUI operations. Test conflict resolution scenarios. Validate command palette executes correctly. Check activity log captures all operations.",
+        "priority": "high",
+        "dependencies": [
+          24,
+          25
+        ],
+        "status": "pending"
+      },
+      {
+        "id": 27,
+        "title": "Auto-Configuration System",
+        "description": "Implement intelligent defaults and automatic configuration detection",
+        "details": "Build project type detection using file patterns and package managers. Implement automatic port allocation with conflict detection. Create secure API key storage with encryption. Add MCP server auto-discovery by scanning .mcp.json files. Build configuration inheritance (global -> project -> agent). Add smart suggestions based on project analysis.",
+        "testStrategy": "Test detection accuracy across different project types. Verify port allocation avoids conflicts. Test API key encryption and retrieval. Validate MCP discovery finds all servers. Test configuration inheritance precedence.",
+        "priority": "medium",
+        "dependencies": [
+          22
+        ],
+        "status": "pending"
+      },
+      {
+        "id": 28,
+        "title": "Progressive Complexity Modes",
+        "description": "Implement three-tier complexity system for different user expertise levels",
+        "details": "Create Simple mode with only essential options (name, project path). Build Standard mode with common configurations exposed. Implement Advanced mode with full Task Master and MCP access. Add mode switching without data loss. Create guided upgrade path from simple to advanced. Build contextual help for each mode level.",
+        "testStrategy": "Test each mode shows appropriate options. Verify mode switching preserves all data. Test guided upgrade suggestions appear correctly. Validate help content matches mode complexity. Test feature discovery in each mode.",
+        "priority": "medium",
+        "dependencies": [
+          24,
+          25
+        ],
+        "status": "pending"
+      },
+      {
+        "id": 29,
+        "title": "Error Message Enhancement",
+        "description": "Replace technical error messages with user-friendly, actionable guidance",
+        "details": "Create error mapping system for common failures. Add actionable suggestions for each error type. Implement error recovery workflows. Add 'Learn More' links to documentation. Create error reporting mechanism. Build automatic error resolution for common issues. Add progress context to long-running operations.",
+        "testStrategy": "Test error scenarios produce friendly messages. Verify suggestions are actionable and correct. Test error recovery flows work properly. Validate documentation links are valid. Test automatic resolution succeeds when possible.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending"
+      },
+      {
+        "id": 30,
+        "title": "Cloud Deployment Support",
+        "description": "Enable deployment and management of agents in cloud environments",
+        "details": "Implement 'magents deploy --cloud' command with provider selection. Add state persistence using cloud storage. Create secure tunnel for remote agent access. Build cloud-specific Docker images with smaller footprint. Add support for AWS ECS, Google Cloud Run, and Azure Container Instances. Implement cost estimation before deployment.",
+        "testStrategy": "Test deployment to each cloud provider. Verify state persistence and restoration. Test remote access security and performance. Validate cost estimates match actual usage. Test container scaling and resource limits.",
+        "priority": "low",
+        "dependencies": [
+          21,
+          24
+        ],
+        "status": "pending"
       }
     ],
     "metadata": {
       "created": "2025-06-30T14:18:19.843Z",
-      "updated": "2025-07-01T06:53:39.484Z",
+      "updated": "2025-07-02T12:50:47.328Z",
       "description": "Tasks for master context"
     }
   }
