@@ -46,6 +46,7 @@ CLAUDE_CODE_PATH=claude
 CLAUDE_AUTO_ACCEPT=true
 DOCKER_ENABLED=false
 DOCKER_IMAGE=magents/agent:latest
+MODE=simple
 `;
       fs.writeFileSync(this.configFile, defaultConfig);
     }
@@ -78,6 +79,12 @@ DOCKER_IMAGE=magents/agent:latest
               break;
             case 'CLAUDE_AUTO_ACCEPT':
             case 'DOCKER_ENABLED':
+            case 'TASK_MASTER_ENABLED':
+            case 'GITHUB_INTEGRATION':
+            case 'MCP_ENABLED':
+            case 'CUSTOM_COMMANDS_ENABLED':
+            case 'MCP_DEVELOPMENT_MODE':
+            case 'ADVANCED_DOCKER_CONFIG':
               config[cleanKey] = cleanValue.toLowerCase() === 'true';
               break;
             case 'DEFAULT_BASE_BRANCH':
@@ -85,7 +92,8 @@ DOCKER_IMAGE=magents/agent:latest
             case 'WORKTREE_PREFIX':
             case 'CLAUDE_CODE_PATH':
             case 'DOCKER_IMAGE':
-              config[cleanKey] = cleanValue;
+            case 'MODE':
+              config[cleanKey] = cleanValue as any;
               break;
           }
         }
@@ -121,7 +129,28 @@ DOCKER_IMAGE=magents/agent:latest
       `CLAUDE_AUTO_ACCEPT=${newConfig.CLAUDE_AUTO_ACCEPT}`,
       `DOCKER_ENABLED=${newConfig.DOCKER_ENABLED}`,
       `DOCKER_IMAGE=${newConfig.DOCKER_IMAGE}`,
+      `MODE=${newConfig.MODE || 'simple'}`,
     ];
+
+    // Add optional fields if they exist
+    if (newConfig.TASK_MASTER_ENABLED !== undefined) {
+      configLines.push(`TASK_MASTER_ENABLED=${newConfig.TASK_MASTER_ENABLED}`);
+    }
+    if (newConfig.GITHUB_INTEGRATION !== undefined) {
+      configLines.push(`GITHUB_INTEGRATION=${newConfig.GITHUB_INTEGRATION}`);
+    }
+    if (newConfig.MCP_ENABLED !== undefined) {
+      configLines.push(`MCP_ENABLED=${newConfig.MCP_ENABLED}`);
+    }
+    if (newConfig.CUSTOM_COMMANDS_ENABLED !== undefined) {
+      configLines.push(`CUSTOM_COMMANDS_ENABLED=${newConfig.CUSTOM_COMMANDS_ENABLED}`);
+    }
+    if (newConfig.MCP_DEVELOPMENT_MODE !== undefined) {
+      configLines.push(`MCP_DEVELOPMENT_MODE=${newConfig.MCP_DEVELOPMENT_MODE}`);
+    }
+    if (newConfig.ADVANCED_DOCKER_CONFIG !== undefined) {
+      configLines.push(`ADVANCED_DOCKER_CONFIG=${newConfig.ADVANCED_DOCKER_CONFIG}`);
+    }
 
     fs.writeFileSync(this.configFile, configLines.join('\n') + '\n');
     this.config = newConfig;

@@ -594,7 +594,16 @@ program
       }
       
       // 3. Progressive complexity modes
-      const mode = options?.mode || 'simple';
+      const { modeManager } = await import('../commands/mode');
+      const currentModeConfig = modeManager.getCurrentMode();
+      const mode = options?.mode || currentModeConfig.mode || 'simple';
+      
+      // Show mode-specific help if different from current
+      if (mode !== currentModeConfig.mode) {
+        ui.info(`Creating agent in ${mode} mode (current default: ${currentModeConfig.mode})`);
+        ui.tip(`Set ${mode} as default with: magents mode switch ${mode}`);
+      }
+      
       let creationConfig: any = {
         autoAccept: options?.autoAccept !== false, // Default to true for instant creation
         useDocker: options?.docker !== undefined ? options.docker : config.DOCKER_ENABLED
@@ -1125,6 +1134,60 @@ program
     } catch (error) {
       spinner.fail(`Failed to initialize: ${error instanceof Error ? error.message : String(error)}`);
       process.exit(1);
+    }
+  });
+
+// Mode management command
+program
+  .command('mode')
+  .description('Manage complexity modes (simple, standard, advanced)')
+  .argument('[action]', 'Action: switch, show, recommend')
+  .argument('[mode]', 'Target mode: simple, standard, advanced')
+  .option('--no-preserve', 'Do not preserve data when switching modes')
+  .action(async (action?: string, mode?: string, options?: { preserve?: boolean }) => {
+    const { modeManager } = await import('../commands/mode');
+    
+    switch (action) {
+      case 'switch':
+        if (!mode || !['simple', 'standard', 'advanced'].includes(mode)) {
+          ui.error('Please specify a valid mode: simple, standard, or advanced');
+          process.exit(1);
+        }
+        await modeManager.switchMode(mode as 'simple' | 'standard' | 'advanced', options?.preserve !== false);
+        break;
+        
+      case 'show':
+        const currentMode = modeManager.getCurrentMode();
+        ui.header(`Current Mode: ${currentMode.mode}`);
+        ui.keyValue('Help Level', currentMode.helpLevel);
+        ui.divider('Enabled Features');
+        Object.entries(currentMode.features).forEach(([feature, enabled]) => {
+          const featureName = feature.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+          ui.keyValue(featureName, enabled ? '✓ Enabled' : '✗ Disabled');
+        });
+        break;
+        
+      case 'recommend':
+        const recommended = modeManager.getModeRecommendation();
+        ui.info(`Based on your environment, we recommend: ${recommended} mode`);
+        ui.tip(`Switch with: magents mode switch ${recommended}`);
+        break;
+        
+      case 'help':
+        modeManager.showModeHelp(mode);
+        break;
+        
+      default:
+        // Show current mode and help
+        const current = modeManager.getCurrentMode();
+        ui.info(`Current mode: ${current.mode}`);
+        modeManager.showModeHelp();
+        ui.divider('Available Commands');
+        ui.command('magents mode show', 'Show current mode and features');
+        ui.command('magents mode switch <mode>', 'Switch to a different mode');
+        ui.command('magents mode recommend', 'Get mode recommendation');
+        ui.command('magents mode help [mode]', 'Show help for a specific mode');
+        break;
     }
   });
 

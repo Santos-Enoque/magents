@@ -239,6 +239,23 @@ export class UIService {
     console.log(`${iconStr}${this.theme.colors.primary.bold(key + ':')} ${value}`);
   }
 
+  // Display a helpful tip
+  tip(message: string): void {
+    console.log(`${chalk.cyan('💡')} ${chalk.cyan(message)}`);
+  }
+
+  // Display an example command
+  example(command: string): void {
+    console.log(`${chalk.gray('Example:')} ${chalk.white(command)}`);
+  }
+
+  // Display a list of items
+  list(items: string[]): void {
+    items.forEach(item => {
+      console.log(`  ${chalk.gray('•')} ${item}`);
+    });
+  }
+
   // Helper to get status color
   private getStatusColor(status: string): typeof chalk {
     switch (status.toLowerCase()) {
