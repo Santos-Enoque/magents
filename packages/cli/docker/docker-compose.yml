@@ -13,30 +13,87 @@ services:
     network_mode: host
     
   # Example agent container
-  agent:
+  agent-1:
     build:
       context: .
       dockerfile: Dockerfile
     image: magents/agent:latest
+    container_name: magents-agent-1
     volumes:
-      # Project workspace
-      - ../../../:/workspace
-      # Shared configuration
-      - ~/.magents/shared:/shared
-      # Agent-specific data
-      - agent_data:/agent
+      # Project workspace - bind mount for active development
+      - type: bind
+        source: ${PROJECT_PATH:-../../../}
+        target: /workspace
+      # Shared configuration - bind mount for cross-agent sharing
+      - type: bind
+        source: ${MAGENTS_SHARED:-~/.magents/shared}
+        target: /shared
+      # Agent-specific data - named volume for persistence
+      - type: volume
+        source: agent_1_data
+        target: /agent
       # Claude Code bridge socket
-      - /var/run/claude-code-bridge.sock:/host/claude-bridge.sock
+      - type: bind
+        source: /var/run/claude-code-bridge.sock
+        target: /host/claude-bridge.sock
       # Task Master config (read-only)
-      - ~/.taskmaster:/home/magents/.taskmaster:ro
+      - type: bind
+        source: ${HOME}/.taskmaster
+        target: /home/magents/.taskmaster
+        read_only: true
+      # Git config (read-only)
+      - type: bind
+        source: ${HOME}/.gitconfig
+        target: /home/magents/.gitconfig
+        read_only: true
     environment:
       - CLAUDE_BRIDGE_SOCKET=/host/claude-bridge.sock
-      - NODE_ENV=production
+      - NODE_ENV=${NODE_ENV:-production}
+      - AGENT_NAME=agent-1
+      - AGENT_ID=1
     depends_on:
       - claude-bridge
     stdin_open: true
     tty: true
     restart: unless-stopped
 
+  # Second agent example (for multi-agent scenarios)
+  agent-2:
+    extends:
+      service: agent-1
+    container_name: magents-agent-2
+    volumes:
+      # Same workspace but different agent data
+      - type: bind
+        source: ${PROJECT_PATH:-../../../}
+        target: /workspace
+      - type: bind
+        source: ${MAGENTS_SHARED:-~/.magents/shared}
+        target: /shared
+      - type: volume
+        source: agent_2_data
+        target: /agent
+      - type: bind
+        source: /var/run/claude-code-bridge.sock
+        target: /host/claude-bridge.sock
+      - type: bind
+        source: ${HOME}/.taskmaster
+        target: /home/magents/.taskmaster
+        read_only: true
+      - type: bind
+        source: ${HOME}/.gitconfig
+        target: /home/magents/.gitconfig
+        read_only: true
+    environment:
+      - CLAUDE_BRIDGE_SOCKET=/host/claude-bridge.sock
+      - NODE_ENV=${NODE_ENV:-production}
+      - AGENT_NAME=agent-2
+      - AGENT_ID=2
+
 volumes:
-  agent_data:
+  agent_1_data:
+    labels:
+      com.magents.description: "Persistent data for agent-1"
+  agent_2_data:
+    labels:
+      com.magents.description: "Persistent data for agent-2"

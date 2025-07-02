@@ -27,17 +27,22 @@ trap cleanup SIGTERM SIGINT SIGQUIT
 # Initialize environment
 echo "Initializing magents agent container..."
 
-# Ensure proper permissions on mounted volumes
-if [ -d "$WORKSPACE_DIR" ]; then
-    echo "Workspace directory found at $WORKSPACE_DIR"
-fi
+# Run volume initialization
+if [ -f "/usr/local/bin/init-volumes.sh" ]; then
+    /usr/local/bin/init-volumes.sh
+else
+    # Fallback if init script not found
+    if [ -d "$WORKSPACE_DIR" ]; then
+        echo "Workspace directory found at $WORKSPACE_DIR"
+    fi
 
-if [ -d "$SHARED_DIR" ]; then
-    echo "Shared directory found at $SHARED_DIR"
-fi
+    if [ -d "$SHARED_DIR" ]; then
+        echo "Shared directory found at $SHARED_DIR"
+    fi
 
-if [ -d "$AGENT_DIR" ]; then
-    echo "Agent directory found at $AGENT_DIR"
+    if [ -d "$AGENT_DIR" ]; then
+        echo "Agent directory found at $AGENT_DIR"
+    fi
 fi
 
 # Create .gitconfig if not exists

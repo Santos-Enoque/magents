@@ -47,7 +47,8 @@ VOLUME ["/workspace", "/shared", "/agent"]
 # Copy scripts
 COPY --chown=magents:magents docker-entrypoint.sh /usr/local/bin/
 COPY --chown=magents:magents claude-wrapper.sh /usr/local/bin/claude
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh /usr/local/bin/claude
+COPY --chown=magents:magents init-volumes.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh /usr/local/bin/claude /usr/local/bin/init-volumes.sh
 
 # Default command
 CMD ["/usr/local/bin/docker-entrypoint.sh"]
