@@ -125,7 +125,7 @@
                     status: this.mapAgentStatus(legacy.status),
                     mode: this.mapAgentMode(legacy.mode),
                     branch: legacy.branch || 'main',
-                    worktreePath: legacy.worktreePath || '',
+                    worktreePath: legacy.worktreePath || '/default/worktree',
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     autoAccept: legacy.autoAccept || false,
