@@ -1,0 +1,126 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    tags:
+      - 'v*'
+    paths:
+      - 'packages/cli/docker/**'
+      - '.github/workflows/docker-build.yml'
+  pull_request:
+    paths:
+      - 'packages/cli/docker/**'
+      - '.github/workflows/docker-build.yml'
+  workflow_dispatch:
+    inputs:
+      push_images:
+        description: 'Push images to Docker Hub'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  REGISTRY: docker.io
+  IMAGE_NAME: magents/agent
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    strategy:
+      matrix:
+        target: [production, development]
+        include:
+          - target: production
+            tag_suffix: ''
+          - target: development
+            tag_suffix: '-dev'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to Docker Hub
+        if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch,suffix=${{ matrix.tag_suffix }}
+            type=ref,event=pr,suffix=${{ matrix.tag_suffix }}
+            type=semver,pattern={{version}},suffix=${{ matrix.tag_suffix }}
+            type=semver,pattern={{major}}.{{minor}},suffix=${{ matrix.tag_suffix }}
+            type=raw,value=${{ matrix.target }},enable={{is_default_branch}}
+            type=raw,value=latest${{ matrix.tag_suffix }},enable={{is_default_branch}}
+      
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: packages/cli/docker
+          file: packages/cli/docker/Dockerfile.multi-stage
+          build-args: |
+            BUILD_TARGET=${{ matrix.target }}
+          push: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+      
+      - name: Test Docker image
+        run: |
+          # Load the built image for testing
+          docker run --rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.target }} \
+            bash -c "node --version && npm --version && task-master --version"
+      
+      - name: Push Docker image
+        if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
+        uses: docker/build-push-action@v5
+        with:
+          context: packages/cli/docker
+          file: packages/cli/docker/Dockerfile.multi-stage
+          build-args: |
+            BUILD_TARGET=${{ matrix.target }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+
+  test-integration:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Test production image
+        run: |
+          cd packages/cli/docker
+          docker build --build-arg BUILD_TARGET=production -f Dockerfile.multi-stage -t test-prod .
+          docker run --rm test-prod task-master --version
+      
+      - name: Test development image
+        run: |
+          cd packages/cli/docker
+          docker build --build-arg BUILD_TARGET=development -f Dockerfile.multi-stage -t test-dev .
+          docker run --rm test-dev bash -c "which vim && which htop"

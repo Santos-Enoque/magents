@@ -1,0 +1,38 @@
+version: '3.8'
+
+# Development variant of docker-compose for debugging and development work
+# Use with: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  # Override agent services to use development image
+  agent-1:
+    build:
+      args:
+        BUILD_TARGET: development
+    image: magents/agent:dev
+    environment:
+      - NODE_ENV=development
+      - DEBUG=true
+      - NODE_OPTIONS=--inspect=0.0.0.0:9229
+    ports:
+      - "9229:9229"  # Node.js debugger
+      - "13999:3999" # Health check endpoint
+    command: |
+      bash -c "
+        echo 'Starting in development mode with debugging enabled...'
+        echo 'Node.js debugger available on port 9229'
+        /usr/local/bin/docker-entrypoint.sh
+      "
+  
+  agent-2:
+    build:
+      args:
+        BUILD_TARGET: development
+    image: magents/agent:dev
+    environment:
+      - NODE_ENV=development
+      - DEBUG=true
+      - NODE_OPTIONS=--inspect=0.0.0.0:9230
+    ports:
+      - "9230:9229"  # Node.js debugger (different host port)
+      - "23999:3999" # Health check endpoint
