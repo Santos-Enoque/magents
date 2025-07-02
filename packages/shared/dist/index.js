@@ -42,6 +42,7 @@ __exportStar(require("./utils"), exports);
 __exportStar(require("./database"), exports);
 // Export services
 __exportStar(require("./services/DataSync"), exports);
+__exportStar(require("./services/AtomicOperations"), exports);
 // Export migration tools with explicit re-exports to avoid naming conflicts
 var ConfigMigrator_1 = require("./migration/ConfigMigrator");
 Object.defineProperty(exports, "ConfigMigrator", { enumerable: true, get: function () { return ConfigMigrator_1.ConfigMigrator; } });

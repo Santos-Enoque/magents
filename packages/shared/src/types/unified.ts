@@ -325,7 +325,7 @@ export type UnifiedEventData = z.infer<typeof UnifiedEventDataSchema>;
 // Database Schema Definitions
 // ============================================================================
 
-export const DATABASE_VERSION = 1;
+export const DATABASE_VERSION = 2;
 
 export const TABLE_SCHEMAS = {
   agents: `
@@ -426,6 +426,7 @@ export const TABLE_SCHEMAS = {
       ports_config TEXT, -- JSON object
       task_master_config TEXT, -- JSON object
       paths_config TEXT, -- JSON object
+      backup_metadata TEXT, -- JSON array of backup metadata
       version TEXT NOT NULL,
       created_at DATETIME NOT NULL,
       updated_at DATETIME NOT NULL
@@ -556,6 +557,17 @@ export const MIGRATIONS: MigrationDefinition[] = [
       'DROP TABLE IF EXISTS projects',
       'DROP TABLE IF EXISTS config',
       'DROP TABLE IF EXISTS migrations',
+    ],
+  },
+  {
+    version: 2,
+    name: 'add_backup_metadata',
+    up: [
+      'ALTER TABLE config ADD COLUMN backup_metadata TEXT',
+    ],
+    down: [
+      // SQLite doesn't support DROP COLUMN, so we'd need to recreate the table
+      // For simplicity, we'll leave the column if downgrading
     ],
   },
 ];

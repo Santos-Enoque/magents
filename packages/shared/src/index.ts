@@ -47,6 +47,7 @@ export * from './database';
 
 // Export services
 export * from './services/DataSync';
+export * from './services/AtomicOperations';
 
 // Export migration tools with explicit re-exports to avoid naming conflicts
 export {

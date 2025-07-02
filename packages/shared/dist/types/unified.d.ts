@@ -54,7 +54,7 @@ export declare const UnifiedAgentDataSchema: z.ZodObject<{
     id: string;
     name: string;
     projectId: string;
-    status: "RUNNING" | "STOPPED" | "ERROR" | "CREATED" | "STARTING" | "STOPPING" | "SUSPENDED";
+    status: "CREATED" | "STARTING" | "RUNNING" | "STOPPING" | "STOPPED" | "ERROR" | "SUSPENDED";
     createdAt: Date;
     updatedAt: Date;
     mode: "tmux" | "docker" | "hybrid";
@@ -84,7 +84,7 @@ export declare const UnifiedAgentDataSchema: z.ZodObject<{
     id: string;
     name: string;
     projectId: string;
-    status: "RUNNING" | "STOPPED" | "ERROR" | "CREATED" | "STARTING" | "STOPPING" | "SUSPENDED";
+    status: "CREATED" | "STARTING" | "RUNNING" | "STOPPING" | "STOPPED" | "ERROR" | "SUSPENDED";
     createdAt: Date;
     updatedAt: Date;
     mode: "tmux" | "docker" | "hybrid";
@@ -304,7 +304,7 @@ export declare const UnifiedTaskDataSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     id: string;
     projectId: string;
-    status: "pending" | "in-progress" | "done" | "blocked" | "cancelled" | "assigned" | "deferred";
+    status: "pending" | "assigned" | "in-progress" | "done" | "blocked" | "cancelled" | "deferred";
     createdAt: Date;
     updatedAt: Date;
     tags: string[];
@@ -333,7 +333,7 @@ export declare const UnifiedTaskDataSchema: z.ZodObject<{
 }, {
     id: string;
     projectId: string;
-    status: "pending" | "in-progress" | "done" | "blocked" | "cancelled" | "assigned" | "deferred";
+    status: "pending" | "assigned" | "in-progress" | "done" | "blocked" | "cancelled" | "deferred";
     createdAt: Date;
     updatedAt: Date;
     title: string;
@@ -558,12 +558,12 @@ export declare const UnifiedEventDataSchema: z.ZodObject<{
     userId?: string | undefined;
 }>;
 export type UnifiedEventData = z.infer<typeof UnifiedEventDataSchema>;
-export declare const DATABASE_VERSION = 1;
+export declare const DATABASE_VERSION = 2;
 export declare const TABLE_SCHEMAS: {
     readonly agents: "\n    CREATE TABLE IF NOT EXISTS agents (\n      id TEXT PRIMARY KEY,\n      name TEXT NOT NULL,\n      project_id TEXT NOT NULL,\n      status TEXT NOT NULL,\n      mode TEXT NOT NULL,\n      branch TEXT NOT NULL,\n      worktree_path TEXT NOT NULL,\n      tmux_session TEXT,\n      docker_container TEXT,\n      docker_image TEXT,\n      docker_ports TEXT, -- JSON array\n      docker_volumes TEXT, -- JSON array\n      docker_network TEXT,\n      auto_accept BOOLEAN DEFAULT FALSE,\n      port_range TEXT,\n      environment_vars TEXT, -- JSON object\n      current_task_id TEXT,\n      assigned_tasks TEXT, -- JSON array\n      resource_limits TEXT, -- JSON object\n      description TEXT,\n      tags TEXT, -- JSON array\n      metadata TEXT, -- JSON object\n      created_at DATETIME NOT NULL,\n      updated_at DATETIME NOT NULL,\n      last_accessed_at DATETIME,\n      \n      FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,\n      FOREIGN KEY (current_task_id) REFERENCES tasks(id) ON DELETE SET NULL\n    )\n  ";
     readonly projects: "\n    CREATE TABLE IF NOT EXISTS projects (\n      id TEXT PRIMARY KEY,\n      name TEXT NOT NULL,\n      path TEXT NOT NULL UNIQUE,\n      status TEXT NOT NULL,\n      git_repository TEXT, -- JSON object\n      agent_ids TEXT, -- JSON array\n      max_agents INTEGER DEFAULT 10,\n      port_range TEXT, -- JSON object\n      docker_network TEXT,\n      task_master_enabled BOOLEAN DEFAULT FALSE,\n      task_master_config TEXT, -- JSON object\n      project_type TEXT, -- JSON object\n      description TEXT,\n      tags TEXT, -- JSON array\n      metadata TEXT, -- JSON object\n      created_at DATETIME NOT NULL,\n      updated_at DATETIME NOT NULL,\n      last_accessed_at DATETIME\n    )\n  ";
     readonly tasks: "\n    CREATE TABLE IF NOT EXISTS tasks (\n      id TEXT PRIMARY KEY,\n      task_master_id TEXT,\n      project_id TEXT NOT NULL,\n      title TEXT NOT NULL,\n      description TEXT,\n      details TEXT,\n      status TEXT NOT NULL,\n      priority TEXT NOT NULL,\n      assigned_to_agent_id TEXT,\n      parent_task_id TEXT,\n      subtask_ids TEXT, -- JSON array\n      dependencies TEXT, -- JSON array\n      test_strategy TEXT,\n      test_results TEXT, -- JSON object\n      estimated_effort REAL,\n      actual_effort REAL,\n      tags TEXT, -- JSON array\n      metadata TEXT, -- JSON object\n      created_at DATETIME NOT NULL,\n      updated_at DATETIME NOT NULL,\n      assigned_at DATETIME,\n      started_at DATETIME,\n      completed_at DATETIME,\n      \n      FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,\n      FOREIGN KEY (assigned_to_agent_id) REFERENCES agents(id) ON DELETE SET NULL,\n      FOREIGN KEY (parent_task_id) REFERENCES tasks(id) ON DELETE CASCADE\n    )\n  ";
-    readonly config: "\n    CREATE TABLE IF NOT EXISTS config (\n      id TEXT PRIMARY KEY DEFAULT 'global',\n      max_agents INTEGER DEFAULT 10,\n      default_mode TEXT DEFAULT 'docker',\n      auto_accept BOOLEAN DEFAULT FALSE,\n      docker_config TEXT, -- JSON object\n      ports_config TEXT, -- JSON object\n      task_master_config TEXT, -- JSON object\n      paths_config TEXT, -- JSON object\n      version TEXT NOT NULL,\n      created_at DATETIME NOT NULL,\n      updated_at DATETIME NOT NULL\n    )\n  ";
+    readonly config: "\n    CREATE TABLE IF NOT EXISTS config (\n      id TEXT PRIMARY KEY DEFAULT 'global',\n      max_agents INTEGER DEFAULT 10,\n      default_mode TEXT DEFAULT 'docker',\n      auto_accept BOOLEAN DEFAULT FALSE,\n      docker_config TEXT, -- JSON object\n      ports_config TEXT, -- JSON object\n      task_master_config TEXT, -- JSON object\n      paths_config TEXT, -- JSON object\n      backup_metadata TEXT, -- JSON array of backup metadata\n      version TEXT NOT NULL,\n      created_at DATETIME NOT NULL,\n      updated_at DATETIME NOT NULL\n    )\n  ";
     readonly events: "\n    CREATE TABLE IF NOT EXISTS events (\n      id TEXT PRIMARY KEY,\n      type TEXT NOT NULL,\n      timestamp DATETIME NOT NULL,\n      entity_id TEXT NOT NULL,\n      entity_type TEXT NOT NULL,\n      project_id TEXT,\n      data TEXT, -- JSON object\n      previous_data TEXT, -- JSON object\n      source TEXT NOT NULL,\n      user_id TEXT,\n      metadata TEXT, -- JSON object\n      \n      FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE\n    )\n  ";
     readonly migrations: "\n    CREATE TABLE IF NOT EXISTS migrations (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      version INTEGER NOT NULL UNIQUE,\n      name TEXT NOT NULL,\n      executed_at DATETIME NOT NULL\n    )\n  ";
 };

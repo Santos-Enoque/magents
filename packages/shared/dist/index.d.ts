@@ -4,6 +4,7 @@ export { AgentStatus as UnifiedAgentStatus, AgentMode, ProjectStatus as UnifiedP
 export * from './utils';
 export * from './database';
 export * from './services/DataSync';
+export * from './services/AtomicOperations';
 export { ConfigMigrator, LegacyAgentConfig, LegacyProjectConfig, LegacyTaskConfig, LegacyGlobalConfig, MigrationOptions, createMigrator, runMigration, } from './migration/ConfigMigrator';
 export { MigrationResult as ConfigMigrationResult } from './migration/ConfigMigrator';
 export * from './constants';
