@@ -288,6 +288,57 @@ async function setupTaskMasterEnvironment(worktreePath: string, taskId?: string)
   }
 }
 
+// Helper function to detect project type for smart branch naming
+async function detectProjectType(): Promise<string> {
+  const fs = await import('fs');
+  const path = await import('path');
+  
+  const currentDir = process.cwd();
+  
+  // Check for common project patterns
+  const patterns = [
+    { files: ['package.json'], keywords: ['bug', 'fix', 'hotfix'], type: 'bug' },
+    { files: ['package.json'], keywords: ['task', 'todo', 'item'], type: 'task' },
+    { files: ['package.json'], keywords: ['experiment', 'test', 'poc', 'prototype'], type: 'experiment' },
+    { files: ['package.json'], keywords: ['feature', 'feat'], type: 'feature' },
+  ];
+  
+  // Check git branch name patterns
+  try {
+    const { execSync } = await import('child_process');
+    const currentBranch = execSync('git branch --show-current', { encoding: 'utf8', cwd: currentDir }).trim();
+    
+    if (currentBranch.startsWith('hotfix/') || currentBranch.includes('hotfix')) return 'hotfix';
+    if (currentBranch.startsWith('fix/') || currentBranch.includes('fix')) return 'bug';
+    if (currentBranch.startsWith('task/') || currentBranch.includes('task')) return 'task';
+    if (currentBranch.startsWith('experiment/') || currentBranch.includes('experiment')) return 'experiment';
+  } catch (error) {
+    // Git not available or not in a repo, continue with file-based detection
+  }
+  
+  // Check for Task Master task context
+  const taskMasterContext = path.join(currentDir, '.taskmaster', 'current-task.json');
+  if (fs.existsSync(taskMasterContext)) {
+    try {
+      const taskData = JSON.parse(fs.readFileSync(taskMasterContext, 'utf8'));
+      if (taskData.id) return 'task';
+    } catch (error) {
+      // Invalid task context, continue
+    }
+  }
+  
+  // Check issue/bug tracking files
+  const issueFiles = ['.github/ISSUE_TEMPLATE', 'BUGS.md', 'ISSUES.md', 'bug-report.md'];
+  for (const file of issueFiles) {
+    if (fs.existsSync(path.join(currentDir, file))) {
+      return 'bug';
+    }
+  }
+  
+  // Default to feature
+  return 'feature';
+}
+
 // Helper function to recursively copy directories
 function copyDirectoryRecursive(source: string, destination: string): void {
   const fs = require('fs');
@@ -455,8 +506,13 @@ program
 // Custom help handler to show beautiful interface
 program.on('--help', () => {
   ui.header('MAGENTS - Multi-Agent Claude Code Workflow Manager', true);
-  ui.divider('Examples');
-  ui.command('magents create feature/auth-system', 'Create agent for auth feature');
+  ui.divider('Instant Agent Creation Examples');
+  ui.command('magents create auth-system', 'Create agent with smart defaults');
+  ui.command('magents create user-dashboard --mode standard', 'Create with Task Master integration');
+  ui.command('magents create fix-login-bug --mode advanced', 'Create with full setup');
+  ui.command('magents create payment-flow --task 24.1', 'Create for specific task');
+  ui.command('magents create api-refactor --dry-run', 'Preview what would be created');
+  ui.divider('Management Examples');
   ui.command('magents ls', 'Show all active agents');
   ui.command('magents a 1', 'Connect to first agent');
   ui.command('magents attach agent-123', 'Connect to specific agent');
@@ -467,52 +523,228 @@ program.on('--help', () => {
 
 if (process.argv.length === 2) {
   ui.header('MAGENTS - Multi-Agent Claude Code Workflow Manager', true);
-  ui.divider('Available Commands');
-  ui.command('magents create <branch>', 'Create new agent');
+  ui.divider('Core Commands');
+  ui.command('magents create <name>', 'Create agent with smart defaults');
+  ui.command('magents create <name> --mode <simple|standard|advanced>', 'Progressive complexity modes');
+  ui.command('magents create <name> --task <id>', 'Create for Task Master task');
   ui.command('magents list (ls)', 'List all agents');
   ui.command('magents attach (a) <id>', 'Attach to agent');
   ui.command('magents stop <id>', 'Stop agent');
-  ui.command('magents cleanup', 'Stop all agents');
+  ui.divider('Advanced Commands');
   ui.command('magents task-create <task-id>', 'Create intelligent agent for specific task');
   ui.command('magents task-agents', 'Create agents from all pending tasks');
   ui.command('magents work-issue <id>', 'Structured development workflow (PLAN→CREATE→TEST→DEPLOY)');
   ui.command('magents sync-taskmaster <id>', 'Sync Task Master config to agent');
   ui.command('magents doctor', 'Check system requirements');
-  ui.command('magents init', 'Initialize config');
-  ui.command('magents config', 'View/edit config');
   ui.command('magents config --docker', 'Enable Docker mode');
   ui.divider();
   ui.info(`Mode: ${config.DOCKER_ENABLED ? 'Docker containers' : 'tmux/git worktrees'}`);
-  ui.info('Run "magents --help" for detailed information');
+  ui.info('Run "magents --help" for detailed examples');
 }
 
-// Create command
+// Create command - enhanced with instant creation
 program
   .command('create')
-  .description('Create new agent with worktree and Claude Code session')
-  .argument('<branch>', 'Branch name for the agent')
+  .description('Create new agent with smart defaults and minimal configuration')
+  .argument('<name>', 'Agent name or branch name')
   .argument('[agent-id]', 'Optional agent ID (auto-generated if not provided)')
+  .option('--branch <branch>', 'Specific branch name (defaults to feature/<name>)')
+  .option('--task <taskId>', 'Task Master task ID to work on')
+  .option('--mode <mode>', 'Creation mode: simple, standard, or advanced', 'simple')
+  .option('--dry-run', 'Show what would be created without creating')
   .option('--no-auto-accept', 'Disable automatic command acceptance in Claude Code')
   .option('--docker', 'Force Docker mode for this agent')
   .option('--no-docker', 'Force tmux mode for this agent')
-  .action(async (branch: string, agentId?: string, options?: { autoAccept: boolean; docker?: boolean }) => {
-    const spinner = ui.spinner('Creating agent...');
-    spinner.start();
-    
+  .option('--interactive', 'Use interactive mode for missing parameters')
+  .action(async (name: string, agentId?: string, options?: { 
+    branch?: string; 
+    task?: string; 
+    mode?: string; 
+    dryRun?: boolean; 
+    autoAccept?: boolean; 
+    docker?: boolean; 
+    interactive?: boolean;
+  }) => {
     try {
-      // Determine if we should use Docker for this specific agent
-      const useDocker = options?.docker !== undefined ? options.docker : config.DOCKER_ENABLED;
+      // === INSTANT AGENT CREATION WITH SMART DEFAULTS ===
       
+      // 1. Smart branch name generation
+      let branchName = options?.branch;
+      if (!branchName) {
+        // Auto-detect project type and generate appropriate branch prefix
+        const projectType = await detectProjectType();
+        const sanitizedName = name.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/^-+|-+$/g, '');
+        
+        const branchPrefixes = {
+          'feature': 'feature',
+          'bug': 'fix',
+          'hotfix': 'hotfix',
+          'task': 'task',
+          'experiment': 'experiment'
+        };
+        
+        const prefix = branchPrefixes[projectType] || 'feature';
+        branchName = `${prefix}/${sanitizedName}`;
+      }
+      
+      // 2. Smart agent ID generation
+      if (!agentId) {
+        const timestamp = new Date().toISOString().slice(0, 16).replace(/[:-]/g, '');
+        agentId = `${name.toLowerCase().replace(/[^a-z0-9]/g, '')}-${timestamp}`;
+      }
+      
+      // 3. Progressive complexity modes
+      const mode = options?.mode || 'simple';
+      let creationConfig: any = {
+        autoAccept: options?.autoAccept !== false, // Default to true for instant creation
+        useDocker: options?.docker !== undefined ? options.docker : config.DOCKER_ENABLED
+      };
+      
+      switch (mode) {
+        case 'simple':
+          // Minimal config - use all defaults
+          creationConfig = {
+            ...creationConfig,
+            setupTaskMaster: false,
+            createIssue: false,
+            pushBranch: false
+          };
+          break;
+          
+        case 'standard':
+          // Balanced setup with Task Master integration
+          creationConfig = {
+            ...creationConfig,
+            setupTaskMaster: true,
+            createIssue: false,
+            pushBranch: true
+          };
+          break;
+          
+        case 'advanced':
+          // Full setup with all features
+          creationConfig = {
+            ...creationConfig,
+            setupTaskMaster: true,
+            createIssue: true,
+            pushBranch: true,
+            createBriefing: true
+          };
+          break;
+      }
+      
+      // 4. Task Master integration if task specified
+      if (options?.task) {
+        try {
+          const { execSync } = await import('child_process');
+          const taskOutput = execSync(`task-master show ${options.task}`, { encoding: 'utf8' });
+          const task = parseTaskMasterOutput(options.task, taskOutput);
+          
+          if (task) {
+            ui.success(`Found Task Master task: ${task.title}`);
+            creationConfig.taskId = options.task;
+            creationConfig.setupTaskMaster = true;
+            
+            // Update branch name to include task ID
+            if (!options?.branch) {
+              branchName = `task/${options.task}-${name.toLowerCase().replace(/[^a-z0-9-]/g, '-')}`;
+            }
+          }
+        } catch (error) {
+          ui.warning(`Task ${options.task} not found, proceeding without Task Master integration`);
+        }
+      }
+      
+      // 5. Interactive mode for missing parameters
+      if (options?.interactive) {
+        const answers = await inquirer.prompt([
+          {
+            type: 'confirm',
+            name: 'setupTaskMaster',
+            message: 'Set up Task Master environment?',
+            default: creationConfig.setupTaskMaster,
+            when: () => mode !== 'simple'
+          },
+          {
+            type: 'confirm',
+            name: 'createIssue',
+            message: 'Create GitHub issue?',
+            default: creationConfig.createIssue,
+            when: () => mode === 'advanced'
+          },
+          {
+            type: 'confirm',
+            name: 'pushBranch',
+            message: 'Push branch to origin?',
+            default: creationConfig.pushBranch,
+            when: () => mode !== 'simple'
+          }
+        ]);
+        
+        creationConfig = { ...creationConfig, ...answers };
+      }
+      
+      // 6. Show dry-run summary
+      if (options?.dryRun) {
+        ui.header('Dry Run - Agent Creation Preview');
+        ui.keyValue('Agent Name', name);
+        ui.keyValue('Agent ID', agentId);
+        ui.keyValue('Branch Name', branchName);
+        ui.keyValue('Mode', mode);
+        ui.keyValue('Docker Enabled', creationConfig.useDocker ? 'Yes' : 'No');
+        ui.keyValue('Task Master Setup', creationConfig.setupTaskMaster ? 'Yes' : 'No');
+        ui.keyValue('Create GitHub Issue', creationConfig.createIssue ? 'Yes' : 'No');
+        ui.keyValue('Push Branch', creationConfig.pushBranch ? 'Yes' : 'No');
+        if (options?.task) {
+          ui.keyValue('Task Master Task', options.task);
+        }
+        ui.info('Use without --dry-run to create the agent');
+        return;
+      }
+      
+      // 7. Progress indicators for long operations
+      const spinner = ui.spinner('Creating agent with smart defaults...');
+      spinner.start();
+      
+      // 8. Create the agent
       const result = await agentManager.createAgent({
-        branch,
+        branch: branchName,
         agentId,
-        autoAccept: options?.autoAccept,
-        useDocker
+        autoAccept: creationConfig.autoAccept,
+        useDocker: creationConfig.useDocker
       });
 
       if (result.success && result.data) {
-        spinner.succeed(result.message);
+        spinner.succeed('Agent created successfully!');
         
+        // 9. Post-creation setup based on mode
+        if (creationConfig.setupTaskMaster) {
+          const setupSpinner = ui.spinner('Setting up Task Master environment...');
+          setupSpinner.start();
+          try {
+            await setupTaskMasterEnvironment(result.data.worktreePath, options?.task);
+            setupSpinner.succeed('Task Master environment configured');
+          } catch (error) {
+            setupSpinner.warn('Task Master setup failed, continuing...');
+          }
+        }
+        
+        if (creationConfig.pushBranch) {
+          const pushSpinner = ui.spinner('Pushing branch to origin...');
+          pushSpinner.start();
+          try {
+            const { execSync } = await import('child_process');
+            execSync(`git push -u origin ${branchName}`, { 
+              cwd: result.data.worktreePath,
+              stdio: 'pipe'
+            });
+            pushSpinner.succeed('Branch pushed to origin');
+          } catch (error) {
+            pushSpinner.warn('Branch push failed, continuing...');
+          }
+        }
+        
+        // 10. Display agent information
         const agent = {
           id: result.data.agentId,
           branch: result.data.branch,
@@ -520,26 +752,34 @@ program
           tmuxSession: result.data.tmuxSession,
           status: 'Active',
           createdAt: new Date(),
-          useDocker
+          useDocker: creationConfig.useDocker
         };
         
         ui.agentDetails(agent);
         
-        ui.divider('Next Steps');
-        if (useDocker) {
-          ui.command(`magents attach ${result.data.agentId}`, 'Attach to the Docker container');
-          ui.command(`docker logs magents-${result.data.agentId}`, 'View container logs');
-        } else {
-          ui.command(`magents attach ${result.data.agentId}`, 'Attach to the agent\'s tmux session');
+        // 11. Show quick start commands
+        ui.divider('Quick Start');
+        ui.command(`magents attach ${result.data.agentId}`, 'Start working on the agent');
+        if (options?.task) {
+          ui.command(`get_task({id: "${options.task}"})`, 'Get task details in Claude Code');
         }
-        ui.command(`magents a 1`, 'Or use shorthand with position number');
-        ui.command(`magents stop ${result.data.agentId}`, 'Stop the agent when done');
+        ui.command(`magents a 1`, 'Or use shorthand to attach');
+        
+        ui.divider('Agent Setup Complete');
+        ui.success(`✅ Mode: ${mode} (${creationConfig.useDocker ? 'Docker' : 'tmux'})`);
+        if (creationConfig.setupTaskMaster) {
+          ui.success('✅ Task Master environment ready');
+        }
+        if (creationConfig.pushBranch) {
+          ui.success('✅ Branch pushed to origin');
+        }
+        
       } else {
         spinner.fail(result.message);
         process.exit(1);
       }
     } catch (error) {
-      spinner.fail(`Failed to create agent: ${error instanceof Error ? error.message : String(error)}`);
+      ui.error(`Failed to create agent: ${error instanceof Error ? error.message : String(error)}`);
       process.exit(1);
     }
   });
