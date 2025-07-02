@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magents Unified Data Model - Browser Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        button { margin: 5px; padding: 10px 15px; cursor: pointer; }
+        #output { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Magents Unified Data Model - Browser Test</h1>
+    <p>This test demonstrates the unified data model functionality in a browser environment (without SQLite database).</p>
+
+    <div class="test-section">
+        <h2>Test Controls</h2>
+        <button onclick="testSchemaValidation()">Test Schema Validation</button>
+        <button onclick="testDataTransformation()">Test Data Transformation</button>
+        <button onclick="testConfigMigration()">Test Config Migration Logic</button>
+        <button onclick="testSyncEvents()">Test Sync Events</button>
+        <button onclick="runAllTests()">Run All Tests</button>
+        <button onclick="clearOutput()">Clear Output</button>
+    </div>
+
+    <div id="output"></div>
+
+    <script>
+        // Mock the unified data model components for browser testing
+        
+        // Simple schema validation using basic JavaScript
+        const UnifiedAgentDataSchema = {
+            validate: (data) => {
+                const required = ['id', 'name', 'projectId', 'status', 'mode', 'branch', 'worktreePath'];
+                const missing = required.filter(field => !data[field]);
+                if (missing.length > 0) {
+                    throw new Error(`Missing required fields: ${missing.join(', ')}`);
+                }
+                
+                const validStatuses = ['CREATED', 'STARTING', 'RUNNING', 'STOPPING', 'STOPPED', 'ERROR', 'SUSPENDED'];
+                if (!validStatuses.includes(data.status)) {
+                    throw new Error(`Invalid status: ${data.status}`);
+                }
+                
+                const validModes = ['tmux', 'docker', 'hybrid'];
+                if (!validModes.includes(data.mode)) {
+                    throw new Error(`Invalid mode: ${data.mode}`);
+                }
+                
+                return true;
+            }
+        };
+
+        const UnifiedProjectDataSchema = {
+            validate: (data) => {
+                const required = ['id', 'name', 'path', 'status'];
+                const missing = required.filter(field => !data[field]);
+                if (missing.length > 0) {
+                    throw new Error(`Missing required fields: ${missing.join(', ')}`);
+                }
+                return true;
+            }
+        };
+
+        // Mock sync event system
+        class MockDataSyncClient {
+            constructor() {
+                this.events = [];
+                this.connected = false;
+            }
+            
+            connect() {
+                this.connected = true;
+                log('📡 Mock sync client connected', 'success');
+                return Promise.resolve();
+            }
+            
+            sendEvent(event) {
+                this.events.push(event);
+                log(`📤 Sync event sent: ${event.type} for ${event.entityType}:${event.entityId}`, 'info');
+            }
+            
+            isConnectedToServer() {
+                return this.connected;
+            }
+        }
+
+        // Mock migration functionality
+        class MockConfigMigrator {
+            mapAgentStatus(status) {
+                const mapping = {
+                    'active': 'RUNNING',
+                    'running': 'RUNNING',
+                    'stopped': 'STOPPED',
+                    'inactive': 'STOPPED',
+                    'error': 'ERROR',
+                    'failed': 'ERROR'
+                };
+                return mapping[status?.toLowerCase()] || 'STOPPED';
+            }
+            
+            mapAgentMode(mode) {
+                const mapping = {
+                    'docker': 'docker',
+                    'container': 'docker',
+                    'tmux': 'tmux',
+                    'local': 'hybrid',
+                    'native': 'hybrid',
+                    'hybrid': 'hybrid'
+                };
+                return mapping[mode?.toLowerCase()] || 'docker';
+            }
+            
+            convertLegacyAgent(legacy) {
+                return {
+                    id: legacy.id || `agent-${Date.now()}`,
+                    name: legacy.name,
+                    projectId: legacy.project || 'default-project',
+                    status: this.mapAgentStatus(legacy.status),
+                    mode: this.mapAgentMode(legacy.mode),
+                    branch: legacy.branch || 'main',
+                    worktreePath: legacy.worktreePath || '',
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    autoAccept: legacy.autoAccept || false,
+                    dockerPorts: legacy.port ? [`${legacy.port}:${legacy.port}`] : [],
+                    dockerVolumes: legacy.volumes || [],
+                    environmentVars: legacy.environment || {},
+                    assignedTasks: [],
+                    tags: [],
+                    metadata: { migratedFrom: 'legacy' }
+                };
+            }
+        }
+
+        // Utility functions
+        function generateId() {
+            return `id-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        }
+
+        function log(message, type = 'info') {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            output.appendChild(div);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearOutput() {
+            document.getElementById('output').innerHTML = '';
+        }
+
+        // Test functions
+        function testSchemaValidation() {
+            log('🧪 Testing Schema Validation...', 'info');
+            
+            try {
+                // Test valid agent data
+                const validAgent = {
+                    id: generateId(),
+                    name: 'Test Agent',
+                    projectId: 'project-1',
+                    status: 'STOPPED',
+                    mode: 'docker',
+                    branch: 'main',
+                    worktreePath: '/test/path',
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    autoAccept: false,
+                    dockerPorts: [],
+                    dockerVolumes: [],
+                    environmentVars: {},
+                    assignedTasks: [],
+                    tags: [],
+                    metadata: {}
+                };
+                
+                UnifiedAgentDataSchema.validate(validAgent);
+                log('✅ Valid agent data passed validation', 'success');
+                
+                // Test invalid agent data
+                const invalidAgent = {
+                    name: 'Invalid Agent',
+                    // Missing required fields
+                };
+                
+                try {
+                    UnifiedAgentDataSchema.validate(invalidAgent);
+                    log('❌ Invalid agent data should have failed', 'error');
+                } catch (error) {
+                    log(`✅ Invalid agent data correctly rejected: ${error.message}`, 'success');
+                }
+                
+                // Test valid project data
+                const validProject = {
+                    id: generateId(),
+                    name: 'Test Project',
+                    path: '/test/project',
+                    status: 'ACTIVE',
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    agentIds: [],
+                    maxAgents: 10,
+                    taskMasterEnabled: false,
+                    tags: [],
+                    metadata: {}
+                };
+                
+                UnifiedProjectDataSchema.validate(validProject);
+                log('✅ Valid project data passed validation', 'success');
+                
+                log('🎉 Schema validation tests completed', 'success');
+                
+            } catch (error) {
+                log(`❌ Schema validation test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function testDataTransformation() {
+            log('🔄 Testing Data Transformation...', 'info');
+            
+            try {
+                const migrator = new MockConfigMigrator();
+                
+                // Test legacy agent conversion
+                const legacyAgent = {
+                    id: 'legacy-1',
+                    name: 'Legacy Agent',
+                    project: 'legacy-project',
+                    status: 'running',
+                    mode: 'local',
+                    port: 3000,
+                    volumes: ['/host:/container'],
+                    environment: { NODE_ENV: 'production' }
+                };
+                
+                const unifiedAgent = migrator.convertLegacyAgent(legacyAgent);
+                
+                log(`📊 Converted legacy agent:`, 'info');
+                log(`<pre>${JSON.stringify(unifiedAgent, null, 2)}</pre>`, 'info');
+                
+                // Validate the converted agent
+                UnifiedAgentDataSchema.validate(unifiedAgent);
+                log('✅ Converted agent passes schema validation', 'success');
+                
+                // Test status mapping
+                const statusTests = [
+                    { input: 'active', expected: 'RUNNING' },
+                    { input: 'stopped', expected: 'STOPPED' },
+                    { input: 'error', expected: 'ERROR' },
+                    { input: 'unknown', expected: 'STOPPED' }
+                ];
+                
+                statusTests.forEach(test => {
+                    const result = migrator.mapAgentStatus(test.input);
+                    if (result === test.expected) {
+                        log(`✅ Status mapping: ${test.input} → ${result}`, 'success');
+                    } else {
+                        log(`❌ Status mapping failed: ${test.input} → ${result} (expected ${test.expected})`, 'error');
+                    }
+                });
+                
+                log('🎉 Data transformation tests completed', 'success');
+                
+            } catch (error) {
+                log(`❌ Data transformation test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function testConfigMigration() {
+            log('⚙️ Testing Config Migration Logic...', 'info');
+            
+            try {
+                const migrator = new MockConfigMigrator();
+                
+                // Test batch migration
+                const legacyAgents = [
+                    { name: 'Agent 1', project: 'proj-1', status: 'running', mode: 'docker' },
+                    { name: 'Agent 2', project: 'proj-1', status: 'stopped', mode: 'local' },
+                    { name: 'Agent 3', project: 'proj-2', status: 'error', mode: 'tmux' }
+                ];
+                
+                const convertedAgents = legacyAgents.map(agent => migrator.convertLegacyAgent(agent));
+                
+                log(`📊 Migrated ${convertedAgents.length} legacy agents`, 'info');
+                
+                convertedAgents.forEach((agent, index) => {
+                    try {
+                        UnifiedAgentDataSchema.validate(agent);
+                        log(`✅ Agent ${index + 1} (${agent.name}) migration successful`, 'success');
+                    } catch (error) {
+                        log(`❌ Agent ${index + 1} migration failed: ${error.message}`, 'error');
+                    }
+                });
+                
+                log('🎉 Config migration tests completed', 'success');
+                
+            } catch (error) {
+                log(`❌ Config migration test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function testSyncEvents() {
+            log('📡 Testing Sync Events...', 'info');
+            
+            try {
+                const syncClient = new MockDataSyncClient();
+                
+                // Test connection
+                syncClient.connect().then(() => {
+                    log(`✅ Sync client connected: ${syncClient.isConnectedToServer()}`, 'success');
+                    
+                    // Test event creation and sending
+                    const events = [
+                        {
+                            id: generateId(),
+                            type: 'agent.created',
+                            entityType: 'agent',
+                            entityId: 'agent-1',
+                            action: 'create',
+                            data: { name: 'New Agent', status: 'CREATED' },
+                            timestamp: new Date(),
+                            source: 'api'
+                        },
+                        {
+                            id: generateId(),
+                            type: 'agent.updated',
+                            entityType: 'agent',
+                            entityId: 'agent-1',
+                            action: 'update',
+                            data: { status: 'RUNNING' },
+                            previousData: { status: 'CREATED' },
+                            timestamp: new Date(),
+                            source: 'api'
+                        },
+                        {
+                            id: generateId(),
+                            type: 'task.assigned',
+                            entityType: 'task',
+                            entityId: 'task-1',
+                            action: 'update',
+                            data: { assignedToAgentId: 'agent-1' },
+                            timestamp: new Date(),
+                            source: 'api'
+                        }
+                    ];
+                    
+                    events.forEach(event => {
+                        syncClient.sendEvent(event);
+                    });
+                    
+                    log(`✅ Sent ${events.length} sync events`, 'success');
+                    log(`📊 Total events in client: ${syncClient.events.length}`, 'info');
+                    
+                    log('🎉 Sync events tests completed', 'success');
+                });
+                
+            } catch (error) {
+                log(`❌ Sync events test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function runAllTests() {
+            log('🚀 Running All Tests...', 'info');
+            clearOutput();
+            
+            setTimeout(() => testSchemaValidation(), 100);
+            setTimeout(() => testDataTransformation(), 500);
+            setTimeout(() => testConfigMigration(), 1000);
+            setTimeout(() => testSyncEvents(), 1500);
+            setTimeout(() => log('🎊 All tests completed!', 'success'), 2000);
+        }
+
+        // Auto-run tests on page load
+        window.onload = function() {
+            log('🌐 Unified Data Model Browser Test Environment Ready', 'info');
+            log('Click the buttons above to run individual tests or run all tests together.', 'info');
+        };
+    </script>
+</body>
+</html>
