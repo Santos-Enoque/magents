@@ -2323,6 +2323,44 @@ program
     }
   });
 
+// Start command - launch agents in Docker containers
+program
+  .command('start')
+  .description('Start agents in Docker containers with orchestration')
+  .argument('[agent-id]', 'Specific agent to start')
+  .option('-a, --all', 'Start all stopped agents')
+  .option('-d, --docker', 'Force Docker mode even if not configured')
+  .option('--cpu <limit>', 'CPU limit (e.g., "1.5", "2")')
+  .option('--memory <limit>', 'Memory limit (e.g., "2g", "512m")')
+  .option('--network <name>', 'Docker network to use')
+  .option('--volume <mapping>', 'Additional volume mappings', (value, previous: string[] = []) => previous.concat(value), [])
+  .option('--env <var>', 'Environment variables', (value, previous: string[] = []) => previous.concat(value), [])
+  .option('--health-check', 'Enable health monitoring')
+  .option('--restart <policy>', 'Restart policy (no, on-failure, unless-stopped, always)')
+  .option('--detach', 'Run in detached mode')
+  .option('--logs', 'Show container logs after starting')
+  .option('--shell', 'Open shell in container after starting')
+  .action(async (agentId: string | undefined, options: any) => {
+    const { startCommand } = await import('../commands/start');
+    await startCommand.execute(agentId, {
+      agent: agentId,
+      all: options.all,
+      docker: options.docker,
+      resources: {
+        cpu: options.cpu,
+        memory: options.memory
+      },
+      network: options.network,
+      volumes: options.volume,
+      env: options.env,
+      healthCheck: options.healthCheck,
+      restart: options.restart,
+      detach: options.detach,
+      logs: options.logs,
+      shell: options.shell
+    });
+  });
+
 // Override help to show our custom styling
 if (process.argv.includes('--help') || process.argv.includes('-h')) {
   ui.header('MAGENTS - Multi-Agent Claude Code Workflow Manager', true);
