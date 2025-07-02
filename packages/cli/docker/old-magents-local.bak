@@ -1,0 +1,8 @@
+#!/bin/bash
+# Local magents wrapper with fixes
+
+# Get the directory of this script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Run the local built version
+node "$SCRIPT_DIR/../dist/bin/magents.js" "$@"

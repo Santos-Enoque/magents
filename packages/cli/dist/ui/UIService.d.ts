@@ -2,6 +2,7 @@ import chalk from 'chalk';
 import { Ora } from 'ora';
 import logSymbols from 'log-symbols';
 import cliSpinners from 'cli-spinners';
+import { MagentsError } from '@magents/shared';
 export type ColorName = 'primary' | 'success' | 'warning' | 'error' | 'info' | 'muted' | 'highlight';
 export interface UITheme {
     colors: Record<ColorName, typeof chalk>;
@@ -24,6 +25,8 @@ export declare class UIService {
     box(content: string, title?: string, color?: ColorName): void;
     success(message: string): void;
     error(message: string): void;
+    enhancedError(error: MagentsError | Error): void;
+    errorSummary(errors: MagentsError[], title?: string): void;
     warning(message: string): void;
     info(message: string): void;
     muted(message: string): void;
@@ -47,8 +50,13 @@ export declare class UIService {
     step(current: number, total: number, description: string): void;
     command(cmd: string, description?: string): void;
     keyValue(key: string, value: string, icon?: string): void;
+    tip(message: string): void;
+    example(command: string): void;
+    list(items: string[]): void;
     private getStatusColor;
     private getColorHex;
+    private getSeverityIcon;
+    private getSeverityColor;
 }
 export declare const ui: UIService;
 //# sourceMappingURL=UIService.d.ts.map

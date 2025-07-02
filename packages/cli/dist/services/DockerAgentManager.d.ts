@@ -25,5 +25,7 @@ export declare class DockerAgentManager {
     private agentExists;
     private recordAgent;
     private updateAgentStatus;
+    private checkClaudeAuthVolume;
+    private checkClaudeAuthVolumeStatic;
 }
 //# sourceMappingURL=DockerAgentManager.d.ts.map

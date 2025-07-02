@@ -13,6 +13,7 @@ const log_symbols_1 = __importDefault(require("log-symbols"));
 const figures_1 = __importDefault(require("figures"));
 const cli_spinners_1 = __importDefault(require("cli-spinners"));
 const ascii_art_1 = require("./ascii-art");
+const shared_1 = require("@magents/shared");
 class UIService {
     constructor() {
         // Create a beautiful gradient similar to Claude Code
@@ -76,6 +77,106 @@ class UIService {
     // Error message with icon
     error(message) {
         console.log(`${this.theme.icons.error} ${this.theme.colors.error(message)}`);
+    }
+    // Enhanced error display with recovery suggestions
+    enhancedError(error) {
+        if (!(error instanceof shared_1.MagentsError)) {
+            this.error(error.message);
+            return;
+        }
+        console.log(); // Add spacing
+        // Error header with severity indicator
+        const severityIcon = this.getSeverityIcon(error.severity);
+        const severityColor = this.getSeverityColor(error.severity);
+        console.log(`${severityIcon} ${severityColor.bold(error.userMessage)}`);
+        // Technical details (muted)
+        if (error.technicalMessage !== error.userMessage) {
+            console.log(`   ${this.theme.colors.muted(`Technical: ${error.technicalMessage}`)}`);
+        }
+        // Error metadata
+        console.log(`   ${this.theme.colors.muted(`Code: ${error.code} | Category: ${error.category} | Severity: ${error.severity}`)}`);
+        // Recovery suggestions
+        if (error.suggestions.length > 0) {
+            console.log();
+            console.log(`${this.theme.colors.info.bold('💡 Suggested solutions:')}`);
+            error.suggestions.forEach((suggestion, index) => {
+                console.log(`   ${this.theme.colors.primary(`${index + 1}.`)} ${suggestion}`);
+            });
+        }
+        // Auto-fix suggestions if available
+        if (error.autoFixAvailable && error.context) {
+            console.log();
+            console.log(`${this.theme.colors.success.bold('🔧 Auto-fix suggestions:')}`);
+            if (error.context.suggestedName) {
+                console.log(`   ${this.theme.colors.primary('•')} Try name: ${this.theme.colors.highlight(error.context.suggestedName)}`);
+            }
+            if (error.context.suggestedPort) {
+                console.log(`   ${this.theme.colors.primary('•')} Try port: ${this.theme.colors.highlight(error.context.suggestedPort)}`);
+            }
+        }
+        // Learn more link
+        if (error.learnMoreUrl) {
+            console.log();
+            console.log(`${this.theme.colors.info('📖 Learn more:')} ${this.theme.colors.primary(error.learnMoreUrl)}`);
+        }
+        // Recovery status
+        if (error.recoverable) {
+            console.log();
+            console.log(`${this.theme.colors.success('✅ This error can be resolved. Try the suggestions above.')}`);
+        }
+        else {
+            console.log();
+            console.log(`${this.theme.colors.warning('⚠️  This may require manual intervention or system changes.')}`);
+        }
+        console.log(); // Add spacing
+    }
+    // Error summary for multiple errors
+    errorSummary(errors, title = 'Multiple Errors Occurred') {
+        const criticalCount = errors.filter(e => e.severity === shared_1.ErrorSeverity.CRITICAL).length;
+        const highCount = errors.filter(e => e.severity === shared_1.ErrorSeverity.HIGH).length;
+        const mediumCount = errors.filter(e => e.severity === shared_1.ErrorSeverity.MEDIUM).length;
+        const lowCount = errors.filter(e => e.severity === shared_1.ErrorSeverity.LOW).length;
+        console.log();
+        console.log(`${this.theme.icons.error} ${this.theme.colors.error.bold(title)}`);
+        console.log();
+        // Summary by severity
+        const summary = [];
+        if (criticalCount > 0)
+            summary.push(`${criticalCount} critical`);
+        if (highCount > 0)
+            summary.push(`${highCount} high`);
+        if (mediumCount > 0)
+            summary.push(`${mediumCount} medium`);
+        if (lowCount > 0)
+            summary.push(`${lowCount} low`);
+        console.log(`   ${this.theme.colors.muted(`Found ${errors.length} errors: ${summary.join(', ')}`)}`);
+        console.log();
+        // List errors with priorities
+        const sortedErrors = [...errors].sort((a, b) => {
+            const severityOrder = {
+                [shared_1.ErrorSeverity.CRITICAL]: 0,
+                [shared_1.ErrorSeverity.HIGH]: 1,
+                [shared_1.ErrorSeverity.MEDIUM]: 2,
+                [shared_1.ErrorSeverity.LOW]: 3
+            };
+            return severityOrder[a.severity] - severityOrder[b.severity];
+        });
+        sortedErrors.forEach((error, index) => {
+            const icon = this.getSeverityIcon(error.severity);
+            const color = this.getSeverityColor(error.severity);
+            console.log(`   ${index + 1}. ${icon} ${color(error.userMessage)}`);
+            if (error.suggestions.length > 0) {
+                console.log(`      ${this.theme.colors.muted(`→ ${error.suggestions[0]}`)}`);
+            }
+        });
+        // Recovery recommendation
+        const recoverableCount = errors.filter(e => e.recoverable).length;
+        if (recoverableCount > 0) {
+            console.log();
+            console.log(`${this.theme.colors.info(`✅ ${recoverableCount} of these errors can be resolved automatically.`)}`);
+            console.log(`   ${this.theme.colors.muted('Run each error suggestion or use auto-fix where available.')}`);
+        }
+        console.log();
     }
     // Warning message with icon
     warning(message) {
@@ -193,6 +294,20 @@ class UIService {
         const iconStr = icon ? `${icon} ` : '';
         console.log(`${iconStr}${this.theme.colors.primary.bold(key + ':')} ${value}`);
     }
+    // Display a helpful tip
+    tip(message) {
+        console.log(`${chalk_1.default.cyan('💡')} ${chalk_1.default.cyan(message)}`);
+    }
+    // Display an example command
+    example(command) {
+        console.log(`${chalk_1.default.gray('Example:')} ${chalk_1.default.white(command)}`);
+    }
+    // Display a list of items
+    list(items) {
+        items.forEach(item => {
+            console.log(`  ${chalk_1.default.gray('•')} ${item}`);
+        });
+    }
     // Helper to get status color
     getStatusColor(status) {
         switch (status.toLowerCase()) {
@@ -222,6 +337,36 @@ class UIService {
             highlight: '#A55EEA'
         };
         return colorMap[color];
+    }
+    // Helper to get severity icon
+    getSeverityIcon(severity) {
+        switch (severity) {
+            case shared_1.ErrorSeverity.CRITICAL:
+                return '🚨';
+            case shared_1.ErrorSeverity.HIGH:
+                return this.theme.icons.error;
+            case shared_1.ErrorSeverity.MEDIUM:
+                return this.theme.icons.warning;
+            case shared_1.ErrorSeverity.LOW:
+                return this.theme.icons.info;
+            default:
+                return this.theme.icons.error;
+        }
+    }
+    // Helper to get severity color
+    getSeverityColor(severity) {
+        switch (severity) {
+            case shared_1.ErrorSeverity.CRITICAL:
+                return this.theme.colors.error;
+            case shared_1.ErrorSeverity.HIGH:
+                return this.theme.colors.error;
+            case shared_1.ErrorSeverity.MEDIUM:
+                return this.theme.colors.warning;
+            case shared_1.ErrorSeverity.LOW:
+                return this.theme.colors.info;
+            default:
+                return this.theme.colors.error;
+        }
     }
 }
 exports.UIService = UIService;

@@ -7,6 +7,7 @@ import { AgentManager } from '../services/AgentManager';
 import { DockerAgentManager } from '../services/DockerAgentManager';
 import { ConfigManager } from '../config/ConfigManager';
 import { ui } from '../ui/UIService';
+import { createAutoConfigCommand } from '../commands/autoconfig';
 
 const program = new Command();
 const configManager = ConfigManager.getInstance();
@@ -2363,6 +2364,9 @@ program
       dryRun: options.dryRun
     });
   });
+
+// Add auto-configuration command
+program.addCommand(createAutoConfigCommand());
 
 // Override help to show our custom styling
 if (process.argv.includes('--help') || process.argv.includes('-h')) {

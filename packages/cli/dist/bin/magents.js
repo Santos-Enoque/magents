@@ -44,6 +44,7 @@ const AgentManager_1 = require("../services/AgentManager");
 const DockerAgentManager_1 = require("../services/DockerAgentManager");
 const ConfigManager_1 = require("../config/ConfigManager");
 const UIService_1 = require("../ui/UIService");
+const autoconfig_1 = require("../commands/autoconfig");
 const program = new commander_1.Command();
 const configManager = ConfigManager_1.ConfigManager.getInstance();
 const config = configManager.loadConfig();
@@ -2150,6 +2151,8 @@ program
         dryRun: options.dryRun
     });
 });
+// Add auto-configuration command
+program.addCommand((0, autoconfig_1.createAutoConfigCommand)());
 // Override help to show our custom styling
 if (process.argv.includes('--help') || process.argv.includes('-h')) {
     UIService_1.ui.header('MAGENTS - Multi-Agent Claude Code Workflow Manager', true);
