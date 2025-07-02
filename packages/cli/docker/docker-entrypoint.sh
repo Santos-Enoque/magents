@@ -97,6 +97,17 @@ check_versions() {
 # Display versions
 check_versions
 
+# Start health check server in background
+if [ -f "/usr/local/bin/health-server.js" ]; then
+    echo "Starting health check server..."
+    node /usr/local/bin/health-server.js &
+    HEALTH_PID=$!
+    echo "Health check server started (PID: $HEALTH_PID)"
+    
+    # Ensure health server stops on exit
+    trap "kill $HEALTH_PID 2>/dev/null || true; cleanup" EXIT
+fi
+
 # If no command provided, start interactive bash
 if [ $# -eq 0 ]; then
     echo "Starting interactive shell..."
