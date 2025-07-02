@@ -1191,6 +1191,24 @@ program
     }
   });
 
+// Assign command - automatic task generation and assignment
+program
+  .command('assign')
+  .description('Automatically analyze project and assign tasks to agents')
+  .option('-p, --project-path <path>', 'Project path to analyze (default: current directory)')
+  .option('-a, --analyze', 'Show detailed project analysis')
+  .option('--auto-create', 'Automatically create agents for high-priority tasks')
+  .option('--agent <agentId>', 'Assign all tasks to specific agent')
+  .option('--max-tasks <number>', 'Maximum number of tasks to generate', parseInt)
+  .option('--category <category>', 'Filter tasks by category (testing, infrastructure, optimization, code-quality)')
+  .option('--priority <priority>', 'Filter tasks by priority (high, medium, low)')
+  .option('--mode <mode>', 'Complexity mode for task generation (simple, standard, advanced)', 'standard')
+  .option('--dry-run', 'Preview tasks without creating them')
+  .action(async (options) => {
+    const { assignCommand } = await import('../commands/assign');
+    await assignCommand.execute(options);
+  });
+
 // Task Master integration - create from specific task
 program
   .command('task-create')
