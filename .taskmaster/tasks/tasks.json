@@ -1006,7 +1006,54 @@
         "testStrategy": "Schema validation tests for all data operations. Migration tests from old to new format. Concurrent access tests for race conditions. Real-time sync tests between multiple clients. Backup and restore functionality tests.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending"
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design UnifiedAgentData schema and data structures",
+            "description": "Create flattened data schema replacing complex nested structures. Define TypeScript interfaces and Zod validation schemas for agent, task, and project data. Design schema for SQLite database with proper relationships and indexing.",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 23
+          },
+          {
+            "id": 2,
+            "title": "Implement SQLite database with migrations",
+            "description": "Set up SQLite database for persistent storage. Create migration system for schema changes. Implement database initialization, connection management, and proper cleanup. Add database versioning and automatic migration handling.",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 23
+          },
+          {
+            "id": 3,
+            "title": "Create DataSync service for real-time updates",
+            "description": "Build service for real-time synchronization between CLI and GUI. Implement WebSocket or Server-Sent Events for live updates. Handle concurrent access and conflict resolution. Add event-driven updates for data changes.",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 23
+          },
+          {
+            "id": 4,
+            "title": "Build migration tool for existing configurations",
+            "description": "Create tool to convert existing agent configurations to new unified format. Handle data transformation from old JSON files to new SQLite schema. Implement backup and rollback capabilities for migrations. Add validation to ensure data integrity during migration.",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 23
+          },
+          {
+            "id": 5,
+            "title": "Implement atomic operations and backup/restore",
+            "description": "Add atomic transaction support to prevent race conditions. Implement database backup and restore functionality. Create data validation layer with comprehensive error handling. Add rollback mechanisms for failed operations.",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 23
+          }
+        ]
       },
       {
         "id": 24,
@@ -1098,7 +1145,7 @@
     ],
     "metadata": {
       "created": "2025-06-30T14:18:19.843Z",
-      "updated": "2025-07-02T12:50:47.328Z",
+      "updated": "2025-07-02T13:02:32.743Z",
       "description": "Tasks for master context"
     }
   }

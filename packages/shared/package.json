@@ -12,6 +12,9 @@
     "format": "prettier --write src/**/*.ts",
     "clean": "rm -rf dist"
   },
+  "dependencies": {
+    "zod": "^3.25.67"
+  },
   "devDependencies": {
     "@types/node": "^20.8.10",
     "@typescript-eslint/eslint-plugin": "^6.9.1",

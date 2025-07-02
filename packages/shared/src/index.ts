@@ -1,6 +1,44 @@
 // Export all types
 export * from './types';
 
+// Export unified types with explicit naming to avoid conflicts
+export {
+  UnifiedAgentData,
+  UnifiedAgentDataSchema,
+  UnifiedProjectData,
+  UnifiedProjectDataSchema,
+  UnifiedTaskData,
+  UnifiedTaskDataSchema,
+  UnifiedConfigData,
+  UnifiedConfigDataSchema,
+  UnifiedEventData,
+  UnifiedEventDataSchema,
+  UnifiedDataValidator,
+  isUnifiedAgentData,
+  isUnifiedProjectData,
+  isUnifiedTaskData,
+  isUnifiedConfigData,
+  isUnifiedEventData,
+  TABLE_SCHEMAS,
+  INDEXES,
+  MIGRATIONS,
+  DATABASE_VERSION,
+  MigrationDefinition,
+  EntityId,
+  EntityIdSchema,
+  EventType,
+  EventTypeSchema,
+} from './types/unified';
+
+// Re-export unified status types with different names
+export {
+  AgentStatus as UnifiedAgentStatus,
+  AgentMode,
+  ProjectStatus as UnifiedProjectStatus,
+  TaskStatus as UnifiedTaskStatus,
+  TaskPriority as UnifiedTaskPriority,
+} from './types/unified';
+
 // Export all utilities
 export * from './utils';
 
