@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # Claude Code Bridge Server (runs on host)
+  claude-bridge:
+    image: node:20-slim
+    volumes:
+      - /var/run/claude-code-bridge.sock:/var/run/claude-code-bridge.sock
+      - ./claude-bridge-server.js:/app/claude-bridge-server.js:ro
+      - ~/.config/claude-code:/root/.config/claude-code:ro
+    command: node /app/claude-bridge-server.js
+    restart: unless-stopped
+    network_mode: host
+    
+  # Example agent container
+  agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: magents/agent:latest
+    volumes:
+      # Project workspace
+      - ../../../:/workspace
+      # Shared configuration
+      - ~/.magents/shared:/shared
+      # Agent-specific data
+      - agent_data:/agent
+      # Claude Code bridge socket
+      - /var/run/claude-code-bridge.sock:/host/claude-bridge.sock
+      # Task Master config (read-only)
+      - ~/.taskmaster:/home/magents/.taskmaster:ro
+    environment:
+      - CLAUDE_BRIDGE_SOCKET=/host/claude-bridge.sock
+      - NODE_ENV=production
+    depends_on:
+      - claude-bridge
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
+volumes:
+  agent_data:

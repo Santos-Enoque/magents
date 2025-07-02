@@ -1,0 +1,23 @@
+[Unit]
+Description=Claude Code Bridge Server for Docker Containers
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=root
+Group=docker
+WorkingDirectory=/opt/magents
+ExecStartPre=/bin/mkdir -p /var/run
+ExecStart=/usr/bin/node /opt/magents/claude-bridge-server.js
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Security
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

@@ -13,6 +13,8 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     sudo \
     netcat-openbsd \
+    jq \
+    coreutils \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user for security
@@ -24,7 +26,7 @@ RUN groupadd -g 1001 magents && \
 WORKDIR /workspace
 
 # Install global npm packages
-RUN npm install -g npm@latest pnpm
+RUN npm install -g npm@latest pnpm task-master-ai
 
 # Switch to non-root user
 USER magents
@@ -42,9 +44,10 @@ ENV USER=magents
 # Create volume mount points
 VOLUME ["/workspace", "/shared", "/agent"]
 
-# Set up entrypoint script location
+# Copy scripts
 COPY --chown=magents:magents docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+COPY --chown=magents:magents claude-wrapper.sh /usr/local/bin/claude
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh /usr/local/bin/claude
 
 # Default command
 CMD ["/usr/local/bin/docker-entrypoint.sh"]
