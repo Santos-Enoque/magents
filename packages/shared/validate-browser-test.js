@@ -125,24 +125,22 @@ function runBrowserTestValidation() {
     }
     
     try {
-      const migrator = vm.runInContext('new MockConfigMigrator()', context);
-      if (migrator) {
-        console.log('✅ MockConfigMigrator can be instantiated');
-        
-        // Test mapping functions
-        const status = vm.runInContext('migrator.mapAgentStatus("running")', context);
-        if (status === 'RUNNING') {
-          console.log('✅ Status mapping works correctly');
-        } else {
-          console.log(`❌ Status mapping failed: got ${status}, expected RUNNING`);
-        }
-        
-        const mode = vm.runInContext('migrator.mapAgentMode("local")', context);
-        if (mode === 'hybrid') {
-          console.log('✅ Mode mapping works correctly');
-        } else {
-          console.log(`❌ Mode mapping failed: got ${mode}, expected hybrid`);
-        }
+      vm.runInContext('const migrator = new MockConfigMigrator();', context);
+      console.log('✅ MockConfigMigrator can be instantiated');
+      
+      // Test mapping functions
+      const status = vm.runInContext('migrator.mapAgentStatus("running")', context);
+      if (status === 'RUNNING') {
+        console.log('✅ Status mapping works correctly');
+      } else {
+        console.log(`❌ Status mapping failed: got ${status}, expected RUNNING`);
+      }
+      
+      const mode = vm.runInContext('migrator.mapAgentMode("local")', context);
+      if (mode === 'hybrid') {
+        console.log('✅ Mode mapping works correctly');
+      } else {
+        console.log(`❌ Mode mapping failed: got ${mode}, expected hybrid`);
       }
     } catch (error) {
       console.log(`❌ MockConfigMigrator error: ${error.message}`);
