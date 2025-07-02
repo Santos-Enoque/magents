@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # Single Claude agent with host auth
+  claude-agent-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.claude
+      target: development
+    image: magents/claude-agent:dev
+    container_name: magents-claude-dev
+    environment:
+      - AGENT_ID=claude-dev
+      - CLAUDE_HEADLESS=true
+    volumes:
+      # Mount host's Claude auth (read-only)
+      - ~/.config/claude:/auth:ro
+      # Mount workspace
+      - ../../../:/workspace
+      # Shared config
+      - magents-shared:/shared
+    stdin_open: true
+    tty: true
+    command: ["tmux", "new-session", "-s", "claude", "claude"]
+
+  # Production-style agent with copied auth
+  claude-agent-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile.claude
+      target: production
+    image: magents/claude-agent:latest
+    container_name: magents-claude-prod
+    environment:
+      - AGENT_ID=claude-prod
+      - CLAUDE_AUTH_TOKEN=${CLAUDE_AUTH_TOKEN}
+    volumes:
+      - ./workspace:/workspace
+      - claude-auth:/home/magents/.config/claude
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+
+  # Multi-agent orchestration
+  agent-1:
+    extends:
+      service: claude-agent-prod
+    container_name: magents-agent-1
+    environment:
+      - AGENT_ID=agent-1
+      - TASK=Implement feature X
+
+  agent-2:
+    extends:
+      service: claude-agent-prod
+    container_name: magents-agent-2
+    environment:
+      - AGENT_ID=agent-2
+      - TASK=Write tests for feature X
+
+volumes:
+  magents-shared:
+  claude-auth:
+    # Initialize with host auth on first run
+    driver_opts:
+      type: none
+      device: ${HOME}/.config/claude
+      o: bind

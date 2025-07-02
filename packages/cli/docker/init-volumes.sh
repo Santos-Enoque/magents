@@ -22,7 +22,7 @@ init_directory() {
 echo "=== Initializing Magents Volume Directories ==="
 
 # Initialize shared directory structure
-if [ -d "/shared" ]; then
+if [ -d "/shared" ] && [ -w "/shared" ]; then
     init_directory "/shared/config" "shared configuration"
     init_directory "/shared/cache" "shared cache"
     init_directory "/shared/logs" "shared logs"
@@ -47,7 +47,7 @@ EOF
 fi
 
 # Initialize agent-specific directory structure
-if [ -d "/agent" ]; then
+if [ -d "/agent" ] && [ -w "/agent" ]; then
     init_directory "/agent/state" "agent state"
     init_directory "/agent/logs" "agent logs"
     init_directory "/agent/tmp" "agent temporary files"
@@ -69,7 +69,7 @@ EOF
 fi
 
 # Initialize workspace (if empty)
-if [ -d "/workspace" ]; then
+if [ -d "/workspace" ] && [ -w "/workspace" ]; then
     # Check if workspace is empty (excluding .git)
     if [ -z "$(ls -A /workspace 2>/dev/null | grep -v '^\.git$')" ]; then
         echo "Workspace is empty, creating README"

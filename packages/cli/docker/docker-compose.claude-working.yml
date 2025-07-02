@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # Claude agent with persistent data
+  claude-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.claude-working
+      target: development
+    image: magents/claude:dev
+    container_name: claude-agent-main
+    volumes:
+      # Persistent Claude data (auth, settings, etc)
+      - claude-data:/home/magents/.claude
+      # Project workspace
+      - ../../../:/workspace
+      # Optional: Mount your local commands
+      - ~/.claude/commands:/home/magents/.claude/commands:ro
+    environment:
+      - AGENT_ID=main
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    stdin_open: true
+    tty: true
+    command: |
+      bash -c "
+        echo 'Starting Claude agent...'
+        tmux new-session -d -s claude 'cd /workspace && claude'
+        echo 'Claude started in tmux session'
+        echo 'To attach: docker exec -it claude-agent-main tmux attach -t claude'
+        sleep infinity
+      "
+
+  # Multiple agents sharing the same auth
+  agent-1:
+    extends:
+      service: claude-agent
+    container_name: claude-agent-1
+    environment:
+      - AGENT_ID=agent-1
+      - TASK="Feature development"
+
+  agent-2:
+    extends:
+      service: claude-agent
+    container_name: claude-agent-2
+    environment:
+      - AGENT_ID=agent-2
+      - TASK="Testing and QA"
+
+  # Agent with Task Master focus
+  taskmaster-agent:
+    extends:
+      service: claude-agent
+    container_name: claude-taskmaster
+    command: |
+      bash -c "
+        echo 'Configuring Task Master...'
+        cd /workspace
+        task-master init || true
+        echo 'Starting Claude with Task Master...'
+        tmux new-session -d -s claude 'claude'
+        sleep infinity
+      "
+
+volumes:
+  # Shared Claude authentication and settings
+  claude-data:
+    external: true

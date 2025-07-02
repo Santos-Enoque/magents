@@ -26,19 +26,12 @@ EOF
     exit 1
 fi
 
-# Prepare request
-REQUEST=$(cat << EOF
-{
-  "command": "claude",
-  "args": $(printf '%s\n' "$@" | jq -R . | jq -s .),
-  "env": {},
-  "cwd": "$(pwd)"
-}
-EOF
-)
+# Prepare request as a single line
+ARGS_JSON=$(printf '%s\n' "$@" | jq -R . | jq -s . | tr -d '\n')
+REQUEST="{\"command\":\"claude\",\"args\":${ARGS_JSON},\"env\":{},\"cwd\":\"$(pwd)\"}"
 
 # Send request and process response
-# Try with timeout and handle connection errors
+# Send as a single line with newline terminator
 if ! response=$(echo "$REQUEST" | timeout 30 nc -U "$SOCKET_PATH" 2>&1); then
     echo "Error: Failed to connect to Claude bridge at $SOCKET_PATH" >&2
     echo "Details: $response" >&2

@@ -1,0 +1,64 @@
+# Dockerfile for Magents agents with Claude Code
+FROM node:20-slim AS base
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    tmux \
+    sudo \
+    python3 \
+    python3-pip \
+    jq \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create magents user
+RUN useradd -m -s /bin/bash magents && \
+    echo "magents ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/magents
+
+# Install Claude Code CLI globally (as root)
+RUN npm install -g @anthropic-ai/claude-code
+
+# Switch to magents user
+USER magents
+WORKDIR /home/magents
+
+# Copy Claude auth setup script
+COPY --chown=magents:magents claude-setup.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/claude-setup.sh
+
+# Create directories
+RUN mkdir -p /home/magents/.config/claude \
+    /home/magents/.claude \
+    /home/magents/workspace
+
+# Production stage - for cloud deployment
+FROM base AS production
+
+# Copy auth configuration (to be mounted at runtime)
+VOLUME /home/magents/.config/claude
+VOLUME /home/magents/workspace
+
+# Environment variables for cloud deployment
+ENV CLAUDE_HEADLESS=true
+ENV CLAUDE_NO_BROWSER=true
+
+# Entry point that handles auth
+ENTRYPOINT ["/usr/local/bin/claude-setup.sh"]
+CMD ["tmux", "new-session", "-s", "claude", "claude"]
+
+# Development stage - for local testing
+FROM base AS development
+
+# Switch back to root for installations
+USER root
+
+# Additional dev tools
+RUN npm install -g task-master-ai
+
+# Switch back to magents user
+USER magents
+
+ENTRYPOINT ["/usr/local/bin/claude-setup.sh"]
+CMD ["bash"]

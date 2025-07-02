@@ -1,0 +1,45 @@
+FROM node:20-slim
+
+# Install dependencies including keychain tools
+RUN apt-get update && apt-get install -y \
+    git curl tmux sudo python3 python3-pip jq build-essential \
+    ca-certificates gnupg \
+    # Add tools for handling secrets
+    libsecret-1-0 libsecret-tools \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create user
+RUN useradd -m -s /bin/bash magents && \
+    echo "magents ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/magents
+
+# Install Claude and Task Master
+RUN npm install -g @anthropic-ai/claude-code task-master-ai
+
+# Create auth wrapper script
+RUN cat > /usr/local/bin/claude-wrapper << 'SCRIPT'
+#!/bin/bash
+# Wrapper to handle Claude authentication
+
+# Check if we need to authenticate
+if ! claude --version 2>/dev/null | grep -q "Claude Code"; then
+    echo "Claude needs authentication. Starting setup..."
+    claude
+else
+    # Run Claude with arguments
+    claude "$@"
+fi
+SCRIPT
+
+RUN chmod +x /usr/local/bin/claude-wrapper
+
+USER magents
+WORKDIR /home/magents
+
+# Create directories
+RUN mkdir -p ~/.claude ~/.config ~/.local/share
+
+# Set up environment
+ENV CLAUDE_DISABLE_ANALYTICS=1
+ENV NODE_ENV=production
+
+ENTRYPOINT ["/usr/local/bin/claude-wrapper"]

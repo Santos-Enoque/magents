@@ -1,0 +1,20 @@
+#!/bin/bash
+# Convenience wrapper for Claude in Docker
+
+# Default to current directory for workspace
+WORKSPACE="${WORKSPACE:-$(pwd)}"
+
+# Check if we're running interactively or with arguments
+if [ $# -eq 0 ]; then
+    # No arguments - run interactive Claude
+    docker run -it --rm \
+        -v claude-container-auth:/home/magents \
+        -v "$WORKSPACE:/workspace" \
+        magents/claude:dev claude
+else
+    # Arguments provided - pass them to Claude
+    docker run -it --rm \
+        -v claude-container-auth:/home/magents \
+        -v "$WORKSPACE:/workspace" \
+        magents/claude:dev claude "$@"
+fi

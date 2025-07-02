@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  # Claude agent with authenticated volume
+  claude-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.claude-working
+      target: development
+    image: magents/claude:dev
+    container_name: claude-agent-main
+    volumes:
+      # Use the authenticated volume
+      - claude-container-auth:/home/magents
+      # Project workspace
+      - ../../../:/workspace
+    environment:
+      - AGENT_ID=main
+    stdin_open: true
+    tty: true
+    command: claude
+
+  # Multiple agents sharing the same auth
+  agent-1:
+    extends:
+      service: claude-agent
+    container_name: claude-agent-1
+    environment:
+      - AGENT_ID=agent-1
+
+  agent-2:
+    extends:
+      service: claude-agent
+    container_name: claude-agent-2
+    environment:
+      - AGENT_ID=agent-2
+
+volumes:
+  # This volume contains the authenticated Claude session
+  claude-container-auth:
+    external: true

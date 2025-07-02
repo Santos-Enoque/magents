@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: claude-auth
+type: Opaque
+data:
+  # Base64 encoded Claude auth config
+  config.json: <BASE64_ENCODED_CLAUDE_CONFIG>
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: magents-config
+data:
+  CLAUDE.md: |
+    # Agent Context
+    This agent is running in Kubernetes
+    Task: Autonomous development
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: magents-agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: magents-agent
+  template:
+    metadata:
+      labels:
+        app: magents-agent
+    spec:
+      containers:
+      - name: claude-agent
+        image: magents/claude-agent:latest
+        env:
+        - name: AGENT_ID
+          value: "k8s-agent-001"
+        - name: CLAUDE_HEADLESS
+          value: "true"
+        volumeMounts:
+        - name: claude-auth
+          mountPath: /home/magents/.config/claude
+          readOnly: true
+        - name: workspace
+          mountPath: /workspace
+        - name: config
+          mountPath: /home/magents/CLAUDE.md
+          subPath: CLAUDE.md
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1"
+          limits:
+            memory: "4Gi"
+            cpu: "2"
+      volumes:
+      - name: claude-auth
+        secret:
+          secretName: claude-auth
+      - name: workspace
+        persistentVolumeClaim:
+          claimName: agent-workspace
+      - name: config
+        configMap:
+          name: magents-config
