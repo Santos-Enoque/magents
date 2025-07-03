@@ -56,6 +56,13 @@ export interface MigrationResult {
 export class UnifiedDatabaseService {
   private connection: DatabaseConnection | null = null;
   private config: DatabaseConfig;
+  
+  // Repository instances
+  public projects!: ProjectRepository;
+  public agents!: AgentRepository;
+  public tasks!: TaskRepository;
+  public configRepo!: ConfigRepository;
+  public events!: EventRepository;
 
   constructor(config: DatabaseConfig = {}) {
     this.config = {
@@ -114,6 +121,13 @@ export class UnifiedDatabaseService {
       if (!this.config.readOnly) {
         await this.runMigrations();
       }
+
+      // Initialize repositories
+      this.projects = new ProjectRepository(this);
+      this.agents = new AgentRepository(this);
+      this.tasks = new TaskRepository(this);
+      this.configRepo = new ConfigRepository(this);
+      this.events = new EventRepository(this);
 
       return this.connection;
     } catch (error) {
@@ -612,6 +626,110 @@ export class AgentRepository extends BaseRepository<UnifiedAgentData> {
     return ['docker_ports', 'docker_volumes', 'environment_vars', 'assigned_tasks', 'resource_limits', 'tags', 'metadata'];
   }
 
+  protected serialize(data: UnifiedAgentData): any {
+    const result = super.serialize(data) as any;
+    
+    // Convert camelCase to snake_case for database storage
+    result.project_id = result.projectId;
+    delete result.projectId;
+    
+    result.tmux_session = result.tmuxSession;
+    delete result.tmuxSession;
+    
+    result.docker_container = result.dockerContainer;
+    delete result.dockerContainer;
+    
+    result.docker_image = result.dockerImage;
+    delete result.dockerImage;
+    
+    result.docker_ports = result.dockerPorts;
+    delete result.dockerPorts;
+    
+    result.docker_volumes = result.dockerVolumes;
+    delete result.dockerVolumes;
+    
+    result.docker_network = result.dockerNetwork;
+    delete result.dockerNetwork;
+    
+    result.auto_accept = result.autoAccept;
+    delete result.autoAccept;
+    
+    result.port_range = result.portRange;
+    delete result.portRange;
+    
+    result.environment_vars = result.environmentVars;
+    delete result.environmentVars;
+    
+    result.current_task_id = result.currentTaskId;
+    delete result.currentTaskId;
+    
+    result.assigned_tasks = result.assignedTasks;
+    delete result.assignedTasks;
+    
+    result.resource_limits = result.resourceLimits;
+    delete result.resourceLimits;
+    
+    result.worktree_path = result.worktreePath;
+    delete result.worktreePath;
+    
+    result.last_accessed_at = result.lastAccessedAt;
+    delete result.lastAccessedAt;
+    
+    return result;
+  }
+
+  protected deserialize(row: any): UnifiedAgentData {
+    const result = super.deserialize(row) as any;
+    
+    // Convert snake_case to camelCase after base class has parsed JSON
+    result.projectId = result.project_id;
+    delete result.project_id;
+    
+    result.tmuxSession = result.tmux_session;
+    delete result.tmux_session;
+    
+    result.dockerContainer = result.docker_container;
+    delete result.docker_container;
+    
+    result.dockerImage = result.docker_image;
+    delete result.docker_image;
+    
+    result.dockerPorts = result.docker_ports || [];
+    delete result.docker_ports;
+    
+    result.dockerVolumes = result.docker_volumes || [];
+    delete result.docker_volumes;
+    
+    result.dockerNetwork = result.docker_network;
+    delete result.docker_network;
+    
+    result.autoAccept = result.auto_accept || false;
+    delete result.auto_accept;
+    
+    result.portRange = result.port_range;
+    delete result.port_range;
+    
+    result.environmentVars = result.environment_vars || {};
+    delete result.environment_vars;
+    
+    result.currentTaskId = result.current_task_id;
+    delete result.current_task_id;
+    
+    result.assignedTasks = result.assigned_tasks || [];
+    delete result.assigned_tasks;
+    
+    result.resourceLimits = result.resource_limits;
+    delete result.resource_limits;
+    
+    result.worktreePath = result.worktree_path;
+    delete result.worktree_path;
+    
+    result.lastAccessedAt = result.last_accessed_at;
+    delete result.last_accessed_at;
+    
+    return result as UnifiedAgentData;
+  }
+
   findByProject(projectId: string): UnifiedAgentData[] {
     return this.findBy({ projectId } as any);
   }
@@ -628,6 +746,40 @@ export class ProjectRepository extends BaseRepository<UnifiedProjectData> {
 
   protected getJsonFields(): string[] {
     return ['git_repository', 'agent_ids', 'port_range', 'task_master_config', 'project_type', 'tags', 'metadata'];
+  }
+
+  protected serialize(data: UnifiedProjectData): any {
+    const result = super.serialize(data) as any;
+    
+    // Convert camelCase to snake_case for database storage
+    result.agent_ids = result.agentIds;
+    delete result.agentIds;
+    
+    result.git_repository = result.gitRepository;
+    delete result.gitRepository;
+    
+    result.port_range = result.portRange;
+    delete result.portRange;
+    
+    result.task_master_config = result.taskMasterConfig;
+    delete result.taskMasterConfig;
+    
+    result.project_type = result.projectType;
+    delete result.projectType;
+    
+    result.task_master_enabled = result.taskMasterEnabled;
+    delete result.taskMasterEnabled;
+    
+    result.max_agents = result.maxAgents;
+    delete result.maxAgents;
+    
+    result.docker_network = result.dockerNetwork;
+    delete result.dockerNetwork;
+    
+    result.last_accessed_at = result.lastAccessedAt;
+    delete result.lastAccessedAt;
+    
+    return result;
   }
 
   protected deserialize(row: any): UnifiedProjectData {
@@ -661,6 +813,14 @@ export class ProjectRepository extends BaseRepository<UnifiedProjectData> {
     if (result.max_agents !== undefined) {
       result.maxAgents = result.max_agents || 0;
       delete result.max_agents;
+    }
+    if (result.docker_network !== undefined) {
+      result.dockerNetwork = result.docker_network;
+      delete result.docker_network;
+    }
+    if (result.last_accessed_at !== undefined) {
+      result.lastAccessedAt = result.last_accessed_at;
+      delete result.last_accessed_at;
     }
     
     return result as UnifiedProjectData;

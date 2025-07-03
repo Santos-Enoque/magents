@@ -19,6 +19,11 @@ export class JsonToSqliteMigration extends BaseMigration {
     agents: 0,
     tasks: 0
   };
+  private migratedCounts = {
+    projects: 0,
+    agents: 0,
+    tasks: 0
+  };
 
   constructor(
     db?: UnifiedDatabaseService,
@@ -65,7 +70,7 @@ export class JsonToSqliteMigration extends BaseMigration {
       await this.migrateTasks();
 
       const result = this.buildResult(
-        this.itemCounts.projects + this.itemCounts.agents + this.itemCounts.tasks
+        this.migratedCounts.projects + this.migratedCounts.agents + this.migratedCounts.tasks
       );
 
       this.logSummary(result);
@@ -165,6 +170,7 @@ export class JsonToSqliteMigration extends BaseMigration {
         }
       }
 
+      this.migratedCounts.projects = migrated;
       this.logger.info(`Migrated ${migrated}/${projects.length} projects`);
     } catch (error) {
       this.logger.error('Failed to migrate projects:', error);
@@ -217,6 +223,7 @@ export class JsonToSqliteMigration extends BaseMigration {
         }
       }
 
+      this.migratedCounts.agents = migrated;
       this.logger.info(`Migrated ${migrated}/${jsonFiles.length} agents`);
     } catch (error) {
       this.logger.error('Failed to migrate agents:', error);
@@ -239,55 +246,96 @@ export class JsonToSqliteMigration extends BaseMigration {
    * Convert project data to unified format
    */
   private convertProjectToUnified(project: any): UnifiedProjectData {
-    return {
+    const unified: any = {
       id: project.id,
       name: project.name,
       path: project.path,
-      description: project.description || '',
+      status: project.status?.toUpperCase() || 'ACTIVE',
+      createdAt: new Date(project.createdAt || Date.now()),
+      updatedAt: new Date(project.updatedAt || Date.now()),
       agentIds: project.agentIds || [],
-      status: project.status || 'active',
-      createdAt: project.createdAt || new Date().toISOString(),
-      updatedAt: project.updatedAt || new Date().toISOString(),
-      settings: project.settings || {},
-      templates: project.templates || {},
-      metadata: {
-        gitBranch: project.gitBranch,
-        gitRemote: project.gitRemote,
-        language: project.language,
-        framework: project.framework,
-        ...project.metadata
-      }
+      maxAgents: project.maxAgents || 10,
+      taskMasterEnabled: project.taskMasterEnabled !== false,
+      description: project.description,
+      tags: project.tags || [],
+      metadata: project.metadata || {}
     };
+
+    // Add git repository info if available
+    if (project.gitBranch || project.gitRemote) {
+      unified.gitRepository = {
+        branch: project.gitBranch || 'main',
+        remote: project.gitRemote,
+        isClean: true
+      };
+    }
+
+    // Add port range if available
+    if (project.portRange) {
+      unified.portRange = project.portRange;
+    }
+
+    return unified;
   }
 
   /**
    * Convert agent data to unified format
    */
   private async convertAgentToUnified(agent: any): Promise<UnifiedAgentData> {
-    const unifiedAgent: UnifiedAgentData = {
+    // Map legacy status to new unified status
+    const statusMap: Record<string, string> = {
+      'stopped': 'STOPPED',
+      'running': 'RUNNING',
+      'stopping': 'STOPPING',
+      'starting': 'STARTING',
+      'created': 'CREATED',
+      'error': 'ERROR',
+      'suspended': 'SUSPENDED'
+    };
+
+    const unifiedAgent: any = {
       id: agent.id,
       name: agent.name,
       projectId: agent.projectId || '',
+      status: statusMap[agent.status?.toLowerCase()] || 'STOPPED',
+      createdAt: new Date(agent.createdAt || Date.now()),
+      updatedAt: new Date(agent.updatedAt || Date.now()),
+      
+      // Execution environment
+      mode: agent.dockerEnabled !== false ? 'docker' : 'hybrid',
+      branch: agent.branch || 'main',
       worktreePath: agent.worktreePath,
-      status: agent.status || 'stopped',
-      containerName: agent.containerName,
-      sessionName: agent.sessionName,
-      port: agent.port,
-      createdAt: agent.createdAt || new Date().toISOString(),
-      updatedAt: agent.updatedAt || new Date().toISOString(),
-      lastActivity: agent.lastActivity,
-      metadata: {
-        mode: agent.mode || 'standard',
-        variant: agent.variant || 'development',
-        dockerEnabled: agent.dockerEnabled !== false,
-        taskMasterEnabled: agent.taskMasterEnabled !== false,
-        tasksAssigned: agent.tasksAssigned || [],
-        environment: agent.environment || {},
-        capabilities: agent.capabilities || []
-      },
-      settings: agent.settings || {},
-      logs: agent.logs || []
+      
+      // Optional fields
+      tmuxSession: agent.sessionName,
+      dockerContainer: agent.containerName,
+      dockerImage: agent.dockerImage,
+      dockerPorts: agent.dockerPorts || [],
+      dockerVolumes: agent.dockerVolumes || [],
+      dockerNetwork: agent.dockerNetwork,
+      
+      // Configuration
+      autoAccept: agent.autoAccept || false,
+      portRange: agent.port ? `${agent.port}-${agent.port + 10}` : undefined,
+      environmentVars: agent.environment || {},
+      
+      // Task assignment
+      currentTaskId: agent.currentTaskId,
+      assignedTasks: agent.tasksAssigned || [],
+      
+      // Resource limits
+      resourceLimits: agent.resourceLimits,
+      
+      // Metadata
+      description: agent.description,
+      tags: agent.tags || [],
+      metadata: agent.metadata || {}
     };
+
+    // Add optional date fields
+    if (agent.lastActivity) {
+      unifiedAgent.lastAccessedAt = new Date(agent.lastActivity);
+    }
 
     // Auto-assign project if needed
     if (!unifiedAgent.projectId && unifiedAgent.worktreePath && !this.config.dryRun) {
@@ -319,13 +367,14 @@ export class JsonToSqliteMigration extends BaseMigration {
       id: `proj-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name: projectName,
       path: projectPath,
-      description: `Auto-created for agent ${agent.name}`,
+      status: 'ACTIVE',
+      createdAt: new Date(),
+      updatedAt: new Date(),
       agentIds: [agent.id],
-      status: 'active',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      settings: {},
-      templates: {},
+      maxAgents: 10,
+      taskMasterEnabled: false,
+      description: `Auto-created for agent ${agent.name}`,
+      tags: [],
       metadata: {}
     });
     

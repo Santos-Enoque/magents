@@ -1968,7 +1968,7 @@
             "description": "Set up the base JsonToSqliteMigration class with proper interfaces and error handling",
             "dependencies": [],
             "details": "Create JsonToSqliteMigration class in packages/shared/src/database/migrations/migrate-json-to-sqlite.ts. Define interfaces for migration results, configuration options. Set up constructor with dependency injection for database service, project service, and config service.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "Unit tests for class instantiation and interface compliance"
           },
           {
@@ -1979,7 +1979,7 @@
               1
             ],
             "details": "Implement migrateProjects() method to read projects.json from ~/.magents/projects/, convert to UnifiedProjectData format, handle missing fields with defaults, and insert into database using ProjectRepository.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": "Integration tests with sample projects.json files"
           },
           {
@@ -2628,7 +2628,7 @@
     ],
     "metadata": {
       "created": "2025-06-30T14:18:19.843Z",
-      "updated": "2025-07-03T13:54:40.827Z",
+      "updated": "2025-07-03T14:02:26.787Z",
       "description": "Tasks for master context"
     }
   }
