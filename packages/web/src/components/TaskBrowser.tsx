@@ -5,6 +5,7 @@ import { apiService } from '../services/api';
 import { StatusIndicator } from './StatusIndicator';
 import { TaskCreationWizard } from './TaskCreationWizard';
 import { ProjectSelector } from './ProjectSelector';
+import { useFeatureFlags } from '../hooks/useFeatureFlags';
 import { ChevronRight, Search, Filter, RefreshCw, AlertCircle, Plus } from 'lucide-react';
 
 interface TaskBrowserProps {
@@ -96,6 +97,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onSelect, isSelected }) => {
 
 export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath: initialProjectPath, onTaskSelect }) => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { features, loading: featuresLoading } = useFeatureFlags();
   const [tasks, setTasks] = useState<TaskMasterTask[]>([]);
   const [filteredTasks, setFilteredTasks] = useState<TaskMasterTask[]>([]);
   const [loading, setLoading] = useState(true);
@@ -327,6 +329,31 @@ export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath: initialPr
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [fetchTasks, updateUrlParams, effectiveProjectPath]);
+
+  // Check if TaskMaster integration is disabled
+  if (!featuresLoading && features && !features.taskMasterIntegration) {
+    return (
+      <div className="h-full flex flex-col bg-background">
+        <div className="p-4 border-b border-border bg-background-card">
+          <h2 className="text-lg font-semibold text-foreground">Task Management</h2>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <AlertCircle className="w-12 h-12 text-foreground-tertiary mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-foreground mb-2">TaskMaster Integration Disabled</h3>
+            <p className="text-foreground-secondary mb-4 max-w-md">
+              TaskMaster integration is currently disabled. Enable it in the system settings or use the internal task system.
+            </p>
+            {features.internalTaskSystem && (
+              <p className="text-sm text-foreground-tertiary">
+                Internal task system is available as an alternative.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Show project selection prompt when no project is selected
   if (!effectiveProjectPath && !loading) {

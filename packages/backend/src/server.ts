@@ -9,10 +9,13 @@ import { configRoutes } from './routes/config';
 import { healthRoutes } from './routes/health';
 import { taskMasterRoutes } from './routes/taskmaster';
 import { metricsRoutes } from './routes/metrics';
+import { featureRoutes } from './routes/features';
 import { errorHandler } from './middleware/errorHandler';
 import { logger } from './middleware/logger';
 import { setupWebSocket } from './services/websocket';
 import { DatabaseService } from './services/DatabaseService';
+import { registerTaskMasterIntegration } from '@magents/shared/src/integrations/taskmaster/registry';
+import { registerInternalTaskIntegration } from '@magents/shared/src/integrations/internal';
 
 const app = express();
 const server = createServer(app);
@@ -36,6 +39,7 @@ app.use(API_ENDPOINTS.PROJECTS, projectRoutes);
 app.use(API_ENDPOINTS.CONFIG, configRoutes);
 app.use('/api/taskmaster', taskMasterRoutes);
 app.use('/api/metrics', metricsRoutes);
+app.use('/api/features', featureRoutes);
 
 // WebSocket setup
 const websocketService = setupWebSocket(io);
@@ -52,6 +56,12 @@ async function initializeServices() {
     console.log('🔧 Initializing services...');
     const dbService = DatabaseService.getInstance();
     await dbService.initialize();
+    
+    // Register task integrations
+    console.log('📋 Registering task integrations...');
+    registerTaskMasterIntegration();
+    registerInternalTaskIntegration();
+    
     console.log('✅ Services initialized successfully');
   } catch (error) {
     console.error('❌ Failed to initialize services:', error);

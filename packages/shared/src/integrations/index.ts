@@ -12,7 +12,8 @@ export * from './TaskIntegrationFactory';
 
 // Built-in implementations
 export * from './MockTaskIntegration';
-export * from './TaskMasterIntegration';
+export * from './taskmaster';
+export * from './internal';
 
 // Re-export the singleton manager for convenience
 export { taskIntegrationManager } from './TaskIntegrationFactory';

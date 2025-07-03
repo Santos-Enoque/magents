@@ -2495,7 +2495,7 @@
         "id": 49,
         "title": "Decouple Task Master as Optional Integration",
         "description": "Move Task Master code to integration layer and make it optional",
-        "status": "pending",
+        "status": "in-progress",
         "dependencies": [
           48
         ],
@@ -2628,7 +2628,7 @@
     ],
     "metadata": {
       "created": "2025-06-30T14:18:19.843Z",
-      "updated": "2025-07-03T17:00:58.864Z",
+      "updated": "2025-07-03T17:15:55.565Z",
       "description": "Tasks for master context"
     }
   }

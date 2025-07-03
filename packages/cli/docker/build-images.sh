@@ -8,6 +8,7 @@ PUSH=false
 REGISTRY="magents"
 VERSION=$(date +%Y%m%d-%H%M%S)
 LATEST=true
+INCLUDE_TASKMASTER=false
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -28,9 +29,13 @@ while [[ $# -gt 0 ]]; do
             LATEST=false
             shift
             ;;
+        --with-taskmaster)
+            INCLUDE_TASKMASTER=true
+            shift
+            ;;
         *)
             echo "Unknown option: $1"
-            echo "Usage: $0 [--push] [--registry <registry>] [--version <version>] [--no-latest]"
+            echo "Usage: $0 [--push] [--registry <registry>] [--version <version>] [--no-latest] [--with-taskmaster]"
             exit 1
             ;;
     esac
@@ -40,12 +45,14 @@ echo "Building magents agent Docker images..."
 echo "Registry: $REGISTRY"
 echo "Version: $VERSION"
 echo "Push to registry: $PUSH"
+echo "Include TaskMaster: $INCLUDE_TASKMASTER"
 echo ""
 
 # Build production image
 echo "=== Building PRODUCTION image ==="
 docker build \
     --build-arg BUILD_TARGET=production \
+    --build-arg INCLUDE_TASKMASTER=$INCLUDE_TASKMASTER \
     -f Dockerfile.multi-stage \
     -t "$REGISTRY/agent:$VERSION" \
     -t "$REGISTRY/agent:production-$VERSION" \
@@ -63,6 +70,7 @@ echo ""
 echo "=== Building DEVELOPMENT image ==="
 docker build \
     --build-arg BUILD_TARGET=development \
+    --build-arg INCLUDE_TASKMASTER=$INCLUDE_TASKMASTER \
     -f Dockerfile.multi-stage \
     -t "$REGISTRY/agent:dev-$VERSION" \
     .

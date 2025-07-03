@@ -1,5 +1,5 @@
 import { TaskMasterTask } from '@magents/shared';
-import { taskMasterIntegrationService, TaskMasterDetection, TaskAssignment } from '../services/taskMasterIntegration';
+import { taskMasterIntegrationService, TaskMasterDetection, TaskAssignment } from '../services/taskMasterIntegrationWrapper';
 import { agentController } from './agentController';
 
 export const taskMasterController = {

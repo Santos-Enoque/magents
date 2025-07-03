@@ -10,6 +10,7 @@ import { ui } from '../ui/UIService';
 import { createAutoConfigCommand } from '../commands/autoconfig';
 import { createMigrateCommand } from '../commands/migrate';
 import { createDatabaseCommand } from '../commands/database';
+import { createFeaturesCommand } from '../commands/features';
 
 const program = new Command();
 const configManager = ConfigManager.getInstance();
@@ -2330,6 +2331,9 @@ program.addCommand(createMigrateCommand());
 
 // Add database command
 program.addCommand(createDatabaseCommand());
+
+// Add features command
+program.addCommand(createFeaturesCommand());
 
 // Override help to show our custom styling
 if (process.argv.includes('--help') || process.argv.includes('-h')) {
