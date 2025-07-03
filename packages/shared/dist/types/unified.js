@@ -262,7 +262,7 @@ exports.UnifiedEventDataSchema = zod_1.z.object({
 // ============================================================================
 // Database Schema Definitions
 // ============================================================================
-exports.DATABASE_VERSION = 2;
+exports.DATABASE_VERSION = 3;
 exports.TABLE_SCHEMAS = {
     agents: `
     CREATE TABLE IF NOT EXISTS agents (
@@ -359,7 +359,6 @@ exports.TABLE_SCHEMAS = {
       ports_config TEXT, -- JSON object
       task_master_config TEXT, -- JSON object
       paths_config TEXT, -- JSON object
-      backup_metadata TEXT, -- JSON array of backup metadata
       version TEXT NOT NULL,
       created_at DATETIME NOT NULL,
       updated_at DATETIME NOT NULL
@@ -474,6 +473,30 @@ exports.MIGRATIONS = [
         down: [
         // SQLite doesn't support DROP COLUMN, so we'd need to recreate the table
         // For simplicity, we'll leave the column if downgrading
+        ],
+    },
+    {
+        version: 3,
+        name: 'enforce_project_id_mandatory',
+        up: [
+            // Ensure all agents have a project_id by creating default projects for orphaned agents
+            `INSERT OR IGNORE INTO projects (id, name, path, status, created_at, updated_at)
+       SELECT DISTINCT 
+         COALESCE(project_id, 'default-' || substr(hex(randomblob(4)), 1, 8)) as id,
+         COALESCE(project_id, 'Unknown Project') as name,
+         COALESCE(worktree_path, '/unknown') as path,
+         'ACTIVE' as status,
+         datetime('now') as created_at,
+         datetime('now') as updated_at
+       FROM agents 
+       WHERE project_id IS NULL OR project_id = ''`,
+            // Update agents without project_id to use a default project
+            `UPDATE agents 
+       SET project_id = 'default-' || substr(hex(randomblob(4)), 1, 8)
+       WHERE project_id IS NULL OR project_id = ''`,
+        ],
+        down: [
+        // No need to reverse - making projectId optional again would be a breaking change
         ],
     },
 ];

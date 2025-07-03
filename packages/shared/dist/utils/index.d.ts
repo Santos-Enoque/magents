@@ -50,4 +50,5 @@ export declare function isNumber(value: unknown): value is number;
 export declare function isObject(value: unknown): value is Record<string, unknown>;
 export declare function isArray<T>(value: unknown): value is T[];
 export declare function isDefined<T>(value: T | undefined | null): value is T;
+export * from './logger';
 //# sourceMappingURL=index.d.ts.map

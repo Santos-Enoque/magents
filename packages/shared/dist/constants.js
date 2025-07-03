@@ -1,6 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.FEATURES = exports.LOG_LEVELS = exports.COLORS = exports.REGEX = exports.TIMEOUTS = exports.VALIDATION = exports.ERROR_CODES = exports.WS_EVENTS = exports.API_ENDPOINTS = exports.FILE_PATTERNS = exports.ENVIRONMENT_TYPES = exports.DOCKER_DEFAULTS = exports.TASK_PRIORITY = exports.TASK_STATUS = exports.PROJECT_STATUS = exports.AGENT_STATUS = exports.PORT_RANGES = exports.DEFAULT_CONFIG = void 0;
+exports.FEATURES = exports.LOG_LEVELS = exports.COLORS = exports.REGEX = exports.TIMEOUTS = exports.VALIDATION = exports.ERROR_CODES = exports.WS_EVENTS = exports.API_ENDPOINTS = exports.FILE_PATTERNS = exports.ENVIRONMENT_TYPES = exports.DOCKER_DEFAULTS = exports.TASK_PRIORITY = exports.TASK_STATUS = exports.PROJECT_STATUS = exports.AGENT_STATUS = exports.PORT_RANGES = exports.DEFAULT_CONFIG = exports.DEFAULT_DATABASE_CONFIG = void 0;
+// Default database configuration
+exports.DEFAULT_DATABASE_CONFIG = {
+    enabled: true,
+    autoMigrate: true,
+    backupOnMigration: true,
+    healthCheckInterval: 30, // 30 seconds
+    connectionTimeout: 5000, // 5 seconds
+    retryAttempts: 3,
+    retryDelay: 1000, // 1 second
+};
 // Default configuration values
 exports.DEFAULT_CONFIG = {
     DEFAULT_BASE_BRANCH: 'main',
@@ -11,6 +21,7 @@ exports.DEFAULT_CONFIG = {
     CLAUDE_AUTO_ACCEPT: true,
     DOCKER_ENABLED: false,
     DOCKER_IMAGE: 'node:18-alpine',
+    DATABASE_CONFIG: exports.DEFAULT_DATABASE_CONFIG,
 };
 // Port ranges
 exports.PORT_RANGES = {

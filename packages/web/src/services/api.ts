@@ -313,6 +313,11 @@ class ApiService {
     });
   }
 
+  async getAvailableAgentsForProject(projectPath: string) {
+    const queryParams = new URLSearchParams({ path: projectPath });
+    return this.request<any[]>(`/api/taskmaster/agents?${queryParams}`);
+  }
+
   async getTaskMasterStatistics(path: string) {
     const queryParams = new URLSearchParams({ path });
     return this.request<any>(`/api/taskmaster/statistics?${queryParams}`);

@@ -95,10 +95,26 @@ export {
 export { MigrationResult as ConfigMigrationResult } from './migration/ConfigMigrator';
 
 // Export constants
-export * from './constants';
+export { 
+  DEFAULT_DATABASE_CONFIG,
+  PORT_RANGES, 
+  AGENT_STATUS, 
+  PROJECT_STATUS, 
+  TASK_STATUS, 
+  TASK_PRIORITY, 
+  ERROR_CODES, 
+  WS_EVENTS, 
+  API_ENDPOINTS 
+} from './constants';
+
+// Export DEFAULT_CONFIG separately to handle the type properly
+export { DEFAULT_CONFIG } from './constants';
 
 // Export core GUI-CLI integration functionality
 export * from './core';
+
+// Export task integration system
+export * from './integrations';
 
 // Re-export specific commonly used items for convenience
 export {
@@ -114,16 +130,6 @@ export {
   getRelativeTime,
 } from './utils';
 
-export {
-  DEFAULT_CONFIG,
-  AGENT_STATUS,
-  PROJECT_STATUS,
-  TASK_STATUS,
-  TASK_PRIORITY,
-  ERROR_CODES,
-  WS_EVENTS,
-  API_ENDPOINTS,
-} from './constants';
 
 // Version information
 export const VERSION = '1.0.0';

@@ -18,6 +18,7 @@ const metrics_1 = require("./routes/metrics");
 const errorHandler_1 = require("./middleware/errorHandler");
 const logger_1 = require("./middleware/logger");
 const websocket_1 = require("./services/websocket");
+const DatabaseService_1 = require("./services/DatabaseService");
 const app = (0, express_1.default)();
 exports.app = app;
 const server = (0, http_1.createServer)(app);
@@ -46,25 +47,49 @@ const websocketService = (0, websocket_1.setupWebSocket)(io);
 exports.websocketService = websocketService;
 // Error handling middleware (must be last)
 app.use(errorHandler_1.errorHandler);
+// Initialize database service
+async function initializeServices() {
+    try {
+        console.log('🔧 Initializing services...');
+        const dbService = DatabaseService_1.DatabaseService.getInstance();
+        await dbService.initialize();
+        console.log('✅ Services initialized successfully');
+    }
+    catch (error) {
+        console.error('❌ Failed to initialize services:', error);
+        // Don't exit - fallback to file-based storage
+    }
+}
 // Start server
 const PORT = parseInt(process.env.PORT || shared_1.PORT_RANGES.BACKEND_DEFAULT.toString(), 10);
 const HOST = process.env.HOST || 'localhost';
-server.listen(PORT, HOST, () => {
-    console.log(`🚀 Magents Backend Server running on http://${HOST}:${PORT}`);
-    console.log(`📡 WebSocket server running on ws://${HOST}:${PORT}`);
-    console.log(`🌐 API available at http://${HOST}:${PORT}/api`);
+// Initialize services first, then start server
+initializeServices().then(() => {
+    server.listen(PORT, HOST, () => {
+        console.log(`🚀 Magents Backend Server running on http://${HOST}:${PORT}`);
+        console.log(`📡 WebSocket server running on ws://${HOST}:${PORT}`);
+        console.log(`🌐 API available at http://${HOST}:${PORT}/api`);
+    });
+}).catch((error) => {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
 });
 // Graceful shutdown
-process.on('SIGTERM', () => {
-    console.log('SIGTERM received, shutting down gracefully');
+async function gracefulShutdown(signal) {
+    console.log(`${signal} received, shutting down gracefully`);
+    try {
+        // Shutdown database service
+        const dbService = DatabaseService_1.DatabaseService.getInstance();
+        await dbService.shutdown();
+    }
+    catch (error) {
+        console.error('Error shutting down database service:', error);
+    }
     server.close(() => {
         console.log('Process terminated');
+        process.exit(0);
     });
-});
-process.on('SIGINT', () => {
-    console.log('SIGINT received, shutting down gracefully');
-    server.close(() => {
-        console.log('Process terminated');
-    });
-});
+}
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 //# sourceMappingURL=server.js.map

@@ -60,6 +60,17 @@ export const taskMasterController = {
       throw new Error(`Agent ${agentId} not found`);
     }
 
+    // Validate that the agent belongs to a project that matches the task's project
+    if (agent.projectId) {
+      // Get the project details to validate the project path
+      const projectController = (await import('./projectController')).projectController;
+      const project = await projectController.getProject(agent.projectId);
+      
+      if (project && project.path !== projectPath) {
+        throw new Error(`Agent ${agentId} belongs to project "${project.name}" (${project.path}), but task is from project "${projectPath}". Agents can only be assigned tasks from their own project.`);
+      }
+    }
+
     // Assign the task
     const assignment = await taskMasterIntegrationService.assignTaskToAgent(
       agentId,
@@ -129,6 +140,32 @@ export const taskMasterController = {
     }
 
     await taskMasterIntegrationService.updateTaskStatus(projectPath, taskId, status);
+  },
+
+  /**
+   * Get agents available for task assignment in a specific project
+   */
+  async getAvailableAgentsForProject(projectPath: string): Promise<any[]> {
+    if (!projectPath) {
+      throw new Error('Project path is required');
+    }
+
+    // Get project by path to find projectId
+    const projectController = (await import('./projectController')).projectController;
+    const projects = await projectController.listProjects();
+    const project = projects.find(p => p.path === projectPath);
+    
+    if (!project) {
+      throw new Error(`No project found for path: ${projectPath}`);
+    }
+
+    // Get agents for this project
+    const agents = await agentController.getAgentsByProject(project.id);
+    
+    // Filter to only show agents that are available for task assignment
+    return agents.filter(agent => 
+      agent.status === 'RUNNING' || agent.status === 'CREATED'
+    );
   },
 
   /**

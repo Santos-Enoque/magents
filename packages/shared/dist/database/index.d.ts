@@ -13,7 +13,7 @@ interface Database {
     transaction<T>(fn: () => T): () => T;
 }
 import { UnifiedAgentData, UnifiedProjectData, UnifiedTaskData, UnifiedConfigData, UnifiedEventData } from '../types/unified';
-export interface DatabaseConfig {
+export interface SqliteConfig {
     dbPath?: string;
     inMemory?: boolean;
     readOnly?: boolean;
@@ -36,7 +36,12 @@ export interface MigrationResult {
 export declare class UnifiedDatabaseService {
     private connection;
     private config;
-    constructor(config?: DatabaseConfig);
+    projects: ProjectRepository;
+    agents: AgentRepository;
+    tasks: TaskRepository;
+    configRepo: ConfigRepository;
+    events: EventRepository;
+    constructor(config?: SqliteConfig);
     /**
      * Initialize the database connection and run migrations
      */
@@ -70,10 +75,6 @@ export declare class UnifiedDatabaseService {
      */
     prepare(query: string): any;
     /**
-     * Start a transaction
-     */
-    transaction<T>(fn: () => T): T;
-    /**
      * Get database statistics
      */
     getStats(): any;
@@ -94,9 +95,27 @@ export declare class UnifiedDatabaseService {
      */
     private getDefaultDbPath;
     /**
+     * Get the database path (public method for migration tools)
+     */
+    getDatabasePath(): string;
+    /**
      * Check if query is a write operation
      */
     private isWriteQuery;
+    /**
+     * Execute multiple operations in a transaction
+     * Automatically rolls back if any operation fails
+     *
+     * Note: Since better-sqlite3 doesn't support async in transactions,
+     * this method converts async operations to sync within the transaction
+     */
+    transaction<T>(operations: (db: UnifiedDatabaseService) => Promise<T>): Promise<T>;
+    /**
+     * Execute multiple operations in a synchronous transaction
+     * Use this for operations that don't need async/await
+     * This is more efficient as it uses better-sqlite3's native transaction support
+     */
+    syncTransaction<T>(operations: (db: UnifiedDatabaseService) => T): T;
     /**
      * Dynamic import of better-sqlite3 to handle optional dependency
      */
@@ -154,12 +173,15 @@ export declare class BaseRepository<T> {
 export declare class AgentRepository extends BaseRepository<UnifiedAgentData> {
     constructor(db: UnifiedDatabaseService);
     protected getJsonFields(): string[];
+    protected serialize(data: UnifiedAgentData): any;
+    protected deserialize(row: any): UnifiedAgentData;
     findByProject(projectId: string): UnifiedAgentData[];
     findByStatus(status: string): UnifiedAgentData[];
 }
 export declare class ProjectRepository extends BaseRepository<UnifiedProjectData> {
     constructor(db: UnifiedDatabaseService);
     protected getJsonFields(): string[];
+    protected serialize(data: UnifiedProjectData): any;
     protected deserialize(row: any): UnifiedProjectData;
     findByStatus(status: string): UnifiedProjectData[];
     findByPath(path: string): UnifiedProjectData | null;
@@ -187,7 +209,7 @@ export declare class EventRepository extends BaseRepository<UnifiedEventData> {
 }
 export declare class DatabaseFactory {
     private static instances;
-    static create(config?: DatabaseConfig): Promise<UnifiedDatabaseService>;
+    static create(config?: SqliteConfig): Promise<UnifiedDatabaseService>;
     static createInMemory(): Promise<UnifiedDatabaseService>;
     static closeAll(): Promise<void>;
 }

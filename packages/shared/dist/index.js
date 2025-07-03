@@ -14,7 +14,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PACKAGE_INFO = exports.VERSION = exports.API_ENDPOINTS = exports.WS_EVENTS = exports.ERROR_CODES = exports.TASK_PRIORITY = exports.TASK_STATUS = exports.PROJECT_STATUS = exports.AGENT_STATUS = exports.DEFAULT_CONFIG = exports.getRelativeTime = exports.formatDate = exports.deepMerge = exports.retry = exports.delay = exports.createErrorResult = exports.createSuccessResult = exports.sanitizeBranchName = exports.generateAgentId = exports.generateId = exports.runMigration = exports.createMigrator = exports.ConfigMigrator = exports.EventTypeSchema = exports.EntityIdSchema = exports.DATABASE_VERSION = exports.MIGRATIONS = exports.INDEXES = exports.TABLE_SCHEMAS = exports.isUnifiedEventData = exports.isUnifiedConfigData = exports.isUnifiedTaskData = exports.isUnifiedProjectData = exports.isUnifiedAgentData = exports.UnifiedDataValidator = exports.UnifiedEventDataSchema = exports.UnifiedConfigDataSchema = exports.UnifiedTaskDataSchema = exports.UnifiedProjectDataSchema = exports.UnifiedAgentDataSchema = exports.AUTO_CONFIG_PORT_RANGES = exports.ConfigLevel = exports.PROJECT_PATTERNS = exports.AutoConfigService = exports.autoConfig = void 0;
+exports.PACKAGE_INFO = exports.VERSION = exports.getRelativeTime = exports.formatDate = exports.deepMerge = exports.retry = exports.delay = exports.createErrorResult = exports.createSuccessResult = exports.sanitizeBranchName = exports.generateAgentId = exports.generateId = exports.DEFAULT_CONFIG = exports.API_ENDPOINTS = exports.WS_EVENTS = exports.ERROR_CODES = exports.TASK_PRIORITY = exports.TASK_STATUS = exports.PROJECT_STATUS = exports.AGENT_STATUS = exports.PORT_RANGES = exports.DEFAULT_DATABASE_CONFIG = exports.runMigration = exports.createMigrator = exports.ConfigMigrator = exports.Logger = exports.JsonToSqliteMigration = exports.BaseMigration = exports.EventTypeSchema = exports.EntityIdSchema = exports.DATABASE_VERSION = exports.MIGRATIONS = exports.INDEXES = exports.TABLE_SCHEMAS = exports.isUnifiedEventData = exports.isUnifiedConfigData = exports.isUnifiedTaskData = exports.isUnifiedProjectData = exports.isUnifiedAgentData = exports.UnifiedDataValidator = exports.UnifiedEventDataSchema = exports.UnifiedConfigDataSchema = exports.UnifiedTaskDataSchema = exports.UnifiedProjectDataSchema = exports.UnifiedAgentDataSchema = exports.AUTO_CONFIG_PORT_RANGES = exports.ConfigLevel = exports.PROJECT_PATTERNS = exports.AutoConfigService = exports.autoConfig = void 0;
 // Export all types
 __exportStar(require("./types"), exports);
 // Export error handling system
@@ -49,6 +49,12 @@ Object.defineProperty(exports, "EventTypeSchema", { enumerable: true, get: funct
 __exportStar(require("./utils"), exports);
 // Export database functionality
 __exportStar(require("./database"), exports);
+var BaseMigration_1 = require("./database/migrations/BaseMigration");
+Object.defineProperty(exports, "BaseMigration", { enumerable: true, get: function () { return BaseMigration_1.BaseMigration; } });
+var JsonToSqliteMigration_1 = require("./database/migrations/JsonToSqliteMigration");
+Object.defineProperty(exports, "JsonToSqliteMigration", { enumerable: true, get: function () { return JsonToSqliteMigration_1.JsonToSqliteMigration; } });
+var logger_1 = require("./utils/logger");
+Object.defineProperty(exports, "Logger", { enumerable: true, get: function () { return logger_1.Logger; } });
 // Export services
 __exportStar(require("./services/DataSync"), exports);
 __exportStar(require("./services/AtomicOperations"), exports);
@@ -58,7 +64,19 @@ Object.defineProperty(exports, "ConfigMigrator", { enumerable: true, get: functi
 Object.defineProperty(exports, "createMigrator", { enumerable: true, get: function () { return ConfigMigrator_1.createMigrator; } });
 Object.defineProperty(exports, "runMigration", { enumerable: true, get: function () { return ConfigMigrator_1.runMigration; } });
 // Export constants
-__exportStar(require("./constants"), exports);
+var constants_1 = require("./constants");
+Object.defineProperty(exports, "DEFAULT_DATABASE_CONFIG", { enumerable: true, get: function () { return constants_1.DEFAULT_DATABASE_CONFIG; } });
+Object.defineProperty(exports, "PORT_RANGES", { enumerable: true, get: function () { return constants_1.PORT_RANGES; } });
+Object.defineProperty(exports, "AGENT_STATUS", { enumerable: true, get: function () { return constants_1.AGENT_STATUS; } });
+Object.defineProperty(exports, "PROJECT_STATUS", { enumerable: true, get: function () { return constants_1.PROJECT_STATUS; } });
+Object.defineProperty(exports, "TASK_STATUS", { enumerable: true, get: function () { return constants_1.TASK_STATUS; } });
+Object.defineProperty(exports, "TASK_PRIORITY", { enumerable: true, get: function () { return constants_1.TASK_PRIORITY; } });
+Object.defineProperty(exports, "ERROR_CODES", { enumerable: true, get: function () { return constants_1.ERROR_CODES; } });
+Object.defineProperty(exports, "WS_EVENTS", { enumerable: true, get: function () { return constants_1.WS_EVENTS; } });
+Object.defineProperty(exports, "API_ENDPOINTS", { enumerable: true, get: function () { return constants_1.API_ENDPOINTS; } });
+// Export DEFAULT_CONFIG separately to handle the type properly
+var constants_2 = require("./constants");
+Object.defineProperty(exports, "DEFAULT_CONFIG", { enumerable: true, get: function () { return constants_2.DEFAULT_CONFIG; } });
 // Export core GUI-CLI integration functionality
 __exportStar(require("./core"), exports);
 // Re-export specific commonly used items for convenience
@@ -73,15 +91,6 @@ Object.defineProperty(exports, "retry", { enumerable: true, get: function () { r
 Object.defineProperty(exports, "deepMerge", { enumerable: true, get: function () { return utils_1.deepMerge; } });
 Object.defineProperty(exports, "formatDate", { enumerable: true, get: function () { return utils_1.formatDate; } });
 Object.defineProperty(exports, "getRelativeTime", { enumerable: true, get: function () { return utils_1.getRelativeTime; } });
-var constants_1 = require("./constants");
-Object.defineProperty(exports, "DEFAULT_CONFIG", { enumerable: true, get: function () { return constants_1.DEFAULT_CONFIG; } });
-Object.defineProperty(exports, "AGENT_STATUS", { enumerable: true, get: function () { return constants_1.AGENT_STATUS; } });
-Object.defineProperty(exports, "PROJECT_STATUS", { enumerable: true, get: function () { return constants_1.PROJECT_STATUS; } });
-Object.defineProperty(exports, "TASK_STATUS", { enumerable: true, get: function () { return constants_1.TASK_STATUS; } });
-Object.defineProperty(exports, "TASK_PRIORITY", { enumerable: true, get: function () { return constants_1.TASK_PRIORITY; } });
-Object.defineProperty(exports, "ERROR_CODES", { enumerable: true, get: function () { return constants_1.ERROR_CODES; } });
-Object.defineProperty(exports, "WS_EVENTS", { enumerable: true, get: function () { return constants_1.WS_EVENTS; } });
-Object.defineProperty(exports, "API_ENDPOINTS", { enumerable: true, get: function () { return constants_1.API_ENDPOINTS; } });
 // Version information
 exports.VERSION = '1.0.0';
 // Package metadata

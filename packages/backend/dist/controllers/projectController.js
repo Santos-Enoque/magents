@@ -1,59 +1,60 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.projectController = void 0;
-const ProjectManager_1 = require("../services/ProjectManager");
-const projectManager = ProjectManager_1.ProjectManager.getInstance();
+const ProjectService_1 = require("../services/ProjectService");
+// Use the ProjectService factory to get the appropriate implementation
+const getProjectManager = () => ProjectService_1.ProjectService.getInstance();
 exports.projectController = {
     async listProjects() {
-        return await projectManager.listProjects();
+        return await getProjectManager().listProjects();
     },
     async getProject(id) {
-        return await projectManager.getProject(id);
+        return await getProjectManager().getProject(id);
     },
     async createProject(options) {
-        return await projectManager.createProject(options);
+        return await getProjectManager().createProject(options);
     },
     async updateProject(id, updates) {
-        return await projectManager.updateProject(id, updates);
+        return await getProjectManager().updateProject(id, updates);
     },
     async deleteProject(id) {
-        return await projectManager.deleteProject(id);
+        return await getProjectManager().deleteProject(id);
     },
     async addAgentToProject(projectId, agentId) {
-        return await projectManager.addAgentToProject(projectId, agentId);
+        return await getProjectManager().addAgentToProject(projectId, agentId);
     },
     async removeAgentFromProject(projectId, agentId) {
-        return await projectManager.removeAgentFromProject(projectId, agentId);
+        return await getProjectManager().removeAgentFromProject(projectId, agentId);
     },
     async getProjectStats(id) {
-        return await projectManager.getProjectStats(id);
+        return await getProjectManager().getProjectStats(id);
     },
     async searchProjects(query) {
-        return await projectManager.searchProjects(query);
+        return await getProjectManager().searchProjects(query);
     },
     async getProjectsByStatus(status) {
-        return await projectManager.getProjectsByStatus(status);
+        return await getProjectManager().getProjectsByStatus(status);
     },
     async getProjectSettings(id) {
-        return await projectManager.getProjectSettings(id);
+        return await getProjectManager().getProjectSettings(id);
     },
     async updateProjectSettings(id, settings) {
-        return await projectManager.updateProjectSettings(id, settings);
+        return await getProjectManager().updateProjectSettings(id, settings);
     },
     async resetProjectSettings(id) {
-        return await projectManager.resetProjectSettings(id);
+        return await getProjectManager().resetProjectSettings(id);
     },
     async createProjectFromTemplate(templateName, options) {
-        return await projectManager.createProjectFromTemplate(templateName, options);
+        return await getProjectManager().createProjectFromTemplate(templateName, options);
     },
     async getProjectTemplate(templateName) {
-        return await projectManager.getProjectTemplate(templateName);
+        return await getProjectManager().getProjectTemplate(templateName);
     },
     async saveProjectTemplate(templateName, template) {
-        return await projectManager.saveProjectTemplate(templateName, template);
+        return await getProjectManager().saveProjectTemplate(templateName, template);
     },
     async listProjectTemplates() {
-        return await projectManager.listProjectTemplates();
+        return await getProjectManager().listProjectTemplates();
     }
 };
 //# sourceMappingURL=projectController.js.map

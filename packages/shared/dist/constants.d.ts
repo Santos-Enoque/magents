@@ -1,3 +1,12 @@
+export declare const DEFAULT_DATABASE_CONFIG: {
+    readonly enabled: true;
+    readonly autoMigrate: true;
+    readonly backupOnMigration: true;
+    readonly healthCheckInterval: 30;
+    readonly connectionTimeout: 5000;
+    readonly retryAttempts: 3;
+    readonly retryDelay: 1000;
+};
 export declare const DEFAULT_CONFIG: {
     readonly DEFAULT_BASE_BRANCH: "main";
     readonly TMUX_SESSION_PREFIX: "magents";
@@ -7,6 +16,7 @@ export declare const DEFAULT_CONFIG: {
     readonly CLAUDE_AUTO_ACCEPT: true;
     readonly DOCKER_ENABLED: false;
     readonly DOCKER_IMAGE: "node:18-alpine";
+    readonly DATABASE_CONFIG: any;
 };
 export declare const PORT_RANGES: {
     readonly DEFAULT_START: 3000;

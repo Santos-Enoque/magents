@@ -68,7 +68,7 @@ class AtomicOperationsService {
         }
         try {
             // Execute all operations in a single transaction
-            this.db.transaction(() => {
+            this.db.syncTransaction(() => {
                 for (const operation of operations) {
                     try {
                         this.executeOperation(operation);

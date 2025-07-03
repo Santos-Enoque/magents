@@ -1,35 +1,36 @@
 import { Project, CreateProjectOptions } from '@magents/shared';
-import { ProjectManager } from '../services/ProjectManager';
+import { ProjectService } from '../services/ProjectService';
 
-const projectManager = ProjectManager.getInstance();
+// Use the ProjectService factory to get the appropriate implementation
+const getProjectManager = () => ProjectService.getInstance();
 
 export const projectController = {
   async listProjects(): Promise<Project[]> {
-    return await projectManager.listProjects();
+    return await getProjectManager().listProjects();
   },
 
   async getProject(id: string): Promise<Project> {
-    return await projectManager.getProject(id);
+    return await getProjectManager().getProject(id);
   },
 
   async createProject(options: CreateProjectOptions): Promise<Project> {
-    return await projectManager.createProject(options);
+    return await getProjectManager().createProject(options);
   },
 
   async updateProject(id: string, updates: Partial<Project>): Promise<Project> {
-    return await projectManager.updateProject(id, updates);
+    return await getProjectManager().updateProject(id, updates);
   },
 
   async deleteProject(id: string): Promise<void> {
-    return await projectManager.deleteProject(id);
+    return await getProjectManager().deleteProject(id);
   },
 
   async addAgentToProject(projectId: string, agentId: string): Promise<Project> {
-    return await projectManager.addAgentToProject(projectId, agentId);
+    return await getProjectManager().addAgentToProject(projectId, agentId);
   },
 
   async removeAgentFromProject(projectId: string, agentId: string): Promise<Project> {
-    return await projectManager.removeAgentFromProject(projectId, agentId);
+    return await getProjectManager().removeAgentFromProject(projectId, agentId);
   },
 
   async getProjectStats(id: string): Promise<{
@@ -38,31 +39,31 @@ export const projectController = {
     lastActivity: Date | null;
     uptime: string;
   }> {
-    return await projectManager.getProjectStats(id);
+    return await getProjectManager().getProjectStats(id);
   },
 
   async searchProjects(query: string): Promise<Project[]> {
-    return await projectManager.searchProjects(query);
+    return await getProjectManager().searchProjects(query);
   },
 
   async getProjectsByStatus(status: 'ACTIVE' | 'INACTIVE'): Promise<Project[]> {
-    return await projectManager.getProjectsByStatus(status);
+    return await getProjectManager().getProjectsByStatus(status);
   },
 
   async getProjectSettings(id: string): Promise<Record<string, any>> {
-    return await projectManager.getProjectSettings(id);
+    return await getProjectManager().getProjectSettings(id);
   },
 
   async updateProjectSettings(id: string, settings: Record<string, any>): Promise<Record<string, any>> {
-    return await projectManager.updateProjectSettings(id, settings);
+    return await getProjectManager().updateProjectSettings(id, settings);
   },
 
   async resetProjectSettings(id: string): Promise<Record<string, any>> {
-    return await projectManager.resetProjectSettings(id);
+    return await getProjectManager().resetProjectSettings(id);
   },
 
   async createProjectFromTemplate(templateName: string, options: CreateProjectOptions): Promise<Project> {
-    return await projectManager.createProjectFromTemplate(templateName, options);
+    return await getProjectManager().createProjectFromTemplate(templateName, options);
   },
 
   async getProjectTemplate(templateName: string): Promise<{
@@ -71,7 +72,7 @@ export const projectController = {
     projectDefaults: Partial<CreateProjectOptions>;
     settings: Record<string, any>;
   }> {
-    return await projectManager.getProjectTemplate(templateName);
+    return await getProjectManager().getProjectTemplate(templateName);
   },
 
   async saveProjectTemplate(templateName: string, template: {
@@ -80,10 +81,10 @@ export const projectController = {
     projectDefaults: Partial<CreateProjectOptions>;
     settings: Record<string, any>;
   }): Promise<void> {
-    return await projectManager.saveProjectTemplate(templateName, template);
+    return await getProjectManager().saveProjectTemplate(templateName, template);
   },
 
   async listProjectTemplates(): Promise<string[]> {
-    return await projectManager.listProjectTemplates();
+    return await getProjectManager().listProjectTemplates();
   }
 };

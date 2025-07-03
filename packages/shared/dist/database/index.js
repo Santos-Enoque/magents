@@ -95,6 +95,12 @@ class UnifiedDatabaseService {
             if (!this.config.readOnly) {
                 await this.runMigrations();
             }
+            // Initialize repositories
+            this.projects = new ProjectRepository(this);
+            this.agents = new AgentRepository(this);
+            this.tasks = new TaskRepository(this);
+            this.configRepo = new ConfigRepository(this);
+            this.events = new EventRepository(this);
             return this.connection;
         }
         catch (error) {
@@ -258,14 +264,6 @@ class UnifiedDatabaseService {
         return conn.db.prepare(query);
     }
     /**
-     * Start a transaction
-     */
-    transaction(fn) {
-        const conn = this.getConnection();
-        const transaction = conn.db.transaction(fn);
-        return transaction();
-    }
-    /**
      * Get database statistics
      */
     getStats() {
@@ -344,11 +342,59 @@ class UnifiedDatabaseService {
         return path.join(magentsDir, 'magents.db');
     }
     /**
+     * Get the database path (public method for migration tools)
+     */
+    getDatabasePath() {
+        if (this.connection) {
+            return this.connection.path;
+        }
+        return this.config.dbPath || this.getDefaultDbPath();
+    }
+    /**
      * Check if query is a write operation
      */
     isWriteQuery(query) {
         const writePatterns = /^\s*(INSERT|UPDATE|DELETE|CREATE|DROP|ALTER|REPLACE)\s/i;
         return writePatterns.test(query.trim());
+    }
+    /**
+     * Execute multiple operations in a transaction
+     * Automatically rolls back if any operation fails
+     *
+     * Note: Since better-sqlite3 doesn't support async in transactions,
+     * this method converts async operations to sync within the transaction
+     */
+    async transaction(operations) {
+        if (!this.connection) {
+            throw new Error('Database not initialized');
+        }
+        // For async operations, we'll execute them immediately but wrap the whole thing
+        // in a try-catch to handle rollback manually if needed
+        let result;
+        this.connection.db.exec('BEGIN IMMEDIATE');
+        try {
+            result = await operations(this);
+            this.connection.db.exec('COMMIT');
+            return result;
+        }
+        catch (error) {
+            this.connection.db.exec('ROLLBACK');
+            throw error;
+        }
+    }
+    /**
+     * Execute multiple operations in a synchronous transaction
+     * Use this for operations that don't need async/await
+     * This is more efficient as it uses better-sqlite3's native transaction support
+     */
+    syncTransaction(operations) {
+        if (!this.connection) {
+            throw new Error('Database not initialized');
+        }
+        const sqliteTransaction = this.connection.db.transaction(() => {
+            return operations(this);
+        });
+        return sqliteTransaction();
     }
     /**
      * Dynamic import of better-sqlite3 to handle optional dependency
@@ -516,6 +562,76 @@ class AgentRepository extends BaseRepository {
     getJsonFields() {
         return ['docker_ports', 'docker_volumes', 'environment_vars', 'assigned_tasks', 'resource_limits', 'tags', 'metadata'];
     }
+    serialize(data) {
+        const result = super.serialize(data);
+        // Convert camelCase to snake_case for database storage
+        result.project_id = result.projectId;
+        delete result.projectId;
+        result.tmux_session = result.tmuxSession;
+        delete result.tmuxSession;
+        result.docker_container = result.dockerContainer;
+        delete result.dockerContainer;
+        result.docker_image = result.dockerImage;
+        delete result.dockerImage;
+        result.docker_ports = result.dockerPorts;
+        delete result.dockerPorts;
+        result.docker_volumes = result.dockerVolumes;
+        delete result.dockerVolumes;
+        result.docker_network = result.dockerNetwork;
+        delete result.dockerNetwork;
+        result.auto_accept = result.autoAccept;
+        delete result.autoAccept;
+        result.port_range = result.portRange;
+        delete result.portRange;
+        result.environment_vars = result.environmentVars;
+        delete result.environmentVars;
+        result.current_task_id = result.currentTaskId;
+        delete result.currentTaskId;
+        result.assigned_tasks = result.assignedTasks;
+        delete result.assignedTasks;
+        result.resource_limits = result.resourceLimits;
+        delete result.resourceLimits;
+        result.worktree_path = result.worktreePath;
+        delete result.worktreePath;
+        result.last_accessed_at = result.lastAccessedAt;
+        delete result.lastAccessedAt;
+        return result;
+    }
+    deserialize(row) {
+        const result = super.deserialize(row);
+        // Convert snake_case to camelCase after base class has parsed JSON
+        result.projectId = result.project_id;
+        delete result.project_id;
+        result.tmuxSession = result.tmux_session;
+        delete result.tmux_session;
+        result.dockerContainer = result.docker_container;
+        delete result.docker_container;
+        result.dockerImage = result.docker_image;
+        delete result.docker_image;
+        result.dockerPorts = result.docker_ports || [];
+        delete result.docker_ports;
+        result.dockerVolumes = result.docker_volumes || [];
+        delete result.docker_volumes;
+        result.dockerNetwork = result.docker_network;
+        delete result.docker_network;
+        result.autoAccept = result.auto_accept || false;
+        delete result.auto_accept;
+        result.portRange = result.port_range;
+        delete result.port_range;
+        result.environmentVars = result.environment_vars || {};
+        delete result.environment_vars;
+        result.currentTaskId = result.current_task_id;
+        delete result.current_task_id;
+        result.assignedTasks = result.assigned_tasks || [];
+        delete result.assigned_tasks;
+        result.resourceLimits = result.resource_limits;
+        delete result.resource_limits;
+        result.worktreePath = result.worktree_path;
+        delete result.worktree_path;
+        result.lastAccessedAt = result.last_accessed_at;
+        delete result.last_accessed_at;
+        return result;
+    }
     findByProject(projectId) {
         return this.findBy({ projectId });
     }
@@ -530,6 +646,29 @@ class ProjectRepository extends BaseRepository {
     }
     getJsonFields() {
         return ['git_repository', 'agent_ids', 'port_range', 'task_master_config', 'project_type', 'tags', 'metadata'];
+    }
+    serialize(data) {
+        const result = super.serialize(data);
+        // Convert camelCase to snake_case for database storage
+        result.agent_ids = result.agentIds;
+        delete result.agentIds;
+        result.git_repository = result.gitRepository;
+        delete result.gitRepository;
+        result.port_range = result.portRange;
+        delete result.portRange;
+        result.task_master_config = result.taskMasterConfig;
+        delete result.taskMasterConfig;
+        result.project_type = result.projectType;
+        delete result.projectType;
+        result.task_master_enabled = result.taskMasterEnabled;
+        delete result.taskMasterEnabled;
+        result.max_agents = result.maxAgents;
+        delete result.maxAgents;
+        result.docker_network = result.dockerNetwork;
+        delete result.dockerNetwork;
+        result.last_accessed_at = result.lastAccessedAt;
+        delete result.lastAccessedAt;
+        return result;
     }
     deserialize(row) {
         const result = super.deserialize(row);
@@ -561,6 +700,14 @@ class ProjectRepository extends BaseRepository {
         if (result.max_agents !== undefined) {
             result.maxAgents = result.max_agents || 0;
             delete result.max_agents;
+        }
+        if (result.docker_network !== undefined) {
+            result.dockerNetwork = result.docker_network;
+            delete result.docker_network;
+        }
+        if (result.last_accessed_at !== undefined) {
+            result.lastAccessedAt = result.last_accessed_at;
+            delete result.last_accessed_at;
         }
         return result;
     }

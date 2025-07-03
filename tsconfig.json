@@ -20,7 +20,8 @@
     { "path": "./packages/shared" },
     { "path": "./packages/cli" },
     { "path": "./packages/backend" },
-    { "path": "./packages/web" }
+    { "path": "./packages/web" },
+    { "path": "./packages/desktop" }
   ],
   "include": [],
   "exclude": [

@@ -2227,7 +2227,7 @@
         "id": 45,
         "title": "Auto-Create Projects for Terminal Agents",
         "description": "Automatically create projects when agents are created from terminal without explicit project",
-        "status": "pending",
+        "status": "in-progress",
         "dependencies": [
           44
         ],
@@ -2295,7 +2295,7 @@
         "id": 46,
         "title": "Add Project Selector to Task Browser",
         "description": "Create UI component for selecting project in task browser interface",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           43
         ],
@@ -2309,7 +2309,7 @@
             "description": "Build dropdown component for project selection",
             "dependencies": [],
             "details": "Create ProjectSelector.tsx component with dropdown UI. Use existing UI library components for consistency. Include search/filter functionality for many projects.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Component rendering tests, interaction tests"
           },
           {
@@ -2320,7 +2320,7 @@
               1
             ],
             "details": "Add API call to fetch projects list on component mount. Handle loading and error states. Cache project list to avoid repeated calls. Set up proper TypeScript types.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "API integration tests, error handling tests"
           },
           {
@@ -2332,7 +2332,7 @@
               2
             ],
             "details": "Add selectedProjectId state to TaskBrowser component. Update state when project is selected. Persist selection in localStorage for user convenience.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "State management tests, persistence tests"
           },
           {
@@ -2343,7 +2343,7 @@
               3
             ],
             "details": "Pass selectedProjectId to task loading API calls. Update taskMasterIntegrationService.getTasks to accept project parameter. Handle case when no project is selected.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Task filtering tests, API parameter tests"
           },
           {
@@ -2354,7 +2354,7 @@
               4
             ],
             "details": "Show loading spinner while switching projects. Display current project name prominently. Add empty states for projects without tasks. Include project task count in selector.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "UI/UX tests, visual regression tests"
           }
         ]
@@ -2363,7 +2363,7 @@
         "id": 47,
         "title": "Implement Project-Based Task Filtering",
         "description": "Filter tasks based on selected project and restrict assignment to same-project agents",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           46
         ],
@@ -2377,7 +2377,7 @@
             "description": "Modify task loading service to accept project path parameter",
             "dependencies": [],
             "details": "Update taskMasterIntegrationService.getTasks signature to accept projectPath. Modify implementation to read from project-specific .taskmaster/tasks/tasks.json. Handle missing task files gracefully.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Service unit tests with various project paths"
           },
           {
@@ -2388,7 +2388,7 @@
               1
             ],
             "details": "Create task cache keyed by project ID. Invalidate cache on task updates. Implement cache expiration strategy. Consider using React Query or similar for cache management.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Cache behavior tests, performance tests"
           },
           {
@@ -2397,7 +2397,7 @@
             "description": "Show only same-project agents when assigning tasks",
             "dependencies": [],
             "details": "When displaying agent list for task assignment, filter by projectId. Modify agent selection UI to only show eligible agents. Add clear messaging about project restrictions.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Agent filtering tests, UI interaction tests"
           },
           {
@@ -2408,7 +2408,7 @@
               3
             ],
             "details": "Add backend validation to prevent cross-project task assignment. Return clear error messages for invalid assignments. Update API documentation with constraints.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Validation tests, error response tests"
           },
           {
@@ -2420,7 +2420,7 @@
               3
             ],
             "details": "Display project name in task cards. Show agent's project in assignment UI. Add visual indicators for project boundaries. Include project in task detail views.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "UI rendering tests, visual consistency tests"
           }
         ]
@@ -2429,7 +2429,7 @@
         "id": 48,
         "title": "Create Task Integration Interface",
         "description": "Design pluggable task system architecture with common interface",
-        "status": "pending",
+        "status": "in-progress",
         "dependencies": [],
         "priority": "medium",
         "details": "Create TaskIntegration interface in packages/shared/src/integrations/ with methods: getTasks, createTask, updateTask, deleteTask, getTaskDetails. Design for multiple implementations (Task Master, internal, none).",
@@ -2628,7 +2628,7 @@
     ],
     "metadata": {
       "created": "2025-06-30T14:18:19.843Z",
-      "updated": "2025-07-03T16:17:15.560Z",
+      "updated": "2025-07-03T16:55:37.866Z",
       "description": "Tasks for master context"
     }
   }

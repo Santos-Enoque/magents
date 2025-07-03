@@ -1,3 +1,14 @@
+// Default database configuration
+export const DEFAULT_DATABASE_CONFIG = {
+  enabled: true,
+  autoMigrate: true,
+  backupOnMigration: true,
+  healthCheckInterval: 30, // 30 seconds
+  connectionTimeout: 5000, // 5 seconds
+  retryAttempts: 3,
+  retryDelay: 1000, // 1 second
+} as const;
+
 // Default configuration values
 export const DEFAULT_CONFIG = {
   DEFAULT_BASE_BRANCH: 'main',
@@ -8,6 +19,7 @@ export const DEFAULT_CONFIG = {
   CLAUDE_AUTO_ACCEPT: true,
   DOCKER_ENABLED: false,
   DOCKER_IMAGE: 'node:18-alpine',
+  DATABASE_CONFIG: DEFAULT_DATABASE_CONFIG as any,
 } as const;
 
 // Port ranges

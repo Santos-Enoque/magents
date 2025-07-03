@@ -34,16 +34,16 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.agentController = void 0;
-const cli_1 = require("@magents/cli");
-const ProjectManager_1 = require("../services/ProjectManager");
-// Initialize the AgentManager to connect to CLI storage
-const agentManager = new cli_1.AgentManager();
-const projectManager = ProjectManager_1.ProjectManager.getInstance();
+const AgentService_1 = require("../services/AgentService");
+const ProjectService_1 = require("../services/ProjectService");
+// Use service factories to get appropriate implementations
+const getAgentManager = () => AgentService_1.AgentService.getInstance();
+const getProjectManager = () => ProjectService_1.ProjectService.getInstance();
 exports.agentController = {
     async listAgents(options) {
         const { page, limit, status } = options;
-        // Get agents from CLI storage
-        let allAgents = agentManager.getActiveAgents();
+        // Get agents from appropriate storage
+        let allAgents = await getAgentManager().getActiveAgents();
         // Filter by status if provided
         if (status) {
             allAgents = allAgents.filter(agent => agent.status === status);
@@ -63,8 +63,7 @@ exports.agentController = {
         };
     },
     async getAgent(id) {
-        const allAgents = agentManager.getActiveAgents();
-        const agent = allAgents.find(a => a.id === id);
+        const agent = await getAgentManager().getAgent(id);
         if (!agent) {
             throw new Error(`Agent with id ${id} not found`);
         }
@@ -143,8 +142,8 @@ exports.agentController = {
             // Step 1: Validation
             currentStepIndex = 0;
             emitProgress(currentStepIndex, 'in-progress');
-            // Use CLI AgentManager to create agent
-            const result = await agentManager.createAgent(options);
+            // Use AgentManager to create agent
+            const result = await getAgentManager().createAgent(options);
             if (!result.success) {
                 emitProgress(currentStepIndex, 'error', result.message || 'Failed to create agent');
                 throw new Error(result.message || 'Failed to create agent');
@@ -179,7 +178,7 @@ exports.agentController = {
             // If projectId is provided, add agent to the project
             if (options.projectId) {
                 try {
-                    await projectManager.addAgentToProject(options.projectId, agent.agentId);
+                    await getProjectManager().addAgentToProject(options.projectId, agent.agentId);
                 }
                 catch (error) {
                     console.warn(`Failed to add agent ${agent.agentId} to project ${options.projectId}:`, error);
@@ -212,15 +211,15 @@ exports.agentController = {
         // Remove agent from project if associated
         if (agent.projectId) {
             try {
-                await projectManager.removeAgentFromProject(agent.projectId, id);
+                await getProjectManager().removeAgentFromProject(agent.projectId, id);
             }
             catch (error) {
                 console.warn(`Failed to remove agent ${id} from project ${agent.projectId}:`, error);
                 // Continue with agent deletion even if project disassociation fails
             }
         }
-        // Use CLI AgentManager to stop and remove agent
-        const result = await agentManager.stopAgent(id, removeWorktree);
+        // Use AgentManager to stop and remove agent
+        const result = await getAgentManager().stopAgent(id, removeWorktree);
         if (!result.success) {
             throw new Error(result.message || 'Failed to delete agent');
         }
@@ -228,29 +227,31 @@ exports.agentController = {
     async updateAgentConfig(id, config) {
         // Get the agent first to ensure it exists
         const agent = await this.getAgent(id);
-        // Note: In a complete implementation, this would persist the config
-        // to the CLI storage. For now, we're storing in memory only.
-        // The AgentManager would need to be extended to support config updates.
-        // Store config in agent object (this is temporary, would need proper storage)
-        agent.config = config;
-        // TODO: Implement proper config persistence in AgentManager
-        console.log(`Updated config for agent ${id}:`, config);
+        // Use database-backed implementation if available
+        if (AgentService_1.AgentService.isUsingDatabase()) {
+            await getAgentManager().updateAgentConfig(id, config);
+        }
+        else {
+            // Fallback to in-memory storage for CLI-only mode
+            agent.config = config;
+            console.log(`Updated config for agent ${id} (in-memory only):`, config);
+        }
     },
     async assignAgentToProject(agentId, projectId) {
         // Get agent and project to ensure they exist
         const agent = await this.getAgent(agentId);
-        await projectManager.getProject(projectId);
+        await getProjectManager().getProject(projectId);
         // Remove from previous project if assigned
         if (agent.projectId && agent.projectId !== projectId) {
             try {
-                await projectManager.removeAgentFromProject(agent.projectId, agentId);
+                await getProjectManager().removeAgentFromProject(agent.projectId, agentId);
             }
             catch (error) {
                 console.warn(`Failed to remove agent ${agentId} from previous project ${agent.projectId}:`, error);
             }
         }
         // Add to new project
-        await projectManager.addAgentToProject(projectId, agentId);
+        await getProjectManager().addAgentToProject(projectId, agentId);
         // Update agent with project assignment
         // Note: In a complete implementation, this would persist to CLI storage
         agent.projectId = projectId;
@@ -261,7 +262,7 @@ exports.agentController = {
         const agent = await this.getAgent(agentId);
         if (agent.projectId) {
             try {
-                await projectManager.removeAgentFromProject(agent.projectId, agentId);
+                await getProjectManager().removeAgentFromProject(agent.projectId, agentId);
             }
             catch (error) {
                 console.warn(`Failed to remove agent ${agentId} from project ${agent.projectId}:`, error);
@@ -274,9 +275,9 @@ exports.agentController = {
     },
     async getAgentsByProject(projectId) {
         // Verify project exists
-        await projectManager.getProject(projectId);
+        await getProjectManager().getProject(projectId);
         // Get all agents and filter by project
-        const allAgents = agentManager.getActiveAgents();
+        const allAgents = await getAgentManager().getActiveAgents();
         return allAgents.filter(agent => agent.projectId === projectId);
     },
     async assignTaskToAgent(agentId, taskId) {

@@ -42,7 +42,15 @@ export interface TaskAssignment {
   environment: Record<string, string>;
 }
 
+interface TaskCache {
+  tasks: TaskMasterTask[];
+  timestamp: number;
+  projectPath: string;
+}
+
 export class TaskMasterIntegrationService {
+  private taskCache = new Map<string, TaskCache>();
+  private cacheExpiry = 5 * 60 * 1000; // 5 minutes in milliseconds
   /**
    * Detect if TaskMaster is configured in a project
    */
@@ -96,10 +104,25 @@ export class TaskMasterIntegrationService {
    * Get available TaskMaster tasks from a project
    */
   async getTasks(projectPath: string): Promise<TaskMasterTask[]> {
+    // Check cache first
+    const cacheKey = projectPath;
+    const cached = this.taskCache.get(cacheKey);
+    const now = Date.now();
+    
+    if (cached && (now - cached.timestamp) < this.cacheExpiry) {
+      return cached.tasks;
+    }
+
     try {
       // First check if TaskMaster is configured
       const detection = await this.detectTaskMaster(projectPath);
       if (!detection.isConfigured || !detection.tasksPath) {
+        // Cache empty result
+        this.taskCache.set(cacheKey, {
+          tasks: [],
+          timestamp: now,
+          projectPath
+        });
         return [];
       }
 
@@ -113,11 +136,19 @@ export class TaskMasterIntegrationService {
       const tasksData = JSON.parse(stdout);
       
       // Extract tasks from the structure
+      let tasks: TaskMasterTask[] = [];
       if (tasksData && tasksData.master && tasksData.master.tasks) {
-        return this.flattenTasks(tasksData.master.tasks);
+        tasks = this.flattenTasks(tasksData.master.tasks);
       }
 
-      return [];
+      // Cache the result
+      this.taskCache.set(cacheKey, {
+        tasks,
+        timestamp: now,
+        projectPath
+      });
+
+      return tasks;
     } catch (error) {
       console.error('Error getting TaskMaster tasks:', error);
       
@@ -127,12 +158,29 @@ export class TaskMasterIntegrationService {
         const tasksContent = await fs.readFile(tasksPath, 'utf-8');
         const tasksData = JSON.parse(tasksContent);
         
+        let tasks: TaskMasterTask[] = [];
         if (tasksData && tasksData.master && tasksData.master.tasks) {
-          return this.flattenTasks(tasksData.master.tasks);
+          tasks = this.flattenTasks(tasksData.master.tasks);
         }
+
+        // Cache the fallback result
+        this.taskCache.set(cacheKey, {
+          tasks,
+          timestamp: now,
+          projectPath
+        });
+
+        return tasks;
       } catch (fallbackError) {
         console.error('Fallback task reading failed:', fallbackError);
       }
+      
+      // Cache empty result on complete failure
+      this.taskCache.set(cacheKey, {
+        tasks: [],
+        timestamp: now,
+        projectPath
+      });
       
       return [];
     }
@@ -246,6 +294,9 @@ export class TaskMasterIntegrationService {
       // Parse the output to extract the created task ID
       const taskIdMatch = stdout.match(/Task (\d+(?:\.\d+)*) added successfully/);
       if (taskIdMatch && taskIdMatch[1]) {
+        // Invalidate cache since we added a new task
+        this.invalidateCache(projectPath);
+        
         const newTaskId = taskIdMatch[1];
         const task = await this.getTaskDetails(projectPath, newTaskId);
         
@@ -253,6 +304,9 @@ export class TaskMasterIntegrationService {
           return task;
         }
       }
+
+      // Invalidate cache even if we couldn't parse the task ID
+      this.invalidateCache(projectPath);
 
       // If we couldn't parse the task ID, return a minimal task object
       return {
@@ -279,9 +333,26 @@ export class TaskMasterIntegrationService {
       await execAsync(`task-master set-status --id=${taskId} --status=${status}`, {
         cwd: projectPath
       });
+      
+      // Invalidate cache for this project
+      this.invalidateCache(projectPath);
     } catch (error) {
       throw new Error(`Failed to update task status: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
+  }
+
+  /**
+   * Invalidate cache for a specific project
+   */
+  private invalidateCache(projectPath: string): void {
+    this.taskCache.delete(projectPath);
+  }
+
+  /**
+   * Clear all cached tasks
+   */
+  public clearCache(): void {
+    this.taskCache.clear();
   }
 
   /**

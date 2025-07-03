@@ -1,3 +1,13 @@
+export interface DatabaseConfig {
+    enabled: boolean;
+    path?: string;
+    autoMigrate: boolean;
+    backupOnMigration: boolean;
+    healthCheckInterval: number;
+    connectionTimeout: number;
+    retryAttempts: number;
+    retryDelay: number;
+}
 export interface MagentsConfig {
     DEFAULT_BASE_BRANCH: string;
     TMUX_SESSION_PREFIX: string;
@@ -9,11 +19,13 @@ export interface MagentsConfig {
     DOCKER_IMAGE: string;
     MODE?: 'simple' | 'standard' | 'advanced';
     TASK_MASTER_ENABLED?: boolean;
+    TASKMASTER_AUTO_INSTALL?: boolean;
     GITHUB_INTEGRATION?: boolean;
     MCP_ENABLED?: boolean;
     CUSTOM_COMMANDS_ENABLED?: boolean;
     MCP_DEVELOPMENT_MODE?: boolean;
     ADVANCED_DOCKER_CONFIG?: boolean;
+    DATABASE_CONFIG?: DatabaseConfig;
 }
 export interface Agent {
     id: string;
@@ -23,7 +35,7 @@ export interface Agent {
     status: AgentStatus;
     createdAt: Date;
     updatedAt?: Date;
-    projectId?: string;
+    projectId: string;
     autoAccept?: boolean;
     useDocker?: boolean;
     config?: Record<string, any>;
@@ -51,7 +63,7 @@ export interface CreateAgentOptions {
     context?: AgentContext;
     useDocker?: boolean;
     dockerOptions?: DockerContainerOptions;
-    projectId?: string;
+    projectId: string;
 }
 export interface AgentRecord {
     id: string;
@@ -62,7 +74,7 @@ export interface AgentRecord {
     context?: AgentContext;
     useDocker?: boolean;
     dockerContainer?: string;
-    projectId?: string;
+    projectId: string;
     portRange?: string;
 }
 export interface CreateAgentResult {

@@ -30,7 +30,7 @@ import {
   UnifiedEventData,
 } from '../types/unified';
 
-export interface DatabaseConfig {
+export interface SqliteConfig {
   dbPath?: string;
   inMemory?: boolean;
   readOnly?: boolean;
@@ -55,7 +55,7 @@ export interface MigrationResult {
 
 export class UnifiedDatabaseService {
   private connection: DatabaseConnection | null = null;
-  private config: DatabaseConfig;
+  private config: SqliteConfig;
   
   // Repository instances
   public projects!: ProjectRepository;
@@ -64,7 +64,7 @@ export class UnifiedDatabaseService {
   public configRepo!: ConfigRepository;
   public events!: EventRepository;
 
-  constructor(config: DatabaseConfig = {}) {
+  constructor(config: SqliteConfig = {}) {
     this.config = {
       dbPath: config.dbPath || this.getDefaultDbPath(),
       inMemory: config.inMemory || false,
@@ -315,14 +315,6 @@ export class UnifiedDatabaseService {
     return conn.db.prepare(query);
   }
 
-  /**
-   * Start a transaction
-   */
-  transaction<T>(fn: () => T): T {
-    const conn = this.getConnection();
-    const transaction = conn.db.transaction(fn);
-    return transaction();
-  }
 
   /**
    * Get database statistics
@@ -430,6 +422,51 @@ export class UnifiedDatabaseService {
   private isWriteQuery(query: string): boolean {
     const writePatterns = /^\s*(INSERT|UPDATE|DELETE|CREATE|DROP|ALTER|REPLACE)\s/i;
     return writePatterns.test(query.trim());
+  }
+
+  /**
+   * Execute multiple operations in a transaction
+   * Automatically rolls back if any operation fails
+   * 
+   * Note: Since better-sqlite3 doesn't support async in transactions,
+   * this method converts async operations to sync within the transaction
+   */
+  async transaction<T>(operations: (db: UnifiedDatabaseService) => Promise<T>): Promise<T> {
+    if (!this.connection) {
+      throw new Error('Database not initialized');
+    }
+
+    // For async operations, we'll execute them immediately but wrap the whole thing
+    // in a try-catch to handle rollback manually if needed
+    let result: T;
+    
+    this.connection.db.exec('BEGIN IMMEDIATE');
+    
+    try {
+      result = await operations(this);
+      this.connection.db.exec('COMMIT');
+      return result;
+    } catch (error) {
+      this.connection.db.exec('ROLLBACK');
+      throw error;
+    }
+  }
+
+  /**
+   * Execute multiple operations in a synchronous transaction
+   * Use this for operations that don't need async/await
+   * This is more efficient as it uses better-sqlite3's native transaction support
+   */
+  syncTransaction<T>(operations: (db: UnifiedDatabaseService) => T): T {
+    if (!this.connection) {
+      throw new Error('Database not initialized');
+    }
+
+    const sqliteTransaction = this.connection.db.transaction(() => {
+      return operations(this);
+    });
+
+    return sqliteTransaction();
   }
 
   /**
@@ -916,7 +953,7 @@ export class EventRepository extends BaseRepository<UnifiedEventData> {
 export class DatabaseFactory {
   private static instances = new Map<string, UnifiedDatabaseService>();
 
-  static async create(config: DatabaseConfig = {}): Promise<UnifiedDatabaseService> {
+  static async create(config: SqliteConfig = {}): Promise<UnifiedDatabaseService> {
     const key = config.dbPath || 'default';
     
     if (!this.instances.has(key)) {
