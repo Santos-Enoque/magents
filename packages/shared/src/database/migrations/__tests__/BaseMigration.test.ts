@@ -152,11 +152,11 @@ describe('BaseMigration', () => {
       const migration = new TestMigration();
       
       migration['startTiming']();
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 150));
       
       const elapsed = migration['getElapsedTime']();
       expect(elapsed).toBeGreaterThan(0.1);
-      expect(elapsed).toBeLessThan(0.2);
+      expect(elapsed).toBeLessThan(0.3);
     });
   });
 

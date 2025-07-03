@@ -1956,7 +1956,7 @@
         "id": 41,
         "title": "Create Database Migration Infrastructure",
         "description": "Set up migration scripts and tools to migrate existing JSON files to SQLite database",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [],
         "priority": "high",
         "details": "Create JsonToSqliteMigration class in packages/shared/src/database/migrations/. Implement methods to read existing JSON files (projects.json, agent configs), convert to unified format, and insert into SQLite database. Add rollback functionality and backup creation. Create CLI command 'magents migrate' with --rollback option.",
@@ -1979,7 +1979,7 @@
               1
             ],
             "details": "Implement migrateProjects() method to read projects.json from ~/.magents/projects/, convert to UnifiedProjectData format, handle missing fields with defaults, and insert into database using ProjectRepository.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "Integration tests with sample projects.json files"
           },
           {
@@ -1990,7 +1990,7 @@
               1
             ],
             "details": "Implement migrateAgents() method to scan agents directory, read each agent JSON file, convert to UnifiedAgentData format, auto-assign projects for orphaned agents, and insert into database using AgentRepository.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Integration tests with various agent configurations"
           },
           {
@@ -2002,7 +2002,7 @@
               3
             ],
             "details": "Create backup copies of all JSON files with .backup extension before migration. Implement rollback() method to restore from backups and remove SQLite database. Add transaction support for atomic migrations.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test backup creation, rollback scenarios, and data integrity"
           },
           {
@@ -2628,7 +2628,7 @@
     ],
     "metadata": {
       "created": "2025-06-30T14:18:19.843Z",
-      "updated": "2025-07-03T14:02:26.787Z",
+      "updated": "2025-07-03T14:16:46.691Z",
       "description": "Tasks for master context"
     }
   }
