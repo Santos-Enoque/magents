@@ -6,6 +6,7 @@ import { ConfigManager } from '../config/ConfigManager';
 import { GitService } from './GitService';
 import { ui } from '../ui/UIService';
 import { createHash } from 'crypto';
+import { UnifiedDatabaseService, UnifiedProjectData } from '@magents/shared';
 
 // Extended agent type for Docker agents
 interface DockerAgent extends Agent {
@@ -22,6 +23,7 @@ export class DockerAgentManager {
   private gitService: GitService;
   private activeAgentsFile: string;
   private dockerImage: string;
+  private databaseService: UnifiedDatabaseService;
 
   constructor() {
     this.configManager = ConfigManager.getInstance();
@@ -30,6 +32,7 @@ export class DockerAgentManager {
     const config = this.configManager.loadConfig();
     // Always check for Claude auth volume to determine image
     this.dockerImage = config.DOCKER_IMAGE || 'magents/agent:latest';
+    this.databaseService = new UnifiedDatabaseService();
   }
 
   /**
@@ -41,6 +44,232 @@ export class DockerAgentManager {
     // Create a short hash from the full path for uniqueness
     const hash = createHash('md5').update(normalizedPath).digest('hex').substring(0, 8);
     return `${projectName}-${hash}`;
+  }
+
+  /**
+   * Detect if a project exists in the database
+   */
+  private async detectExistingProject(projectPath: string): Promise<UnifiedProjectData | null> {
+    try {
+      await this.databaseService.initialize();
+      const normalizedPath = path.resolve(projectPath);
+      
+      // First try to find by exact path match
+      const projectByPath = await this.databaseService.projects.findBy({ path: normalizedPath });
+      if (projectByPath.length > 0) {
+        return projectByPath[0];
+      }
+
+      // If not found by path, try to find by generated project ID
+      const projectId = this.generateProjectId(normalizedPath);
+      const project = await this.databaseService.projects.findById(projectId);
+      return project;
+    } catch (error) {
+      ui.info(`Could not check for existing project: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      return null;
+    }
+  }
+
+  /**
+   * Auto-create a project for the given path
+   */
+  private async autoCreateProject(projectPath: string): Promise<UnifiedProjectData> {
+    await this.databaseService.initialize();
+    
+    const normalizedPath = path.resolve(projectPath);
+    const projectName = path.basename(normalizedPath);
+    const projectId = this.generateProjectId(normalizedPath);
+
+    // Check if it's a git repository
+    let gitRepository;
+    try {
+      // Try to get git info using execSync
+      const { execSync } = require('child_process');
+      const gitBranch = execSync('git rev-parse --abbrev-ref HEAD', { 
+        cwd: normalizedPath, 
+        encoding: 'utf8',
+        stdio: ['pipe', 'pipe', 'pipe']
+      }).trim();
+      
+      let gitRemote;
+      try {
+        gitRemote = execSync('git config --get remote.origin.url', { 
+          cwd: normalizedPath, 
+          encoding: 'utf8',
+          stdio: ['pipe', 'pipe', 'pipe']
+        }).trim();
+      } catch {
+        gitRemote = undefined;
+      }
+      
+      gitRepository = {
+        branch: gitBranch,
+        remote: gitRemote,
+        isClean: true,
+      };
+    } catch (error) {
+      // Not a git repository or git commands failed
+      gitRepository = undefined;
+    }
+
+    // Detect project type
+    const projectType = this.detectProjectType(normalizedPath);
+
+    const projectData: UnifiedProjectData = {
+      id: projectId,
+      name: projectName,
+      path: normalizedPath,
+      status: 'ACTIVE',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      gitRepository,
+      agentIds: [],
+      maxAgents: 10,
+      taskMasterEnabled: false,
+      projectType,
+      description: `Auto-created project for ${projectName}`,
+      tags: ['auto-created'],
+      metadata: {
+        autoCreated: true,
+        createdBy: 'docker-agent-manager',
+      },
+    };
+
+    try {
+      const createdProject = await this.databaseService.projects.create(projectData);
+      ui.success(`✓ Auto-created project '${projectName}' (${projectId})`);
+      return createdProject;
+    } catch (error) {
+      ui.error(`Failed to create project: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Detect project type based on files in the directory
+   */
+  private detectProjectType(projectPath: string): UnifiedProjectData['projectType'] {
+    const now = new Date();
+    
+    try {
+      // Check for package.json (Node.js)
+      if (fs.existsSync(path.join(projectPath, 'package.json'))) {
+        const packageJson = JSON.parse(fs.readFileSync(path.join(projectPath, 'package.json'), 'utf8'));
+        const frameworks = [];
+        
+        // Detect common frameworks
+        if (packageJson.dependencies || packageJson.devDependencies) {
+          const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
+          if (deps.react) frameworks.push('React');
+          if (deps.vue) frameworks.push('Vue');
+          if (deps.angular) frameworks.push('Angular');
+          if (deps.express) frameworks.push('Express');
+          if (deps.next) frameworks.push('Next.js');
+        }
+
+        let packageManager = 'npm';
+        if (fs.existsSync(path.join(projectPath, 'yarn.lock'))) packageManager = 'yarn';
+        if (fs.existsSync(path.join(projectPath, 'pnpm-lock.yaml'))) packageManager = 'pnpm';
+
+        return {
+          type: 'node',
+          packageManager,
+          frameworks,
+          detectedAt: now,
+        };
+      }
+
+      // Check for requirements.txt or pyproject.toml (Python)
+      if (fs.existsSync(path.join(projectPath, 'requirements.txt')) || 
+          fs.existsSync(path.join(projectPath, 'pyproject.toml'))) {
+        return {
+          type: 'python',
+          frameworks: [],
+          detectedAt: now,
+        };
+      }
+
+      // Check for Cargo.toml (Rust)
+      if (fs.existsSync(path.join(projectPath, 'Cargo.toml'))) {
+        return {
+          type: 'rust',
+          frameworks: [],
+          detectedAt: now,
+        };
+      }
+
+      // Check for go.mod (Go)
+      if (fs.existsSync(path.join(projectPath, 'go.mod'))) {
+        return {
+          type: 'go',
+          frameworks: [],
+          detectedAt: now,
+        };
+      }
+
+      // Check for pom.xml or build.gradle (Java)
+      if (fs.existsSync(path.join(projectPath, 'pom.xml')) || 
+          fs.existsSync(path.join(projectPath, 'build.gradle'))) {
+        return {
+          type: 'java',
+          frameworks: [],
+          detectedAt: now,
+        };
+      }
+
+      // Default to unknown
+      return {
+        type: 'unknown',
+        frameworks: [],
+        detectedAt: now,
+      };
+    } catch (error) {
+      return {
+        type: 'unknown',
+        frameworks: [],
+        detectedAt: now,
+      };
+    }
+  }
+
+  /**
+   * Get or create project for the given path
+   */
+  private async getOrCreateProject(projectPath: string): Promise<{ project: UnifiedProjectData; wasCreated: boolean }> {
+    // First try to detect existing project
+    const existingProject = await this.detectExistingProject(projectPath);
+    if (existingProject) {
+      return { project: existingProject, wasCreated: false };
+    }
+
+    // Create new project
+    const newProject = await this.autoCreateProject(projectPath);
+    return { project: newProject, wasCreated: true };
+  }
+
+  /**
+   * Update project to include the agent in its agentIds array
+   */
+  private async updateProjectWithAgent(projectId: string, agentId: string): Promise<void> {
+    await this.databaseService.initialize();
+    
+    const project = await this.databaseService.projects.findById(projectId);
+    if (!project) {
+      throw new Error(`Project ${projectId} not found`);
+    }
+
+    // Add agent to project if not already present
+    const agentIds = project.agentIds || [];
+    if (!agentIds.includes(agentId)) {
+      agentIds.push(agentId);
+      
+      await this.databaseService.projects.update(projectId, {
+        agentIds,
+        updatedAt: new Date(),
+      });
+      
+      ui.info(`🔗 Linked agent ${agentId} to project ${project.name}`);
+    }
   }
 
   // Compatibility method for CLI that might check for TmuxService
@@ -77,7 +306,25 @@ export class DockerAgentManager {
       }
 
       const repoRoot = options.projectPath || this.gitService.getRepoRoot();
-      const projectId = options.projectId || this.generateProjectId(repoRoot);
+      
+      // Auto-detect or create project if projectId not provided
+      let projectId = options.projectId;
+      let project: UnifiedProjectData | undefined;
+      let wasProjectCreated = false;
+      
+      if (!projectId) {
+        const result = await this.getOrCreateProject(repoRoot);
+        project = result.project;
+        projectId = project.id;
+        wasProjectCreated = result.wasCreated;
+        
+        if (wasProjectCreated) {
+          ui.info(`📁 Created new project: ${project.name} (${project.id})`);
+        } else {
+          ui.info(`📁 Using existing project: ${project.name} (${project.id})`);
+        }
+      }
+      
       const containerName = `magents-${agentId}`;
 
       // Prepare shared volumes
@@ -121,6 +368,13 @@ export class DockerAgentManager {
         status: 'RUNNING',
         createdAt: new Date()
       });
+
+      // Update project to include this agent
+      try {
+        await this.updateProjectWithAgent(projectId, agentId);
+      } catch (error) {
+        ui.info(`Could not update project with agent: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
 
       return {
         success: true,

@@ -40,6 +40,8 @@ const child_process_1 = require("child_process");
 const ConfigManager_1 = require("../config/ConfigManager");
 const GitService_1 = require("./GitService");
 const UIService_1 = require("../ui/UIService");
+const crypto_1 = require("crypto");
+const shared_1 = require("@magents/shared");
 /**
  * Docker-based Agent Manager for Magents
  * Creates and manages AI agents as Docker containers
@@ -52,6 +54,227 @@ class DockerAgentManager {
         const config = this.configManager.loadConfig();
         // Always check for Claude auth volume to determine image
         this.dockerImage = config.DOCKER_IMAGE || 'magents/agent:latest';
+        this.databaseService = new shared_1.UnifiedDatabaseService();
+    }
+    /**
+     * Generate a consistent project ID based on the project path
+     */
+    generateProjectId(projectPath) {
+        const normalizedPath = path.resolve(projectPath);
+        const projectName = path.basename(normalizedPath);
+        // Create a short hash from the full path for uniqueness
+        const hash = (0, crypto_1.createHash)('md5').update(normalizedPath).digest('hex').substring(0, 8);
+        return `${projectName}-${hash}`;
+    }
+    /**
+     * Detect if a project exists in the database
+     */
+    async detectExistingProject(projectPath) {
+        try {
+            await this.databaseService.initialize();
+            const normalizedPath = path.resolve(projectPath);
+            // First try to find by exact path match
+            const projectByPath = await this.databaseService.projects.findBy({ path: normalizedPath });
+            if (projectByPath.length > 0) {
+                return projectByPath[0];
+            }
+            // If not found by path, try to find by generated project ID
+            const projectId = this.generateProjectId(normalizedPath);
+            const project = await this.databaseService.projects.findById(projectId);
+            return project;
+        }
+        catch (error) {
+            UIService_1.ui.info(`Could not check for existing project: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            return null;
+        }
+    }
+    /**
+     * Auto-create a project for the given path
+     */
+    async autoCreateProject(projectPath) {
+        await this.databaseService.initialize();
+        const normalizedPath = path.resolve(projectPath);
+        const projectName = path.basename(normalizedPath);
+        const projectId = this.generateProjectId(normalizedPath);
+        // Check if it's a git repository
+        let gitRepository;
+        try {
+            // Try to get git info using execSync
+            const { execSync } = require('child_process');
+            const gitBranch = execSync('git rev-parse --abbrev-ref HEAD', {
+                cwd: normalizedPath,
+                encoding: 'utf8',
+                stdio: ['pipe', 'pipe', 'pipe']
+            }).trim();
+            let gitRemote;
+            try {
+                gitRemote = execSync('git config --get remote.origin.url', {
+                    cwd: normalizedPath,
+                    encoding: 'utf8',
+                    stdio: ['pipe', 'pipe', 'pipe']
+                }).trim();
+            }
+            catch {
+                gitRemote = undefined;
+            }
+            gitRepository = {
+                branch: gitBranch,
+                remote: gitRemote,
+                isClean: true,
+            };
+        }
+        catch (error) {
+            // Not a git repository or git commands failed
+            gitRepository = undefined;
+        }
+        // Detect project type
+        const projectType = this.detectProjectType(normalizedPath);
+        const projectData = {
+            id: projectId,
+            name: projectName,
+            path: normalizedPath,
+            status: 'ACTIVE',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            gitRepository,
+            agentIds: [],
+            maxAgents: 10,
+            taskMasterEnabled: false,
+            projectType,
+            description: `Auto-created project for ${projectName}`,
+            tags: ['auto-created'],
+            metadata: {
+                autoCreated: true,
+                createdBy: 'docker-agent-manager',
+            },
+        };
+        try {
+            const createdProject = await this.databaseService.projects.create(projectData);
+            UIService_1.ui.success(`✓ Auto-created project '${projectName}' (${projectId})`);
+            return createdProject;
+        }
+        catch (error) {
+            UIService_1.ui.error(`Failed to create project: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            throw error;
+        }
+    }
+    /**
+     * Detect project type based on files in the directory
+     */
+    detectProjectType(projectPath) {
+        const now = new Date();
+        try {
+            // Check for package.json (Node.js)
+            if (fs.existsSync(path.join(projectPath, 'package.json'))) {
+                const packageJson = JSON.parse(fs.readFileSync(path.join(projectPath, 'package.json'), 'utf8'));
+                const frameworks = [];
+                // Detect common frameworks
+                if (packageJson.dependencies || packageJson.devDependencies) {
+                    const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
+                    if (deps.react)
+                        frameworks.push('React');
+                    if (deps.vue)
+                        frameworks.push('Vue');
+                    if (deps.angular)
+                        frameworks.push('Angular');
+                    if (deps.express)
+                        frameworks.push('Express');
+                    if (deps.next)
+                        frameworks.push('Next.js');
+                }
+                let packageManager = 'npm';
+                if (fs.existsSync(path.join(projectPath, 'yarn.lock')))
+                    packageManager = 'yarn';
+                if (fs.existsSync(path.join(projectPath, 'pnpm-lock.yaml')))
+                    packageManager = 'pnpm';
+                return {
+                    type: 'node',
+                    packageManager,
+                    frameworks,
+                    detectedAt: now,
+                };
+            }
+            // Check for requirements.txt or pyproject.toml (Python)
+            if (fs.existsSync(path.join(projectPath, 'requirements.txt')) ||
+                fs.existsSync(path.join(projectPath, 'pyproject.toml'))) {
+                return {
+                    type: 'python',
+                    frameworks: [],
+                    detectedAt: now,
+                };
+            }
+            // Check for Cargo.toml (Rust)
+            if (fs.existsSync(path.join(projectPath, 'Cargo.toml'))) {
+                return {
+                    type: 'rust',
+                    frameworks: [],
+                    detectedAt: now,
+                };
+            }
+            // Check for go.mod (Go)
+            if (fs.existsSync(path.join(projectPath, 'go.mod'))) {
+                return {
+                    type: 'go',
+                    frameworks: [],
+                    detectedAt: now,
+                };
+            }
+            // Check for pom.xml or build.gradle (Java)
+            if (fs.existsSync(path.join(projectPath, 'pom.xml')) ||
+                fs.existsSync(path.join(projectPath, 'build.gradle'))) {
+                return {
+                    type: 'java',
+                    frameworks: [],
+                    detectedAt: now,
+                };
+            }
+            // Default to unknown
+            return {
+                type: 'unknown',
+                frameworks: [],
+                detectedAt: now,
+            };
+        }
+        catch (error) {
+            return {
+                type: 'unknown',
+                frameworks: [],
+                detectedAt: now,
+            };
+        }
+    }
+    /**
+     * Get or create project for the given path
+     */
+    async getOrCreateProject(projectPath) {
+        // First try to detect existing project
+        const existingProject = await this.detectExistingProject(projectPath);
+        if (existingProject) {
+            return { project: existingProject, wasCreated: false };
+        }
+        // Create new project
+        const newProject = await this.autoCreateProject(projectPath);
+        return { project: newProject, wasCreated: true };
+    }
+    /**
+     * Update project to include the agent in its agentIds array
+     */
+    async updateProjectWithAgent(projectId, agentId) {
+        await this.databaseService.initialize();
+        const project = await this.databaseService.projects.findById(projectId);
+        if (!project) {
+            throw new Error(`Project ${projectId} not found`);
+        }
+        // Add agent to project if not already present
+        const agentIds = project.agentIds || [];
+        if (!agentIds.includes(agentId)) {
+            agentIds.push(agentId);
+            await this.databaseService.projects.update(projectId, {
+                agentIds,
+                updatedAt: new Date(),
+            });
+            UIService_1.ui.info(`🔗 Linked agent ${agentId} to project ${project.name}`);
+        }
     }
     // Compatibility method for CLI that might check for TmuxService
     getTmuxService() {
@@ -83,6 +306,22 @@ class DockerAgentManager {
                 };
             }
             const repoRoot = options.projectPath || this.gitService.getRepoRoot();
+            // Auto-detect or create project if projectId not provided
+            let projectId = options.projectId;
+            let project;
+            let wasProjectCreated = false;
+            if (!projectId) {
+                const result = await this.getOrCreateProject(repoRoot);
+                project = result.project;
+                projectId = project.id;
+                wasProjectCreated = result.wasCreated;
+                if (wasProjectCreated) {
+                    UIService_1.ui.info(`📁 Created new project: ${project.name} (${project.id})`);
+                }
+                else {
+                    UIService_1.ui.info(`📁 Using existing project: ${project.name} (${project.id})`);
+                }
+            }
             const containerName = `magents-${agentId}`;
             // Prepare shared volumes
             const sharedConfigDir = path.join(this.configManager.getAgentsDir(), 'shared-config');
@@ -113,11 +352,19 @@ class DockerAgentManager {
                 branch: options.branch,
                 worktreePath: repoRoot,
                 tmuxSession: containerName,
+                projectId,
                 containerName,
                 repoRoot,
                 status: 'RUNNING',
                 createdAt: new Date()
             });
+            // Update project to include this agent
+            try {
+                await this.updateProjectWithAgent(projectId, agentId);
+            }
+            catch (error) {
+                UIService_1.ui.info(`Could not update project with agent: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            }
             return {
                 success: true,
                 message: `Docker agent '${agentId}' created successfully!`,
@@ -285,8 +532,23 @@ class DockerAgentManager {
         const bridgeEnv = !hasClaudeAuth && bridgeMount
             ? `-e CLAUDE_BRIDGE_SOCKET=/host/claude-bridge.sock`
             : '';
-        // Use Claude-enabled image if auth volume exists
-        const dockerImage = hasClaudeAuth ? 'magents/claude:dev' : this.dockerImage;
+        // Determine which Docker image to use
+        const config = this.configManager.loadConfig();
+        let dockerImage = this.dockerImage;
+        // Check for Task Master variant if enabled
+        if (config.TASK_MASTER_ENABLED && config.TASKMASTER_AUTO_INSTALL) {
+            // Use Task Master variant of the image
+            if (dockerImage.includes(':')) {
+                dockerImage = dockerImage.replace(/:(\w+)$/, ':$1-taskmaster');
+            }
+            else {
+                dockerImage += '-taskmaster';
+            }
+        }
+        // Override with Claude image if auth volume exists
+        if (hasClaudeAuth) {
+            dockerImage = 'magents/claude:dev';
+        }
         // For Claude image, we need to override the entrypoint
         const entrypointOverride = hasClaudeAuth ? '--entrypoint /bin/bash' : '';
         // Command to initialize tmux and keep container running
@@ -305,6 +567,7 @@ class DockerAgentManager {
       -e AGENT_BRANCH="${options.branch}" \
       ${bridgeEnv} \
       ${envVars} \
+      -e TASK_MASTER_ENABLED="${config.TASK_MASTER_ENABLED || false}" \
       ${entrypointOverride} \
       ${dockerImage} \
       ${runCommand}`;
@@ -343,12 +606,18 @@ class DockerAgentManager {
         return keys;
     }
     async setupSharedConfiguration(sourceRepo, sharedConfigDir) {
-        // Copy Task Master configuration
-        const taskMasterSource = path.join(sourceRepo, '.taskmaster');
-        const taskMasterDest = path.join(sharedConfigDir, '.taskmaster');
-        if (fs.existsSync(taskMasterSource)) {
-            this.copyDirectory(taskMasterSource, taskMasterDest);
-            UIService_1.ui.muted('  ✓ Copied Task Master configuration');
+        const config = this.configManager.loadConfig();
+        // Copy Task Master configuration only if enabled
+        if (config.TASK_MASTER_ENABLED) {
+            const taskMasterSource = path.join(sourceRepo, '.taskmaster');
+            const taskMasterDest = path.join(sharedConfigDir, '.taskmaster');
+            if (fs.existsSync(taskMasterSource)) {
+                this.copyDirectory(taskMasterSource, taskMasterDest);
+                UIService_1.ui.muted('  ✓ Copied Task Master configuration');
+            }
+            else if (config.TASK_MASTER_ENABLED) {
+                UIService_1.ui.muted('  ⚠ Task Master enabled but no .taskmaster directory found');
+            }
         }
         // Copy CLAUDE.md
         const claudeMdSource = path.join(sourceRepo, 'CLAUDE.md');

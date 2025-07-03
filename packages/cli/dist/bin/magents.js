@@ -40,14 +40,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const commander_1 = require("commander");
 const inquirer_1 = __importDefault(require("inquirer"));
 const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
 const DockerAgentManager_1 = require("../services/DockerAgentManager");
 const ConfigManager_1 = require("../config/ConfigManager");
 const UIService_1 = require("../ui/UIService");
 const autoconfig_1 = require("../commands/autoconfig");
+const migrate_1 = require("../commands/migrate");
+const database_1 = require("../commands/database");
 const program = new commander_1.Command();
 const configManager = ConfigManager_1.ConfigManager.getInstance();
 const config = configManager.loadConfig();
-// Always use DockerAgentManager (tmux mode removed)
+// Docker is the default and only mode for agent management
 const agentManager = new DockerAgentManager_1.DockerAgentManager();
 // Helper function to parse Task Master output when --json is not supported
 function parseTaskMasterOutput(taskId, output) {
@@ -676,11 +679,14 @@ program
         const spinner = UIService_1.ui.spinner('Creating agent with smart defaults...');
         spinner.start();
         // 8. Create the agent
+        const currentPath = process.cwd();
+        const projectId = path_1.default.basename(currentPath);
         const result = await agentManager.createAgent({
             branch: branchName,
             agentId,
             autoAccept: creationConfig.autoAccept,
-            useDocker: creationConfig.useDocker
+            useDocker: creationConfig.useDocker,
+            projectId
         });
         if (result.success && result.data) {
             spinner.succeed('Agent created successfully!');
@@ -1173,10 +1179,13 @@ program
         const spinner = UIService_1.ui.spinner(`Creating agent for Task ${task.id}: ${task.title}`);
         spinner.start();
         try {
+            const currentPath = process.cwd();
+            const projectId = path_1.default.basename(currentPath);
             const result = await agentManager.createAgent({
                 branch: branchName,
                 agentId,
-                autoAccept: true
+                autoAccept: true,
+                projectId
             });
             if (result.success && result.data) {
                 spinner.succeed(`Agent ${agentId} created successfully!`);
@@ -1435,10 +1444,13 @@ program
             const spinner = UIService_1.ui.spinner(`Creating agent for Task ${task.id}: ${task.title}`);
             spinner.start();
             try {
+                const currentPath = process.cwd();
+                const projectId = path_1.default.basename(currentPath);
                 const result = await agentManager.createAgent({
                     branch: branchName,
                     agentId,
-                    autoAccept: true
+                    autoAccept: true,
+                    projectId
                 });
                 if (result.success && result.data) {
                     // Set up complete Task Master environment for each agent
@@ -2095,6 +2107,10 @@ program
 });
 // Add auto-configuration command
 program.addCommand((0, autoconfig_1.createAutoConfigCommand)());
+// Add migrate command
+program.addCommand((0, migrate_1.createMigrateCommand)());
+// Add database command
+program.addCommand((0, database_1.createDatabaseCommand)());
 // Override help to show our custom styling
 if (process.argv.includes('--help') || process.argv.includes('-h')) {
     UIService_1.ui.header('MAGENTS - Multi-Agent Claude Code Workflow Manager', true);

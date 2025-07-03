@@ -29,7 +29,6 @@ export interface ContainerStatus {
 }
 export declare class StartCommand {
     private configManager;
-    private agentManager;
     private dockerManager;
     constructor();
     execute(agentId?: string, options?: StartOptions): Promise<void>;

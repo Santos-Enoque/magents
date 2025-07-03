@@ -6,14 +6,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.startCommand = exports.StartCommand = void 0;
 const UIService_1 = require("../ui/UIService");
 const ConfigManager_1 = require("../config/ConfigManager");
-const AgentManager_1 = require("../services/AgentManager");
+// AgentManager removed - using DockerAgentManager as the only implementation
 const DockerAgentManager_1 = require("../services/DockerAgentManager");
 const child_process_1 = require("child_process");
 const inquirer_1 = __importDefault(require("inquirer"));
 class StartCommand {
     constructor() {
         this.configManager = ConfigManager_1.ConfigManager.getInstance();
-        this.agentManager = new AgentManager_1.AgentManager();
         this.dockerManager = new DockerAgentManager_1.DockerAgentManager();
     }
     async execute(agentId, options = {}) {
@@ -53,7 +52,7 @@ class StartCommand {
         }
     }
     async startAllAgents(options) {
-        const agents = this.agentManager.getActiveAgents();
+        const agents = this.dockerManager.getActiveAgents();
         const stoppedAgents = agents.filter(a => a.status !== 'RUNNING');
         if (stoppedAgents.length === 0) {
             UIService_1.ui.info('All agents are already running');
@@ -66,7 +65,7 @@ class StartCommand {
         UIService_1.ui.success(`Started ${stoppedAgents.length} agents`);
     }
     async startSpecificAgent(agentId, options) {
-        const agents = this.agentManager.getActiveAgents();
+        const agents = this.dockerManager.getActiveAgents();
         const agent = agents.find(a => a.id === agentId || a.id.startsWith(agentId));
         if (!agent) {
             UIService_1.ui.error(`Agent '${agentId}' not found`);
@@ -124,7 +123,7 @@ class StartCommand {
         await this.startAgent(agent, options);
     }
     async startInteractive(options) {
-        const agents = this.agentManager.getActiveAgents();
+        const agents = this.dockerManager.getActiveAgents();
         if (agents.length === 0) {
             UIService_1.ui.warning('No agents found');
             const create = await inquirer_1.default.prompt([{

@@ -37,6 +37,7 @@ exports.ConfigManager = void 0;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const os = __importStar(require("os"));
+const shared_1 = require("@magents/shared");
 class ConfigManager {
     constructor() {
         this.config = null;
@@ -62,16 +63,20 @@ class ConfigManager {
         }
         // Create default config if it doesn't exist
         if (!fs.existsSync(this.configFile)) {
-            const defaultConfig = `# magents Configuration
+            const defaultConfig = `# Magents Configuration - Docker-based AI Agent Management
 DEFAULT_BASE_BRANCH=main
-TMUX_SESSION_PREFIX=magent
 WORKTREE_PREFIX=agent
 MAX_AGENTS=5
 CLAUDE_CODE_PATH=claude
 CLAUDE_AUTO_ACCEPT=true
-DOCKER_ENABLED=true
 DOCKER_IMAGE=magents/agent:latest
 MODE=simple
+# Task Master Integration (Optional)
+TASK_MASTER_ENABLED=false
+TASKMASTER_AUTO_INSTALL=false
+# Advanced Features
+GITHUB_INTEGRATION=false
+MCP_ENABLED=false
 `;
             fs.writeFileSync(this.configFile, defaultConfig);
         }
@@ -100,6 +105,7 @@ MODE=simple
                         case 'CLAUDE_AUTO_ACCEPT':
                         case 'DOCKER_ENABLED':
                         case 'TASK_MASTER_ENABLED':
+                        case 'TASKMASTER_AUTO_INSTALL':
                         case 'GITHUB_INTEGRATION':
                         case 'MCP_ENABLED':
                         case 'CUSTOM_COMMANDS_ENABLED':
@@ -108,7 +114,6 @@ MODE=simple
                             config[cleanKey] = cleanValue.toLowerCase() === 'true';
                             break;
                         case 'DEFAULT_BASE_BRANCH':
-                        case 'TMUX_SESSION_PREFIX':
                         case 'WORKTREE_PREFIX':
                         case 'CLAUDE_CODE_PATH':
                         case 'DOCKER_IMAGE':
@@ -122,13 +127,26 @@ MODE=simple
         // Set defaults for missing values
         this.config = {
             DEFAULT_BASE_BRANCH: config.DEFAULT_BASE_BRANCH || 'main',
-            TMUX_SESSION_PREFIX: config.TMUX_SESSION_PREFIX || 'magent',
+            TMUX_SESSION_PREFIX: 'docker', // Kept for backward compatibility but not used
             WORKTREE_PREFIX: config.WORKTREE_PREFIX || 'agent',
             MAX_AGENTS: config.MAX_AGENTS || 5,
             CLAUDE_CODE_PATH: config.CLAUDE_CODE_PATH || 'claude',
             CLAUDE_AUTO_ACCEPT: config.CLAUDE_AUTO_ACCEPT !== undefined ? config.CLAUDE_AUTO_ACCEPT : true,
-            DOCKER_ENABLED: config.DOCKER_ENABLED !== undefined ? config.DOCKER_ENABLED : false,
+            DOCKER_ENABLED: true, // Docker is always enabled now
             DOCKER_IMAGE: config.DOCKER_IMAGE || 'magents/agent:latest',
+            MODE: config.MODE || 'simple',
+            TASK_MASTER_ENABLED: config.TASK_MASTER_ENABLED || false,
+            TASKMASTER_AUTO_INSTALL: config.TASKMASTER_AUTO_INSTALL || false,
+            DATABASE_CONFIG: {
+                enabled: config.DATABASE_ENABLED !== undefined ? config.DATABASE_ENABLED : shared_1.DEFAULT_DATABASE_CONFIG.enabled,
+                path: config.DATABASE_PATH,
+                autoMigrate: config.DATABASE_AUTO_MIGRATE !== undefined ? config.DATABASE_AUTO_MIGRATE : shared_1.DEFAULT_DATABASE_CONFIG.autoMigrate,
+                backupOnMigration: config.DATABASE_BACKUP_ON_MIGRATION !== undefined ? config.DATABASE_BACKUP_ON_MIGRATION : shared_1.DEFAULT_DATABASE_CONFIG.backupOnMigration,
+                healthCheckInterval: config.DATABASE_HEALTH_CHECK_INTERVAL || shared_1.DEFAULT_DATABASE_CONFIG.healthCheckInterval,
+                connectionTimeout: config.DATABASE_CONNECTION_TIMEOUT || shared_1.DEFAULT_DATABASE_CONFIG.connectionTimeout,
+                retryAttempts: config.DATABASE_RETRY_ATTEMPTS || shared_1.DEFAULT_DATABASE_CONFIG.retryAttempts,
+                retryDelay: config.DATABASE_RETRY_DELAY || shared_1.DEFAULT_DATABASE_CONFIG.retryDelay,
+            },
         };
         return this.config;
     }
@@ -136,16 +154,18 @@ MODE=simple
         const currentConfig = this.loadConfig();
         const newConfig = { ...currentConfig, ...updates };
         const configLines = [
-            '# magents Configuration',
+            '# Magents Configuration - Docker-based AI Agent Management',
             `DEFAULT_BASE_BRANCH=${newConfig.DEFAULT_BASE_BRANCH}`,
-            `TMUX_SESSION_PREFIX=${newConfig.TMUX_SESSION_PREFIX}`,
             `WORKTREE_PREFIX=${newConfig.WORKTREE_PREFIX}`,
             `MAX_AGENTS=${newConfig.MAX_AGENTS}`,
             `CLAUDE_CODE_PATH=${newConfig.CLAUDE_CODE_PATH}`,
             `CLAUDE_AUTO_ACCEPT=${newConfig.CLAUDE_AUTO_ACCEPT}`,
-            `DOCKER_ENABLED=${newConfig.DOCKER_ENABLED}`,
             `DOCKER_IMAGE=${newConfig.DOCKER_IMAGE}`,
             `MODE=${newConfig.MODE || 'simple'}`,
+            '',
+            '# Task Master Integration (Optional)',
+            `TASK_MASTER_ENABLED=${newConfig.TASK_MASTER_ENABLED || false}`,
+            `TASKMASTER_AUTO_INSTALL=${newConfig.TASKMASTER_AUTO_INSTALL || false}`,
         ];
         // Add optional fields if they exist
         if (newConfig.TASK_MASTER_ENABLED !== undefined) {
@@ -165,6 +185,21 @@ MODE=simple
         }
         if (newConfig.ADVANCED_DOCKER_CONFIG !== undefined) {
             configLines.push(`ADVANCED_DOCKER_CONFIG=${newConfig.ADVANCED_DOCKER_CONFIG}`);
+        }
+        // Add database configuration section
+        if (newConfig.DATABASE_CONFIG) {
+            configLines.push('');
+            configLines.push('# Database Configuration');
+            configLines.push(`DATABASE_ENABLED=${newConfig.DATABASE_CONFIG.enabled}`);
+            if (newConfig.DATABASE_CONFIG.path) {
+                configLines.push(`DATABASE_PATH=${newConfig.DATABASE_CONFIG.path}`);
+            }
+            configLines.push(`DATABASE_AUTO_MIGRATE=${newConfig.DATABASE_CONFIG.autoMigrate}`);
+            configLines.push(`DATABASE_BACKUP_ON_MIGRATION=${newConfig.DATABASE_CONFIG.backupOnMigration}`);
+            configLines.push(`DATABASE_HEALTH_CHECK_INTERVAL=${newConfig.DATABASE_CONFIG.healthCheckInterval}`);
+            configLines.push(`DATABASE_CONNECTION_TIMEOUT=${newConfig.DATABASE_CONFIG.connectionTimeout}`);
+            configLines.push(`DATABASE_RETRY_ATTEMPTS=${newConfig.DATABASE_CONFIG.retryAttempts}`);
+            configLines.push(`DATABASE_RETRY_DELAY=${newConfig.DATABASE_CONFIG.retryDelay}`);
         }
         fs.writeFileSync(this.configFile, configLines.join('\n') + '\n');
         this.config = newConfig;

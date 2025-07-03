@@ -41,14 +41,14 @@ const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const UIService_1 = require("../ui/UIService");
 const ConfigManager_1 = require("../config/ConfigManager");
-const AgentManager_1 = require("../services/AgentManager");
+const DockerAgentManager_1 = require("../services/DockerAgentManager");
 const GitService_1 = require("../services/GitService");
 const child_process_1 = require("child_process");
 const inquirer_1 = __importDefault(require("inquirer"));
 class AssignCommand {
     constructor() {
         this.configManager = ConfigManager_1.ConfigManager.getInstance();
-        this.agentManager = new AgentManager_1.AgentManager();
+        this.agentManager = new DockerAgentManager_1.DockerAgentManager();
         this.gitService = new GitService_1.GitService();
     }
     async execute(options) {
@@ -445,10 +445,13 @@ ${task.description}
                 const agentName = task.title.toLowerCase().replace(/\s+/g, '-');
                 UIService_1.ui.info(`Creating agent for task: ${task.title}`);
                 try {
+                    const currentPath = process.cwd();
+                    const projectId = require('path').basename(currentPath);
                     const result = await this.agentManager.createAgent({
                         branch: `task/${agentName}`,
                         agentId: `${agentName}-agent`,
-                        autoAccept: true
+                        autoAccept: true,
+                        projectId
                     });
                     if (result.success) {
                         task.assignToAgent = result.data?.agentId;
