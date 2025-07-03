@@ -1,0 +1,43 @@
+# Task ID: 45
+# Title: Auto-Create Projects for Terminal Agents
+# Status: pending
+# Dependencies: 44
+# Priority: medium
+# Description: Automatically create projects when agents are created from terminal without explicit project
+# Details:
+In DockerAgentManager.createAgent, check if projectId is provided. If not, create project using current working directory as path and basename as name. Link Docker volumes to project path. Update agent with auto-created projectId.
+
+# Test Strategy:
+Integration tests for CLI agent creation, tests for project auto-creation logic, Docker volume mapping tests
+
+# Subtasks:
+## 1. Add project detection logic [pending]
+### Dependencies: None
+### Description: Detect when agent is created without explicit project
+### Details:
+In DockerAgentManager.createAgent, check if projectId is provided in options. If not, flag for auto-creation. Get current working directory for project path.
+
+## 2. Implement project auto-creation [pending]
+### Dependencies: 45.1
+### Description: Create project based on current directory when not specified
+### Details:
+Use process.cwd() as project path. Use path.basename() for project name. Generate unique project ID. Set appropriate defaults for project settings.
+
+## 3. Link Docker volumes to project [pending]
+### Dependencies: 45.2
+### Description: Ensure Docker volumes are created from project path
+### Details:
+Update Docker volume mounting to use project path as base. Ensure agent worktree is within project directory. Update volume permissions appropriately.
+
+## 4. Update agent with project association [pending]
+### Dependencies: 45.2, 45.3
+### Description: Associate newly created agent with auto-created project
+### Details:
+After project creation, update agent record with projectId. Update project's agentIds array to include new agent. Ensure bidirectional relationship is maintained.
+
+## 5. Add user feedback for auto-creation [pending]
+### Dependencies: 45.4
+### Description: Provide clear feedback when project is auto-created
+### Details:
+Show message indicating project was auto-created. Display project name and path. Suggest using explicit project for better organization. Log auto-creation for debugging.
+

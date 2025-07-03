@@ -311,8 +311,24 @@ export class DockerAgentManager {
       ? `-e CLAUDE_BRIDGE_SOCKET=/host/claude-bridge.sock`
       : '';
 
-    // Use Claude-enabled image if auth volume exists
-    const dockerImage = hasClaudeAuth ? 'magents/claude:dev' : this.dockerImage;
+    // Determine which Docker image to use
+    const config = this.configManager.loadConfig();
+    let dockerImage = this.dockerImage;
+    
+    // Check for Task Master variant if enabled
+    if (config.TASK_MASTER_ENABLED && config.TASKMASTER_AUTO_INSTALL) {
+      // Use Task Master variant of the image
+      if (dockerImage.includes(':')) {
+        dockerImage = dockerImage.replace(/:(\w+)$/, ':$1-taskmaster');
+      } else {
+        dockerImage += '-taskmaster';
+      }
+    }
+    
+    // Override with Claude image if auth volume exists
+    if (hasClaudeAuth) {
+      dockerImage = 'magents/claude:dev';
+    }
     
     // For Claude image, we need to override the entrypoint
     const entrypointOverride = hasClaudeAuth ? '--entrypoint /bin/bash' : '';
@@ -334,6 +350,7 @@ export class DockerAgentManager {
       -e AGENT_BRANCH="${options.branch}" \
       ${bridgeEnv} \
       ${envVars} \
+      -e TASK_MASTER_ENABLED="${config.TASK_MASTER_ENABLED || false}" \
       ${entrypointOverride} \
       ${dockerImage} \
       ${runCommand}`;
@@ -378,13 +395,19 @@ export class DockerAgentManager {
   }
 
   private async setupSharedConfiguration(sourceRepo: string, sharedConfigDir: string): Promise<void> {
-    // Copy Task Master configuration
-    const taskMasterSource = path.join(sourceRepo, '.taskmaster');
-    const taskMasterDest = path.join(sharedConfigDir, '.taskmaster');
+    const config = this.configManager.loadConfig();
     
-    if (fs.existsSync(taskMasterSource)) {
-      this.copyDirectory(taskMasterSource, taskMasterDest);
-      ui.muted('  ✓ Copied Task Master configuration');
+    // Copy Task Master configuration only if enabled
+    if (config.TASK_MASTER_ENABLED) {
+      const taskMasterSource = path.join(sourceRepo, '.taskmaster');
+      const taskMasterDest = path.join(sharedConfigDir, '.taskmaster');
+      
+      if (fs.existsSync(taskMasterSource)) {
+        this.copyDirectory(taskMasterSource, taskMasterDest);
+        ui.muted('  ✓ Copied Task Master configuration');
+      } else if (config.TASK_MASTER_ENABLED) {
+        ui.muted('  ⚠ Task Master enabled but no .taskmaster directory found');
+      }
     }
 
     // Copy CLAUDE.md

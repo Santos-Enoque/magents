@@ -401,6 +401,16 @@ export class UnifiedDatabaseService {
   }
 
   /**
+   * Get the database path (public method for migration tools)
+   */
+  getDatabasePath(): string {
+    if (this.connection) {
+      return this.connection.path;
+    }
+    return this.config.dbPath || this.getDefaultDbPath();
+  }
+
+  /**
    * Check if query is a write operation
    */
   private isWriteQuery(query: string): boolean {

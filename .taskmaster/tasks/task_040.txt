@@ -16,3 +16,55 @@
 
 # Test Strategy:
 Run accessibility audit, test with screen readers, verify keyboard navigation complete, ensure all tests pass
+
+# Subtasks:
+## 40.1. Add comprehensive ARIA labels [pending]
+### Dependencies: None
+### Description: Ensure all UI elements are accessible
+### Details:
+1. Audit all components
+2. Add missing ARIA labels
+3. Set proper roles
+4. Configure live regions
+5. Test with screen reader
+
+## 40.2. Implement keyboard navigation [pending]
+### Dependencies: None
+### Description: Enable full keyboard control
+### Details:
+1. Add focus management
+2. Implement tab order
+3. Create keyboard shortcuts
+4. Add skip links
+5. Handle modal focus
+
+## 40.3. Create high contrast mode [pending]
+### Dependencies: None
+### Description: Add accessibility color theme
+### Details:
+1. Design high contrast palette
+2. Create theme switcher
+3. Increase text contrast
+4. Add focus indicators
+5. Test with users
+
+## 40.4. Setup E2E testing with Playwright [pending]
+### Dependencies: None
+### Description: Configure end-to-end testing for Electron
+### Details:
+1. Install Playwright Electron
+2. Create test helpers
+3. Write app launch tests
+4. Add user flow tests
+5. Setup CI integration
+
+## 40.5. Add unit tests for main process [pending]
+### Dependencies: None
+### Description: Test Electron main process code
+### Details:
+1. Setup Jest for main
+2. Mock Electron APIs
+3. Test IPC handlers
+4. Test window management
+5. Achieve 80% coverage
+

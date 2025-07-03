@@ -16,3 +16,55 @@
 
 # Test Strategy:
 Test update flow end-to-end, verify signatures, test installers on each platform, check auto-update works
+
+# Subtasks:
+## 38.1. Configure electron-updater [pending]
+### Dependencies: None
+### Description: Setup auto-update infrastructure
+### Details:
+1. Configure update server URL
+2. Setup electron-updater
+3. Create update config
+4. Handle update events
+5. Add rollback support
+
+## 38.2. Create update UI components [pending]
+### Dependencies: 38.1
+### Description: Build user interface for update process
+### Details:
+1. Create update dialog
+2. Add progress bar
+3. Show release notes
+4. Handle user choices
+5. Add force update option
+
+## 38.3. Setup code signing for macOS [pending]
+### Dependencies: None
+### Description: Configure Developer ID signing
+### Details:
+1. Obtain signing certificates
+2. Configure electron-builder
+3. Setup keychain access
+4. Test signing process
+5. Verify with codesign
+
+## 38.4. Create platform installers [pending]
+### Dependencies: 38.3
+### Description: Build DMG, MSI, and AppImage
+### Details:
+1. Configure DMG with background
+2. Setup MSI with installer UI
+3. Create AppImage config
+4. Add installer icons
+5. Test installations
+
+## 38.5. Setup GitHub Actions CI/CD [pending]
+### Dependencies: 38.4
+### Description: Automate build and release process
+### Details:
+1. Create workflow files
+2. Setup build matrix
+3. Configure artifact uploads
+4. Add release creation
+5. Setup signing secrets
+

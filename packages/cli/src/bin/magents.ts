@@ -3,17 +3,17 @@
 import { Command } from 'commander';
 import inquirer from 'inquirer';
 import fs from 'fs';
-import { AgentManager } from '../services/AgentManager';
 import { DockerAgentManager } from '../services/DockerAgentManager';
 import { ConfigManager } from '../config/ConfigManager';
 import { ui } from '../ui/UIService';
 import { createAutoConfigCommand } from '../commands/autoconfig';
+import { createMigrateCommand } from '../commands/migrate';
 
 const program = new Command();
 const configManager = ConfigManager.getInstance();
 const config = configManager.loadConfig();
 
-// Always use DockerAgentManager (tmux mode removed)
+// Docker is the default and only mode for agent management
 const agentManager = new DockerAgentManager();
 
 // Helper function to parse Task Master output when --json is not supported
@@ -2313,6 +2313,9 @@ program
 
 // Add auto-configuration command
 program.addCommand(createAutoConfigCommand());
+
+// Add migrate command
+program.addCommand(createMigrateCommand());
 
 // Override help to show our custom styling
 if (process.argv.includes('--help') || process.argv.includes('-h')) {

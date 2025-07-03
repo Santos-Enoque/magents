@@ -1,0 +1,43 @@
+# Task ID: 44
+# Title: Make ProjectId Mandatory for Agents
+# Status: pending
+# Dependencies: 42
+# Priority: high
+# Description: Update agent data model and creation flow to require project association
+# Details:
+Update UnifiedAgentData schema to make projectId required field. Add validation in agent creation endpoints. Update database schema with foreign key constraints. Modify CLI and API to enforce project association.
+
+# Test Strategy:
+Schema validation tests, API tests for agent creation without projectId, foreign key constraint tests
+
+# Subtasks:
+## 1. Update UnifiedAgentData schema [pending]
+### Dependencies: None
+### Description: Make projectId a required field in agent data model
+### Details:
+Modify UnifiedAgentData interface and Zod schema to make projectId required. Remove optional modifier from projectId field. Update all TypeScript types that depend on this.
+
+## 2. Add database foreign key constraints [pending]
+### Dependencies: 44.1
+### Description: Create foreign key relationship between agents and projects
+### Details:
+Add migration to create foreign key constraint on agents.projectId referencing projects.id. Set up cascade rules for updates and restrict deletes. Add appropriate indexes.
+
+## 3. Update agent creation validation [pending]
+### Dependencies: 44.1
+### Description: Add validation to ensure projectId is provided when creating agents
+### Details:
+Update agent creation endpoints to validate projectId presence. Return clear error messages when projectId is missing. Check that referenced project exists.
+
+## 4. Update CLI agent creation [pending]
+### Dependencies: 44.3
+### Description: Modify CLI create command to handle project requirement
+### Details:
+Update magents create command to check for projectId. Implement logic to auto-create project if not provided (task 45). Show clear messages about project association.
+
+## 5. Update existing data migration [pending]
+### Dependencies: 44.2, 44.3
+### Description: Handle existing agents without projects in migration
+### Details:
+In migration script, handle agents that don't have projectId. Either assign to existing project based on path matching or create new project. Log decisions made during migration.
+

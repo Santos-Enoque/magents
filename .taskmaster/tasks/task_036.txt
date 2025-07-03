@@ -16,3 +16,55 @@
 
 # Test Strategy:
 Performance benchmarks, test split panes, verify copy/paste works across platforms, test PiP mode
+
+# Subtasks:
+## 36.1. Replace xterm.js with node-pty [pending]
+### Dependencies: None
+### Description: Integrate native PTY for better performance
+### Details:
+1. Add node-pty to Electron main
+2. Create PTY management service
+3. Handle PTY lifecycle
+4. Stream data to renderer
+5. Manage multiple PTY instances
+
+## 36.2. Implement terminal tab management [pending]
+### Dependencies: 36.1
+### Description: Add tabbed interface for multiple terminals
+### Details:
+1. Create tab bar component
+2. Handle tab creation/deletion
+3. Implement tab reordering
+4. Add tab context menu
+5. Persist tab state
+
+## 36.3. Add split pane functionality [pending]
+### Dependencies: 36.1
+### Description: Enable horizontal and vertical terminal splits
+### Details:
+1. Implement split pane logic
+2. Add split controls
+3. Handle resize dragging
+4. Manage focus between panes
+5. Add keyboard navigation
+
+## 36.4. Create terminal theming system [pending]
+### Dependencies: 36.1
+### Description: Implement customizable terminal colors
+### Details:
+1. Define terminal color schemes
+2. Apply new dark palette
+3. Add theme picker UI
+4. Store theme preferences
+5. Support custom themes
+
+## 36.5. Implement picture-in-picture mode [pending]
+### Dependencies: 36.1
+### Description: Allow terminals to float in separate windows
+### Details:
+1. Create PiP window management
+2. Handle window creation
+3. Sync terminal state
+4. Add window controls
+5. Manage PiP lifecycle
+

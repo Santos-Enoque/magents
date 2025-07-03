@@ -16,3 +16,55 @@
 
 # Test Strategy:
 Test notifications appear correctly, verify system tray works, check file operations, test Touch Bar on supported Macs
+
+# Subtasks:
+## 37.1. Setup native notifications API [pending]
+### Dependencies: None
+### Description: Implement system notifications with Electron
+### Details:
+1. Create notification service
+2. Request notification permissions
+3. Design notification templates
+4. Handle notification clicks
+5. Add notification queue
+
+## 37.2. Create system tray integration [pending]
+### Dependencies: None
+### Description: Add persistent system tray icon with menu
+### Details:
+1. Create tray icon assets
+2. Build tray menu template
+3. Show agent status in tray
+4. Add quick actions menu
+5. Handle tray clicks
+
+## 37.3. Implement dock badge for macOS [pending]
+### Dependencies: None
+### Description: Show agent count badge on dock icon
+### Details:
+1. Track active agent count
+2. Update dock badge number
+3. Add bounce animation for alerts
+4. Handle dock menu
+5. Clear badge on focus
+
+## 37.4. Add drag and drop file support [pending]
+### Dependencies: None
+### Description: Enable dragging files into the application
+### Details:
+1. Setup drop zones
+2. Handle file drag events
+3. Process dropped files
+4. Show drop indicators
+5. Validate file types
+
+## 37.5. Configure Touch Bar for macOS [pending]
+### Dependencies: None
+### Description: Add Touch Bar controls for compatible Macs
+### Details:
+1. Create Touch Bar template
+2. Add agent controls
+3. Show status indicators
+4. Handle Touch Bar actions
+5. Update dynamically
+

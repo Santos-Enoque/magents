@@ -97,6 +97,19 @@ check_versions() {
 # Display versions
 check_versions
 
+# Check if Task Master is available and enabled
+if [ "$TASK_MASTER_ENABLED" = "true" ]; then
+    if command -v task-master &> /dev/null; then
+        echo "Task Master is available and enabled"
+        task-master --version || echo "Task Master version check failed"
+    else
+        echo "Warning: Task Master is enabled but not installed in this image"
+        echo "To use Task Master, rebuild the image with --with-taskmaster flag"
+    fi
+else
+    echo "Task Master integration is disabled (optional feature)"
+fi
+
 # Start health check server in background
 if [ -f "/usr/local/bin/health-server.js" ]; then
     echo "Starting health check server..."

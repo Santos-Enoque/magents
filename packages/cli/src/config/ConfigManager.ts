@@ -37,16 +37,20 @@ export class ConfigManager {
 
     // Create default config if it doesn't exist
     if (!fs.existsSync(this.configFile)) {
-      const defaultConfig = `# magents Configuration
+      const defaultConfig = `# Magents Configuration - Docker-based AI Agent Management
 DEFAULT_BASE_BRANCH=main
-TMUX_SESSION_PREFIX=magent
 WORKTREE_PREFIX=agent
 MAX_AGENTS=5
 CLAUDE_CODE_PATH=claude
 CLAUDE_AUTO_ACCEPT=true
-DOCKER_ENABLED=true
 DOCKER_IMAGE=magents/agent:latest
 MODE=simple
+# Task Master Integration (Optional)
+TASK_MASTER_ENABLED=false
+TASKMASTER_AUTO_INSTALL=false
+# Advanced Features
+GITHUB_INTEGRATION=false
+MCP_ENABLED=false
 `;
       fs.writeFileSync(this.configFile, defaultConfig);
     }
@@ -80,6 +84,7 @@ MODE=simple
             case 'CLAUDE_AUTO_ACCEPT':
             case 'DOCKER_ENABLED':
             case 'TASK_MASTER_ENABLED':
+            case 'TASKMASTER_AUTO_INSTALL':
             case 'GITHUB_INTEGRATION':
             case 'MCP_ENABLED':
             case 'CUSTOM_COMMANDS_ENABLED':
@@ -88,7 +93,6 @@ MODE=simple
               config[cleanKey] = cleanValue.toLowerCase() === 'true';
               break;
             case 'DEFAULT_BASE_BRANCH':
-            case 'TMUX_SESSION_PREFIX':
             case 'WORKTREE_PREFIX':
             case 'CLAUDE_CODE_PATH':
             case 'DOCKER_IMAGE':
@@ -103,13 +107,16 @@ MODE=simple
     // Set defaults for missing values
     this.config = {
       DEFAULT_BASE_BRANCH: config.DEFAULT_BASE_BRANCH || 'main',
-      TMUX_SESSION_PREFIX: config.TMUX_SESSION_PREFIX || 'magent',
+      TMUX_SESSION_PREFIX: 'docker', // Kept for backward compatibility but not used
       WORKTREE_PREFIX: config.WORKTREE_PREFIX || 'agent',
       MAX_AGENTS: config.MAX_AGENTS || 5,
       CLAUDE_CODE_PATH: config.CLAUDE_CODE_PATH || 'claude',
       CLAUDE_AUTO_ACCEPT: config.CLAUDE_AUTO_ACCEPT !== undefined ? config.CLAUDE_AUTO_ACCEPT : true,
-      DOCKER_ENABLED: config.DOCKER_ENABLED !== undefined ? config.DOCKER_ENABLED : false,
+      DOCKER_ENABLED: true, // Docker is always enabled now
       DOCKER_IMAGE: config.DOCKER_IMAGE || 'magents/agent:latest',
+      MODE: (config.MODE as any) || 'simple',
+      TASK_MASTER_ENABLED: config.TASK_MASTER_ENABLED || false,
+      TASKMASTER_AUTO_INSTALL: (config as any).TASKMASTER_AUTO_INSTALL || false,
     };
 
     return this.config;
@@ -120,16 +127,18 @@ MODE=simple
     const newConfig = { ...currentConfig, ...updates };
 
     const configLines = [
-      '# magents Configuration',
+      '# Magents Configuration - Docker-based AI Agent Management',
       `DEFAULT_BASE_BRANCH=${newConfig.DEFAULT_BASE_BRANCH}`,
-      `TMUX_SESSION_PREFIX=${newConfig.TMUX_SESSION_PREFIX}`,
       `WORKTREE_PREFIX=${newConfig.WORKTREE_PREFIX}`,
       `MAX_AGENTS=${newConfig.MAX_AGENTS}`,
       `CLAUDE_CODE_PATH=${newConfig.CLAUDE_CODE_PATH}`,
       `CLAUDE_AUTO_ACCEPT=${newConfig.CLAUDE_AUTO_ACCEPT}`,
-      `DOCKER_ENABLED=${newConfig.DOCKER_ENABLED}`,
       `DOCKER_IMAGE=${newConfig.DOCKER_IMAGE}`,
       `MODE=${newConfig.MODE || 'simple'}`,
+      '',
+      '# Task Master Integration (Optional)',
+      `TASK_MASTER_ENABLED=${newConfig.TASK_MASTER_ENABLED || false}`,
+      `TASKMASTER_AUTO_INSTALL=${(newConfig as any).TASKMASTER_AUTO_INSTALL || false}`,
     ];
 
     // Add optional fields if they exist

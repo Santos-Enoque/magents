@@ -16,3 +16,55 @@
 
 # Test Strategy:
 Verify all buttons functional, test real-time updates, check resource monitoring accuracy, test responsive behavior
+
+# Subtasks:
+## 35.1. Create StatusBar React component [pending]
+### Dependencies: None
+### Description: Build fixed bottom bar with proper styling
+### Details:
+1. Create StatusBar component
+2. Set 32px fixed height
+3. Apply new color scheme
+4. Add flex layout for sections
+5. Ensure proper z-index
+
+## 35.2. Implement quick action buttons [pending]
+### Dependencies: 35.1
+### Description: Add interactive buttons for common actions
+### Details:
+1. Create New Agent button
+2. Add Start/Stop All toggle
+3. Implement View Mode switcher
+4. Style with hover effects
+5. Add keyboard shortcuts hints
+
+## 35.3. Add connection status indicator [pending]
+### Dependencies: 35.1
+### Description: Show real-time connection status with animations
+### Details:
+1. Create status indicator component
+2. Connect to WebSocket state
+3. Add pulse animation for active
+4. Show error states clearly
+5. Add reconnection info
+
+## 35.4. Implement resource monitoring [pending]
+### Dependencies: 35.1
+### Description: Display system CPU and memory usage
+### Details:
+1. Add IPC channel for system stats
+2. Create usage display components
+3. Update every 2 seconds
+4. Show as percentages/graphs
+5. Add threshold warnings
+
+## 35.5. Create notification center button [pending]
+### Dependencies: 35.1
+### Description: Add notification badge and dropdown
+### Details:
+1. Create notification button
+2. Add badge for count
+3. Implement dropdown panel
+4. Store notification history
+5. Add clear all option
+

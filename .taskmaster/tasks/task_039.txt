@@ -16,3 +16,55 @@
 
 # Test Strategy:
 Measure startup time < 2s, verify memory < 200MB idle, test 60fps animations, profile performance bottlenecks
+
+# Subtasks:
+## 39.1. Implement React.lazy code splitting [pending]
+### Dependencies: None
+### Description: Split code bundles for faster loading
+### Details:
+1. Identify split points
+2. Wrap routes in lazy()
+3. Add loading states
+4. Configure webpack chunks
+5. Analyze bundle sizes
+
+## 39.2. Add virtual scrolling for lists [pending]
+### Dependencies: None
+### Description: Optimize rendering of large agent lists
+### Details:
+1. Integrate react-window
+2. Convert agent list
+3. Implement dynamic heights
+4. Add scroll restoration
+5. Handle list updates
+
+## 39.3. Setup performance monitoring [pending]
+### Dependencies: None
+### Description: Track app performance metrics
+### Details:
+1. Add performance marks
+2. Track startup time
+3. Monitor memory usage
+4. Log frame rates
+5. Create perf dashboard
+
+## 39.4. Optimize IPC communication [pending]
+### Dependencies: None
+### Description: Reduce overhead in process communication
+### Details:
+1. Batch IPC messages
+2. Use binary protocols
+3. Add message compression
+4. Implement caching
+5. Profile IPC usage
+
+## 39.5. Configure GPU acceleration [pending]
+### Dependencies: None
+### Description: Enable hardware acceleration for rendering
+### Details:
+1. Enable GPU rasterization
+2. Configure WebGL settings
+3. Test GPU compatibility
+4. Add fallback options
+5. Monitor GPU usage
+

@@ -16,3 +16,55 @@
 
 # Test Strategy:
 Verify app launches, React components render, DevTools available, hot reload works, IPC communication functional
+
+# Subtasks:
+## 31.1. Install Electron dependencies and setup package structure [pending]
+### Dependencies: None
+### Description: Install core Electron packages and configure workspace for Electron app
+### Details:
+1. Add Electron dependencies to packages/electron/package.json
+2. Install electron, electron-builder, electron-updater
+3. Add electron-devtools-installer for development
+4. Configure main and renderer entry points in package.json
+5. Setup electron-specific scripts (dev, build, dist)
+
+## 31.2. Create main process architecture with BrowserWindow [pending]
+### Dependencies: 31.1
+### Description: Implement Electron main process with proper window management and security
+### Details:
+1. Create packages/electron/src/main/index.ts
+2. Implement createWindow function with security best practices
+3. Configure BrowserWindow with webPreferences
+4. Handle app lifecycle events (ready, window-all-closed, activate)
+5. Setup proper window sizing and centering
+
+## 31.3. Setup preload script and context bridge [pending]
+### Dependencies: 31.2
+### Description: Create secure bridge between main and renderer processes
+### Details:
+1. Create packages/electron/src/preload/index.ts
+2. Use contextBridge.exposeInMainWorld for secure API
+3. Define IPC channels for agent management
+4. Implement type-safe IPC communication
+5. Add validation for all IPC messages
+
+## 31.4. Configure build system for Electron with React [pending]
+### Dependencies: 31.1
+### Description: Setup webpack/vite configuration for Electron renderer with React
+### Details:
+1. Create electron-specific vite config
+2. Configure proper externals for Electron
+3. Setup hot module replacement for development
+4. Configure production build optimizations
+5. Ensure proper source maps for debugging
+
+## 31.5. Integrate existing React app as renderer [pending]
+### Dependencies: 31.3, 31.4
+### Description: Connect the web UI to run inside Electron renderer process
+### Details:
+1. Update packages/web entry point for Electron
+2. Modify API calls to use IPC instead of HTTP
+3. Create ElectronProvider for React context
+4. Update routing for file:// protocol
+5. Ensure all assets load correctly in Electron
+

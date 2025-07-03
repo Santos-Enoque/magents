@@ -1,0 +1,43 @@
+# Task ID: 41
+# Title: Create Database Migration Infrastructure
+# Status: in-progress
+# Dependencies: None
+# Priority: high
+# Description: Set up migration scripts and tools to migrate existing JSON files to SQLite database
+# Details:
+Create JsonToSqliteMigration class in packages/shared/src/database/migrations/. Implement methods to read existing JSON files (projects.json, agent configs), convert to unified format, and insert into SQLite database. Add rollback functionality and backup creation. Create CLI command 'magents migrate' with --rollback option.
+
+# Test Strategy:
+Unit tests for migration logic, integration tests with sample JSON data, manual testing of rollback functionality
+
+# Subtasks:
+## 1. Create migration class structure and interfaces [pending]
+### Dependencies: None
+### Description: Set up the base JsonToSqliteMigration class with proper interfaces and error handling
+### Details:
+Create JsonToSqliteMigration class in packages/shared/src/database/migrations/migrate-json-to-sqlite.ts. Define interfaces for migration results, configuration options. Set up constructor with dependency injection for database service, project service, and config service.
+
+## 2. Implement project migration logic [pending]
+### Dependencies: 41.1
+### Description: Create method to read and migrate projects from JSON to SQLite
+### Details:
+Implement migrateProjects() method to read projects.json from ~/.magents/projects/, convert to UnifiedProjectData format, handle missing fields with defaults, and insert into database using ProjectRepository.
+
+## 3. Implement agent migration logic [pending]
+### Dependencies: 41.1
+### Description: Create method to read and migrate agents from individual JSON files to SQLite
+### Details:
+Implement migrateAgents() method to scan agents directory, read each agent JSON file, convert to UnifiedAgentData format, auto-assign projects for orphaned agents, and insert into database using AgentRepository.
+
+## 4. Add backup and rollback functionality [pending]
+### Dependencies: 41.2, 41.3
+### Description: Implement backup creation before migration and rollback capability
+### Details:
+Create backup copies of all JSON files with .backup extension before migration. Implement rollback() method to restore from backups and remove SQLite database. Add transaction support for atomic migrations.
+
+## 5. Create CLI migrate command [pending]
+### Dependencies: 41.4
+### Description: Add 'magents migrate' command to CLI with options and progress feedback
+### Details:
+Create migrate.ts command file, add --rollback flag support, implement progress indicators and confirmation prompts, integrate with main CLI program, add proper error handling and user feedback.
+

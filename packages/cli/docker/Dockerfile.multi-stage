@@ -1,6 +1,7 @@
 # Multi-stage Dockerfile for magents agent containers
 # Build args control which variant is built
 ARG BUILD_TARGET=production
+ARG INCLUDE_TASKMASTER=false
 
 ###########################################
 # Base stage - Common for all variants
@@ -33,13 +34,22 @@ RUN groupadd -g 1001 magents && \
 WORKDIR /workspace
 
 # Install global npm packages
-RUN npm install -g npm@latest pnpm task-master-ai
+RUN npm install -g npm@latest pnpm
 
 # Switch to non-root user
 USER magents
 
 # Create necessary directories with proper permissions
 RUN mkdir -p /home/magents/.config /home/magents/.cache /home/magents/.npm
+
+# Conditionally install Task Master
+ARG INCLUDE_TASKMASTER
+RUN if [ "$INCLUDE_TASKMASTER" = "true" ]; then \
+      npm install -g task-master-ai && \
+      echo "Task Master installed"; \
+    else \
+      echo "Task Master not included (optional integration)"; \
+    fi
 
 ###########################################
 # Development stage - Additional debug tools
@@ -131,7 +141,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 
 # Labels for image metadata
 LABEL org.opencontainers.image.title="Magents Agent"
-LABEL org.opencontainers.image.description="AI agent runtime with Claude Code and Task Master integration"
+LABEL org.opencontainers.image.description="Docker-based AI agent runtime with optional Task Master integration"
 LABEL org.opencontainers.image.vendor="Magents"
 LABEL org.opencontainers.image.version="1.0.0"
 

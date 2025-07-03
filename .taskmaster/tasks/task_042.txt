@@ -1,0 +1,43 @@
+# Task ID: 42
+# Title: Update Backend Services for Database
+# Status: pending
+# Dependencies: 41
+# Priority: high
+# Description: Modify backend services to use database repositories instead of file operations
+# Details:
+Update ProjectService to use ProjectRepository, modify agent management to use AgentRepository. Maintain backward compatibility with existing API contracts. Add transaction support for complex operations like creating agent with project.
+
+# Test Strategy:
+Unit tests for repository integration, API integration tests, regression tests for existing functionality
+
+# Subtasks:
+## 1. Update ProjectService to use repositories [pending]
+### Dependencies: None
+### Description: Refactor ProjectService to use ProjectRepository instead of file operations
+### Details:
+Modify all methods in ProjectService to use database repositories. Replace fs.readJson/writeJson with repository.create/update/find methods. Maintain same public API to ensure backward compatibility.
+
+## 2. Update agent management services [pending]
+### Dependencies: None
+### Description: Refactor agent-related services to use AgentRepository
+### Details:
+Update DockerAgentManager and related services to use AgentRepository for persistence. Replace file-based agent storage with database operations. Ensure status updates are persisted to database.
+
+## 3. Implement transaction support [pending]
+### Dependencies: 42.1, 42.2
+### Description: Add database transaction support for complex operations
+### Details:
+Wrap complex operations like creating agent with project in database transactions. Implement rollback on failure. Use UnifiedDatabaseService.transaction() method for atomic operations.
+
+## 4. Update API controllers [pending]
+### Dependencies: 42.1, 42.2
+### Description: Modify API controllers to use updated services with repositories
+### Details:
+Update all API endpoints in backend controllers to use the refactored services. Ensure proper error handling and response formats remain unchanged.
+
+## 5. Add database connection management [pending]
+### Dependencies: 42.3, 42.4
+### Description: Implement proper database connection lifecycle in backend
+### Details:
+Add database connection initialization in backend startup, implement connection pooling if needed, add graceful shutdown to close database connections properly.
+

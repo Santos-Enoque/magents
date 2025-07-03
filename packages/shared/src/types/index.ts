@@ -1,15 +1,16 @@
 // Core configuration interfaces
 export interface MagentsConfig {
   DEFAULT_BASE_BRANCH: string;
-  TMUX_SESSION_PREFIX: string;
+  TMUX_SESSION_PREFIX: string; // Deprecated - kept for backward compatibility
   WORKTREE_PREFIX: string;
   MAX_AGENTS: number;
   CLAUDE_CODE_PATH: string;
   CLAUDE_AUTO_ACCEPT: boolean;
-  DOCKER_ENABLED: boolean;
+  DOCKER_ENABLED: boolean; // Always true in new version
   DOCKER_IMAGE: string;
   MODE?: 'simple' | 'standard' | 'advanced';
   TASK_MASTER_ENABLED?: boolean;
+  TASKMASTER_AUTO_INSTALL?: boolean;
   GITHUB_INTEGRATION?: boolean;
   MCP_ENABLED?: boolean;
   CUSTOM_COMMANDS_ENABLED?: boolean;

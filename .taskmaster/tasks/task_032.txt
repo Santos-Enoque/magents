@@ -16,3 +16,55 @@
 
 # Test Strategy:
 Test on macOS for native feel, verify window controls work, check vibrancy effects, ensure state persistence across restarts
+
+# Subtasks:
+## 32.1. Implement frameless window with traffic lights [pending]
+### Dependencies: None
+### Description: Create custom title bar with native macOS controls
+### Details:
+1. Set frame: false in BrowserWindow options
+2. Configure titleBarStyle: 'hiddenInset' for macOS
+3. Add transparent window background
+4. Position traffic lights correctly
+5. Handle window dragging regions
+
+## 32.2. Add vibrancy effects to sidebar [pending]
+### Dependencies: 32.1
+### Description: Implement native macOS vibrancy for visual depth
+### Details:
+1. Set vibrancy: 'sidebar' in BrowserWindow
+2. Make sidebar background transparent
+3. Adjust text contrast for readability
+4. Test different vibrancy modes
+5. Add fallback for non-macOS
+
+## 32.3. Implement window state management [pending]
+### Dependencies: None
+### Description: Persist and restore window size and position
+### Details:
+1. Use electron-window-state package
+2. Save window bounds on resize/move
+3. Restore position on app launch
+4. Handle multi-monitor scenarios
+5. Respect system window constraints
+
+## 32.4. Add full-screen and workspace support [pending]
+### Dependencies: 32.1
+### Description: Implement native full-screen mode and Mission Control integration
+### Details:
+1. Enable native full-screen support
+2. Handle full-screen transitions
+3. Update UI for full-screen mode
+4. Support Mission Control gestures
+5. Add keyboard shortcuts for full-screen
+
+## 32.5. Configure rounded corners and shadows [pending]
+### Dependencies: 32.1
+### Description: Apply native macOS window styling with proper shadows
+### Details:
+1. Set proper window background color
+2. Configure shadow properties
+3. Apply 12px border radius to window
+4. Ensure content doesn't overflow corners
+5. Test visual appearance on all macOS versions
+

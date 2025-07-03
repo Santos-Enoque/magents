@@ -1,0 +1,43 @@
+# Task ID: 49
+# Title: Decouple Task Master as Optional Integration
+# Status: pending
+# Dependencies: 48
+# Priority: medium
+# Description: Move Task Master code to integration layer and make it optional
+# Details:
+Create TaskMasterIntegration implementing TaskIntegration interface. Move existing Task Master code to packages/shared/src/integrations/taskmaster/. Update Dockerfile to conditionally install Task Master. Add configuration for enabling/disabling Task Master.
+
+# Test Strategy:
+Integration tests with Task Master enabled/disabled, Docker build tests, configuration tests
+
+# Subtasks:
+## 1. Create TaskMasterIntegration class [pending]
+### Dependencies: None
+### Description: Implement TaskIntegration interface for Task Master
+### Details:
+Create TaskMasterIntegration.ts implementing TaskIntegration interface. Wrap existing Task Master CLI calls. Handle Task Master not being installed gracefully.
+
+## 2. Move Task Master code to integration layer [pending]
+### Dependencies: 49.1
+### Description: Relocate Task Master specific code
+### Details:
+Move taskMasterIntegrationService to packages/shared/src/integrations/taskmaster/. Update all imports throughout codebase. Maintain backward compatibility.
+
+## 3. Update Dockerfile for conditional installation [pending]
+### Dependencies: None
+### Description: Make Task Master installation optional in Docker
+### Details:
+Add INSTALL_TASKMASTER build arg to Dockerfile. Conditionally run npm install -g task-master-ai. Document build options in README.
+
+## 4. Add feature toggle configuration [pending]
+### Dependencies: 49.2
+### Description: Create configuration to enable/disable Task Master
+### Details:
+Add taskIntegration.type config option. Support values: 'taskmaster', 'internal', 'none'. Update mode configurations to reflect choice.
+
+## 5. Update UI for optional Task Master [pending]
+### Dependencies: 49.4
+### Description: Modify UI to handle Task Master being optional
+### Details:
+Conditionally show Task Master UI elements. Add messages when Task Master is disabled. Provide UI to switch task integrations.
+

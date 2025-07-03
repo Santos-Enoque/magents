@@ -871,11 +871,1091 @@
         ],
         "status": "done",
         "subtasks": []
+      },
+      {
+        "id": 21,
+        "title": "Docker Runtime Implementation",
+        "description": "Create Docker-based runtime for agents with pre-built images including all necessary tools",
+        "details": "Create Dockerfile for magents/agent:latest with Node.js 20, tmux, git, task-master-ai, and claude-code bridge. Implement volume mapping for project files (/workspace) and shared configuration (/shared). Add Docker health checks using HTTP endpoint. Configure auto-restart policies with restart: unless-stopped. Create two variants: magents/agent:latest (production) and magents/agent:dev (with debugging tools). Include entrypoint script for proper signal handling and graceful shutdown.",
+        "testStrategy": "Build Docker image and verify all tools are installed correctly. Test volume persistence across container restarts. Verify health checks respond correctly. Test container lifecycle (start, stop, restart). Validate signal handling for graceful shutdown.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Base Dockerfile with Core Dependencies",
+            "description": "Build the foundational Docker image with Node.js 20, system packages, and base tools",
+            "details": "Create Dockerfile in packages/cli/docker/ directory. Use node:20-slim as base image for smaller size. Install essential system packages: git, tmux, curl, python3, make, g++ for native modules. Set up non-root user for security. Configure working directory as /workspace. Install global npm packages: npm@latest, yarn, pnpm for flexibility.",
+            "testStrategy": "Build image and verify all tools are installed with correct versions. Test that git, tmux, and node commands work. Verify non-root user has proper permissions.",
+            "dependencies": [],
+            "status": "done"
+          },
+          {
+            "id": 2,
+            "title": "Install Task Master and Claude Code Bridge",
+            "description": "Add Task Master AI and create socket-based Claude Code bridge for host communication",
+            "details": "Install task-master-ai globally via npm. Create a Unix domain socket-based bridge system that allows containers to use the host's Claude Code installation. Implementation includes: 1) Create /var/run/claude-code-bridge.sock Unix domain socket on host accessible via volume mount at /host/claude-bridge.sock in containers, 2) Implement lightweight Node.js proxy service (claude-bridge-server) that listens on the socket and forwards commands to host's Claude Code CLI, 3) Create claude-code wrapper script in container that communicates through the socket instead of requiring local Claude Code installation, 4) Handle authentication tokens and session management transparently by proxying ~/.config/claude-code from host, 5) Support multiple concurrent container connections with request queuing and connection pooling, 6) Provide fallback mechanism that detects if bridge is unavailable and shows helpful error message with setup instructions. Configure Task Master to use mounted config directory. Set up environment variables for Task Master configuration including CLAUDE_BRIDGE_SOCKET=/host/claude-bridge.sock.",
+            "testStrategy": "Verify task-master CLI is available and functional. Test claude-code bridge socket connection from container to host. Validate multiple containers can connect simultaneously. Test authentication token passthrough works correctly. Verify fallback error handling when bridge unavailable. Validate Task Master can read/write to mounted volumes and use Claude Code through the bridge.",
+            "dependencies": [
+              1
+            ],
+            "status": "done"
+          },
+          {
+            "id": 3,
+            "title": "Implement Volume Mapping and Persistence",
+            "description": "Configure Docker volumes for project files, shared config, and agent state persistence",
+            "details": "Define volume mount points: /workspace for project files, /shared for shared configuration, /agent for agent-specific state. Create docker-compose.yml template with proper volume definitions. Implement permission handling for mounted volumes. Add .dockerignore to exclude unnecessary files. Create volume initialization scripts.",
+            "testStrategy": "Test file persistence across container restarts. Verify permissions allow read/write from container. Test that changes in container reflect on host. Validate .gitignore patterns work correctly.",
+            "dependencies": [
+              1
+            ],
+            "status": "done"
+          },
+          {
+            "id": 4,
+            "title": "Add Health Checks and Auto-restart Policies",
+            "description": "Implement container health monitoring and automatic recovery mechanisms",
+            "details": "Create health check endpoint using simple HTTP server on port 3999. Implement HEALTHCHECK instruction in Dockerfile with proper intervals. Configure restart policy as 'unless-stopped' in docker-compose. Add graceful shutdown handling for SIGTERM/SIGINT. Create health status script that checks tmux sessions and agent status.",
+            "testStrategy": "Test health endpoint responds correctly. Verify container auto-restarts on failure. Test graceful shutdown preserves work. Monitor resource usage during health checks.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "status": "done"
+          },
+          {
+            "id": 5,
+            "title": "Create Production and Development Image Variants",
+            "description": "Build optimized production image and feature-rich development image with debugging tools",
+            "details": "Create multi-stage Dockerfile with shared base. Production variant: minimal size, no debugging tools, optimized for performance. Development variant: includes vim, htop, strace, tcpdump, node debugger. Use build args to control variant selection. Create GitHub Actions workflow for automated image building and publishing to Docker Hub.",
+            "testStrategy": "Compare image sizes between variants. Test debugging tools work in dev image. Verify production image has no unnecessary packages. Test automated build and publish workflow.",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "status": "done"
+          }
+        ]
+      },
+      {
+        "id": 22,
+        "title": "Task Master Integration Wrapper",
+        "description": "Build transparent wrapper API to hide Task Master complexity while preserving functionality",
+        "details": "Create MagentsTaskManager class with simplified methods: quickStart(), autoAnalyze(), simplifyTasks(). Implement automatic PRD generation from codebase using AST analysis. Add project type detection (package.json for Node.js, requirements.txt for Python, etc.). Create task view simplification that shows only essential information for basic users. Build caching layer to avoid redundant Task Master calls. Add error translation to convert Task Master errors to user-friendly messages.",
+        "testStrategy": "Unit test wrapper methods with mocked Task Master. Integration test with real Task Master installation. Verify PRD generation produces valid output. Test project type detection with various project structures. Validate simplified task view maintains essential information.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create MagentsTaskManager core class with simplified API",
+            "description": "Implement the MagentsTaskManager class with methods quickStart(), autoAnalyze(), and simplifyTasks(). This class will serve as the main interface between Magents and Task Master, providing a simplified API that abstracts Task Master's complexity while maintaining its functionality.",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 22
+          },
+          {
+            "id": 2,
+            "title": "Implement automatic PRD generation and project detection",
+            "description": "Build functionality to automatically generate PRD from codebase using AST analysis. Implement project type detection by checking for package.json (Node.js), requirements.txt (Python), pom.xml (Java), etc. This will enable zero-config project initialization.",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 22
+          },
+          {
+            "id": 3,
+            "title": "Build simplified task view and user interface abstraction",
+            "description": "Create task view simplification layer that shows only essential information for basic users. Implement different view modes (basic, intermediate, advanced) that progressively expose more Task Master functionality. Design clean, intuitive task presentation format.",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 22
+          },
+          {
+            "id": 4,
+            "title": "Implement caching layer and performance optimization",
+            "description": "Build caching layer to avoid redundant Task Master calls and improve performance. Implement smart cache invalidation, task state persistence, and efficient data structures. Add metrics to track cache hit rates and API call reduction.",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 22
+          },
+          {
+            "id": 5,
+            "title": "Create error handling and user-friendly messaging system",
+            "description": "Implement comprehensive error translation to convert Task Master errors to user-friendly messages. Build error recovery mechanisms, helpful suggestions for common issues, and graceful fallbacks. Add logging and debugging features for troubleshooting.",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 22
+          }
+        ]
+      },
+      {
+        "id": 23,
+        "title": "Unified Data Model Implementation",
+        "description": "Create single source of truth for agent and task data shared between CLI and GUI",
+        "details": "Design flattened UnifiedAgentData schema replacing complex nested structures. Implement SQLite database for persistent storage with automatic migrations. Create DataSync service for real-time updates between CLI and GUI. Build migration tool to convert existing agent configurations. Add data validation layer with Zod schemas. Implement atomic operations to prevent race conditions. Create backup/restore functionality.",
+        "testStrategy": "Schema validation tests for all data operations. Migration tests from old to new format. Concurrent access tests for race conditions. Real-time sync tests between multiple clients. Backup and restore functionality tests.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design UnifiedAgentData schema and data structures",
+            "description": "Create flattened data schema replacing complex nested structures. Define TypeScript interfaces and Zod validation schemas for agent, task, and project data. Design schema for SQLite database with proper relationships and indexing.",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 23
+          },
+          {
+            "id": 2,
+            "title": "Implement SQLite database with migrations",
+            "description": "Set up SQLite database for persistent storage. Create migration system for schema changes. Implement database initialization, connection management, and proper cleanup. Add database versioning and automatic migration handling.",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 23
+          },
+          {
+            "id": 3,
+            "title": "Create DataSync service for real-time updates",
+            "description": "Build service for real-time synchronization between CLI and GUI. Implement WebSocket or Server-Sent Events for live updates. Handle concurrent access and conflict resolution. Add event-driven updates for data changes.",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 23
+          },
+          {
+            "id": 4,
+            "title": "Build migration tool for existing configurations",
+            "description": "Create tool to convert existing agent configurations to new unified format. Handle data transformation from old JSON files to new SQLite schema. Implement backup and rollback capabilities for migrations. Add validation to ensure data integrity during migration.",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 23
+          },
+          {
+            "id": 5,
+            "title": "Implement atomic operations and backup/restore",
+            "description": "Add atomic transaction support to prevent race conditions. Implement database backup and restore functionality. Create data validation layer with comprehensive error handling. Add rollback mechanisms for failed operations.",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 23
+          }
+        ]
+      },
+      {
+        "id": 24,
+        "title": "Core CLI Commands Implementation",
+        "description": "Implement three essential commands with progressive complexity options",
+        "details": "Implement 'magents create <name>' with instant agent creation using defaults. Add 'magents assign' for automatic task generation based on project analysis. Create 'magents start' to launch agents in Docker containers. Add --mode flag supporting simple/standard/advanced modes. Implement --dry-run for preview. Add progress indicators for long operations. Create interactive mode for missing parameters.",
+        "testStrategy": "CLI integration tests for all commands. Test mode switching preserves data. Verify dry-run doesn't make changes. Test progress indicators show accurate status. Validate interactive prompts work correctly.",
+        "priority": "high",
+        "dependencies": [
+          21,
+          22,
+          23
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement `magents create <name>` command with instant agent creation",
+            "description": "Create the core 'magents create' command that instantly creates agents using smart defaults and minimal user input",
+            "dependencies": [],
+            "details": "Implement the primary agent creation command that accepts a name parameter and creates an agent with intelligent defaults. Include automatic project detection, default branch selection, smart naming conventions, and minimal configuration requirements. The command should work out-of-the-box without requiring extensive setup or configuration from users.",
+            "status": "done",
+            "testStrategy": "Test instant creation with various project types, verify smart defaults are applied correctly, test with and without existing git repositories, validate naming conventions and conflict resolution"
+          },
+          {
+            "id": 2,
+            "title": "Add progressive complexity modes (--mode simple/standard/advanced)",
+            "description": "Implement the --mode flag system that provides different levels of configuration complexity based on user expertise",
+            "dependencies": [
+              1
+            ],
+            "details": "Create a progressive disclosure system with three modes: simple (minimal options, smart defaults), standard (common configurations exposed), and advanced (full feature access). Include mode switching capabilities, data preservation across mode changes, and contextual help for each mode level. Ensure users can upgrade from simple to advanced modes without losing data.",
+            "status": "done",
+            "testStrategy": "Test each mode shows appropriate options, verify mode switching preserves all data, test guided upgrade suggestions, validate help content matches mode complexity"
+          },
+          {
+            "id": 3,
+            "title": "Implement `magents assign` command for automatic task generation",
+            "description": "Create the 'magents assign' command that automatically generates and assigns tasks based on project analysis",
+            "dependencies": [
+              1
+            ],
+            "details": "Build the task assignment command that leverages the MagentsTaskManager wrapper to automatically analyze projects, generate relevant tasks, and assign them to agents. Include project type detection, automatic PRD generation, task prioritization, and intelligent task-to-agent matching. Integrate with TaskMaster functionality while hiding complexity from users.",
+            "status": "done",
+            "testStrategy": "Test automatic task generation for different project types, verify task assignment logic, test integration with TaskMaster, validate project analysis accuracy"
+          },
+          {
+            "id": 4,
+            "title": "Create `magents start` command to launch agents in Docker containers",
+            "description": "Implement the container orchestration command that launches agents in Docker environments with proper resource management",
+            "dependencies": [
+              1
+            ],
+            "details": "Build the agent startup command that creates and manages Docker containers for agents. Include container lifecycle management, volume mounting, network configuration, health monitoring, and resource allocation. Integrate with the Docker runtime implementation and ensure proper container cleanup and restart policies.",
+            "status": "done",
+            "testStrategy": "Test container creation and startup, verify volume mounting and persistence, test health monitoring and auto-restart, validate resource allocation and limits"
+          },
+          {
+            "id": 5,
+            "title": "Add utility features (--dry-run, progress indicators, interactive mode)",
+            "description": "Implement supporting utility features that enhance user experience and provide operational transparency",
+            "dependencies": [
+              2,
+              3,
+              4
+            ],
+            "details": "Add --dry-run functionality for previewing changes without execution, implement real-time progress indicators for long-running operations, create interactive mode for missing parameters with smart prompts and validation. Include operation cancellation, progress persistence across page refreshes, and comprehensive user feedback systems.",
+            "status": "done",
+            "testStrategy": "Test dry-run doesn't make changes, verify progress indicators show accurate status, test interactive prompts work correctly, validate cancellation stops operations cleanly"
+          }
+        ]
+      },
+      {
+        "id": 25,
+        "title": "Single-Page Dashboard Implementation",
+        "description": "Redesign GUI to single-page application with progressive disclosure interface",
+        "details": "Create unified dashboard with agent cards showing live status. Implement collapsible sections for advanced options. Add quick action buttons (Create, Start, Stop, Assign Tasks). Build inline terminal component using xterm.js. Implement real-time updates via Server-Sent Events. Add keyboard shortcuts for power users. Create responsive design for mobile support.",
+        "testStrategy": "Component tests for all UI elements. E2E tests for user workflows. Responsive design tests on various screen sizes. Real-time update tests with simulated events. Accessibility tests for keyboard navigation.",
+        "priority": "high",
+        "dependencies": [
+          23
+        ],
+        "status": "done"
+      },
+      {
+        "id": 26,
+        "title": "GUI-CLI Integration Bridge",
+        "description": "Ensure complete feature parity and real-time synchronization between GUI and CLI",
+        "details": "Share business logic through @magents/core package. Implement unified command execution layer. Create WebSocket/SSE bridge for real-time updates. Add command palette in GUI mapping to CLI commands. Build activity log showing all operations from both interfaces. Implement conflict resolution for concurrent operations.",
+        "testStrategy": "Integration tests for CLI commands executed from GUI. Verify real-time sync with parallel CLI/GUI operations. Test conflict resolution scenarios. Validate command palette executes correctly. Check activity log captures all operations.",
+        "priority": "high",
+        "dependencies": [
+          24,
+          25
+        ],
+        "status": "in-progress"
+      },
+      {
+        "id": 27,
+        "title": "Auto-Configuration System",
+        "description": "Implement intelligent defaults and automatic configuration detection",
+        "details": "Build project type detection using file patterns and package managers. Implement automatic port allocation with conflict detection. Create secure API key storage with encryption. Add MCP server auto-discovery by scanning .mcp.json files. Build configuration inheritance (global -> project -> agent). Add smart suggestions based on project analysis.",
+        "testStrategy": "Test detection accuracy across different project types. Verify port allocation avoids conflicts. Test API key encryption and retrieval. Validate MCP discovery finds all servers. Test configuration inheritance precedence.",
+        "priority": "medium",
+        "dependencies": [
+          22
+        ],
+        "status": "done"
+      },
+      {
+        "id": 28,
+        "title": "Progressive Complexity Modes",
+        "description": "Implement three-tier complexity system for different user expertise levels",
+        "details": "Create Simple mode with only essential options (name, project path). Build Standard mode with common configurations exposed. Implement Advanced mode with full Task Master and MCP access. Add mode switching without data loss. Create guided upgrade path from simple to advanced. Build contextual help for each mode level.",
+        "testStrategy": "Test each mode shows appropriate options. Verify mode switching preserves all data. Test guided upgrade suggestions appear correctly. Validate help content matches mode complexity. Test feature discovery in each mode.",
+        "priority": "medium",
+        "dependencies": [
+          24,
+          25
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Simple Mode UI and Configuration",
+            "description": "Create the Simple mode interface with only essential options (agent name and project path). Build the minimal UI components and state management for this mode.",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 28
+          },
+          {
+            "id": 2,
+            "title": "Build Standard Mode with Common Configurations",
+            "description": "Implement Standard mode interface that exposes commonly used configuration options while hiding advanced complexity. Include project settings, basic Docker options, and environment variables.",
+            "details": "",
+            "status": "done",
+            "dependencies": [
+              "28.1"
+            ],
+            "parentTaskId": 28
+          },
+          {
+            "id": 3,
+            "title": "Implement Advanced Mode with Full Feature Access",
+            "description": "Create Advanced mode that provides complete access to Task Master integration, MCP configuration, Docker settings, and all other power-user features with comprehensive customization options.",
+            "details": "",
+            "status": "done",
+            "dependencies": [
+              "28.2"
+            ],
+            "parentTaskId": 28
+          },
+          {
+            "id": 4,
+            "title": "Add Mode Switching and Data Persistence",
+            "description": "Implement seamless mode switching functionality that preserves user data and configurations. Create migration paths between modes without losing settings or requiring re-configuration.",
+            "details": "",
+            "status": "done",
+            "dependencies": [
+              "28.3"
+            ],
+            "parentTaskId": 28
+          },
+          {
+            "id": 5,
+            "title": "Create Contextual Help and Guided Upgrade System",
+            "description": "Build contextual help system that adapts to each mode level. Implement guided upgrade paths that suggest when users might benefit from more advanced features, with step-by-step tutorials and feature discovery mechanisms.",
+            "details": "",
+            "status": "done",
+            "dependencies": [
+              "28.4"
+            ],
+            "parentTaskId": 28
+          }
+        ]
+      },
+      {
+        "id": 29,
+        "title": "Error Message Enhancement",
+        "description": "Replace technical error messages with user-friendly, actionable guidance",
+        "details": "Create error mapping system for common failures. Add actionable suggestions for each error type. Implement error recovery workflows. Add 'Learn More' links to documentation. Create error reporting mechanism. Build automatic error resolution for common issues. Add progress context to long-running operations.",
+        "testStrategy": "Test error scenarios produce friendly messages. Verify suggestions are actionable and correct. Test error recovery flows work properly. Validate documentation links are valid. Test automatic resolution succeeds when possible.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "done"
+      },
+      {
+        "id": 30,
+        "title": "Cloud Deployment Support",
+        "description": "Enable deployment and management of agents in cloud environments",
+        "details": "Implement 'magents deploy --cloud' command with provider selection. Add state persistence using cloud storage. Create secure tunnel for remote agent access. Build cloud-specific Docker images with smaller footprint. Add support for AWS ECS, Google Cloud Run, and Azure Container Instances. Implement cost estimation before deployment.",
+        "testStrategy": "Test deployment to each cloud provider. Verify state persistence and restoration. Test remote access security and performance. Validate cost estimates match actual usage. Test container scaling and resource limits.",
+        "priority": "low",
+        "dependencies": [
+          21,
+          24
+        ],
+        "status": "pending"
+      },
+      {
+        "id": 31,
+        "title": "Setup Electron project foundation",
+        "description": "Initialize Electron app structure with main/renderer process architecture and integrate existing React codebase",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "high",
+        "details": "1. Install Electron and essential dependencies (electron, electron-builder, electron-updater)\n2. Create main process entry point (main.js) with BrowserWindow configuration\n3. Setup preload script for secure context bridging\n4. Configure webpack/vite for Electron renderer process\n5. Integrate existing React app as renderer\n6. Setup IPC communication patterns\n7. Configure development environment with hot reload\n8. Add electron-devtools-installer for React DevTools",
+        "testStrategy": "Verify app launches, React components render, DevTools available, hot reload works, IPC communication functional",
+        "subtasks": [
+          {
+            "id": "31.1",
+            "title": "Install Electron dependencies and setup package structure",
+            "description": "Install core Electron packages and configure workspace for Electron app",
+            "dependencies": [],
+            "details": "1. Add Electron dependencies to packages/electron/package.json\n2. Install electron, electron-builder, electron-updater\n3. Add electron-devtools-installer for development\n4. Configure main and renderer entry points in package.json\n5. Setup electron-specific scripts (dev, build, dist)",
+            "status": "pending",
+            "testStrategy": "Verify all packages install correctly, check package.json scripts work",
+            "parentTaskId": 31
+          },
+          {
+            "id": "31.2",
+            "title": "Create main process architecture with BrowserWindow",
+            "description": "Implement Electron main process with proper window management and security",
+            "dependencies": [
+              "31.1"
+            ],
+            "details": "1. Create packages/electron/src/main/index.ts\n2. Implement createWindow function with security best practices\n3. Configure BrowserWindow with webPreferences\n4. Handle app lifecycle events (ready, window-all-closed, activate)\n5. Setup proper window sizing and centering",
+            "status": "pending",
+            "testStrategy": "Test app launches, window appears correctly, lifecycle events work",
+            "parentTaskId": 31
+          },
+          {
+            "id": "31.3",
+            "title": "Setup preload script and context bridge",
+            "description": "Create secure bridge between main and renderer processes",
+            "dependencies": [
+              "31.2"
+            ],
+            "details": "1. Create packages/electron/src/preload/index.ts\n2. Use contextBridge.exposeInMainWorld for secure API\n3. Define IPC channels for agent management\n4. Implement type-safe IPC communication\n5. Add validation for all IPC messages",
+            "status": "pending",
+            "testStrategy": "Verify preload script loads, test IPC communication works securely",
+            "parentTaskId": 31
+          },
+          {
+            "id": "31.4",
+            "title": "Configure build system for Electron with React",
+            "description": "Setup webpack/vite configuration for Electron renderer with React",
+            "dependencies": [
+              "31.1"
+            ],
+            "details": "1. Create electron-specific vite config\n2. Configure proper externals for Electron\n3. Setup hot module replacement for development\n4. Configure production build optimizations\n5. Ensure proper source maps for debugging",
+            "status": "pending",
+            "testStrategy": "Test dev server works with HMR, production build completes successfully",
+            "parentTaskId": 31
+          },
+          {
+            "id": "31.5",
+            "title": "Integrate existing React app as renderer",
+            "description": "Connect the web UI to run inside Electron renderer process",
+            "dependencies": [
+              "31.3",
+              "31.4"
+            ],
+            "details": "1. Update packages/web entry point for Electron\n2. Modify API calls to use IPC instead of HTTP\n3. Create ElectronProvider for React context\n4. Update routing for file:// protocol\n5. Ensure all assets load correctly in Electron",
+            "status": "pending",
+            "testStrategy": "Verify React app renders in Electron, test navigation works, check API calls",
+            "parentTaskId": 31
+          }
+        ]
+      },
+      {
+        "id": 32,
+        "title": "Implement macOS native window controls and styling",
+        "description": "Add native macOS traffic light controls, vibrancy effects, and system-integrated window management",
+        "status": "pending",
+        "dependencies": [
+          31
+        ],
+        "priority": "high",
+        "details": "1. Configure frameless window with traffic light buttons\n2. Implement custom title bar with draggable region\n3. Add vibrancy effect to sidebar using BrowserWindow options\n4. Setup window state management (size, position persistence)\n5. Implement full-screen mode support\n6. Add window snapping and multiple workspace support\n7. Configure rounded corners and shadows\n8. Implement SF Pro font stack",
+        "testStrategy": "Test on macOS for native feel, verify window controls work, check vibrancy effects, ensure state persistence across restarts",
+        "subtasks": [
+          {
+            "id": "32.1",
+            "title": "Implement frameless window with traffic lights",
+            "description": "Create custom title bar with native macOS controls",
+            "dependencies": [],
+            "details": "1. Set frame: false in BrowserWindow options\n2. Configure titleBarStyle: 'hiddenInset' for macOS\n3. Add transparent window background\n4. Position traffic lights correctly\n5. Handle window dragging regions",
+            "status": "pending",
+            "testStrategy": "Test on macOS, verify traffic lights appear and function correctly",
+            "parentTaskId": 32
+          },
+          {
+            "id": "32.2",
+            "title": "Add vibrancy effects to sidebar",
+            "description": "Implement native macOS vibrancy for visual depth",
+            "dependencies": [
+              "32.1"
+            ],
+            "details": "1. Set vibrancy: 'sidebar' in BrowserWindow\n2. Make sidebar background transparent\n3. Adjust text contrast for readability\n4. Test different vibrancy modes\n5. Add fallback for non-macOS",
+            "status": "pending",
+            "testStrategy": "Verify vibrancy effect visible on macOS, test readability",
+            "parentTaskId": 32
+          },
+          {
+            "id": "32.3",
+            "title": "Implement window state management",
+            "description": "Persist and restore window size and position",
+            "dependencies": [],
+            "details": "1. Use electron-window-state package\n2. Save window bounds on resize/move\n3. Restore position on app launch\n4. Handle multi-monitor scenarios\n5. Respect system window constraints",
+            "status": "pending",
+            "testStrategy": "Test window position persists across restarts, verify multi-monitor support",
+            "parentTaskId": 32
+          },
+          {
+            "id": "32.4",
+            "title": "Add full-screen and workspace support",
+            "description": "Implement native full-screen mode and Mission Control integration",
+            "dependencies": [
+              "32.1"
+            ],
+            "details": "1. Enable native full-screen support\n2. Handle full-screen transitions\n3. Update UI for full-screen mode\n4. Support Mission Control gestures\n5. Add keyboard shortcuts for full-screen",
+            "status": "pending",
+            "testStrategy": "Test full-screen toggle, verify Mission Control integration works",
+            "parentTaskId": 32
+          },
+          {
+            "id": "32.5",
+            "title": "Configure rounded corners and shadows",
+            "description": "Apply native macOS window styling with proper shadows",
+            "dependencies": [
+              "32.1"
+            ],
+            "details": "1. Set proper window background color\n2. Configure shadow properties\n3. Apply 12px border radius to window\n4. Ensure content doesn't overflow corners\n5. Test visual appearance on all macOS versions",
+            "status": "pending",
+            "testStrategy": "Visual inspection of window appearance, verify shadows render correctly",
+            "parentTaskId": 32
+          }
+        ]
+      },
+      {
+        "id": 33,
+        "title": "Update UI with new color palette and design system",
+        "description": "Apply new dark theme color palette with improved visual hierarchy and macOS design language",
+        "status": "pending",
+        "dependencies": [
+          31
+        ],
+        "priority": "high",
+        "details": "1. Create CSS variables for new color palette (#1A1B1E backgrounds, #339AF0 primary, etc.)\n2. Update all component styles to use new colors\n3. Implement elevation system with subtle shadows\n4. Add 8px/12px border radius system\n5. Update typography with proper text color hierarchy\n6. Create themed scrollbar styles\n7. Implement hover/active states with new colors\n8. Add transition animations for smooth interactions",
+        "testStrategy": "Visual regression testing, verify all components use new palette, check contrast ratios, test dark/light mode switching",
+        "subtasks": [
+          {
+            "id": "33.1",
+            "title": "Create CSS variables for new color system",
+            "description": "Implement comprehensive color palette with CSS custom properties",
+            "dependencies": [],
+            "details": "1. Define root CSS variables for all colors\n2. Create semantic color mappings\n3. Add elevation/shadow variables\n4. Define spacing and radius tokens\n5. Ensure proper CSS cascade",
+            "status": "pending",
+            "testStrategy": "Verify all CSS variables defined, test color inheritance works",
+            "parentTaskId": 33
+          },
+          {
+            "id": "33.2",
+            "title": "Update component styles with new palette",
+            "description": "Apply new colors to all React components systematically",
+            "dependencies": [
+              "33.1"
+            ],
+            "details": "1. Update Layout components first\n2. Modify Card and Panel backgrounds\n3. Update button and form styles\n4. Adjust text and icon colors\n5. Update status indicators colors",
+            "status": "pending",
+            "testStrategy": "Visual regression testing, check all components use new colors",
+            "parentTaskId": 33
+          },
+          {
+            "id": "33.3",
+            "title": "Implement elevation and shadow system",
+            "description": "Create consistent depth hierarchy with shadows",
+            "dependencies": [
+              "33.1"
+            ],
+            "details": "1. Define 5 elevation levels\n2. Create shadow utilities\n3. Apply shadows to cards and modals\n4. Add hover elevation changes\n5. Ensure performance with shadows",
+            "status": "pending",
+            "testStrategy": "Verify shadow rendering, test performance impact",
+            "parentTaskId": 33
+          },
+          {
+            "id": "33.4",
+            "title": "Update typography and text hierarchy",
+            "description": "Implement SF Pro font stack with proper text colors",
+            "dependencies": [
+              "33.1"
+            ],
+            "details": "1. Configure SF Pro font family\n2. Define font size scale\n3. Set line heights and weights\n4. Apply text color hierarchy\n5. Add responsive typography",
+            "status": "pending",
+            "testStrategy": "Check font rendering on macOS, verify text hierarchy clear",
+            "parentTaskId": 33
+          },
+          {
+            "id": "33.5",
+            "title": "Add transitions and hover states",
+            "description": "Implement smooth animations with new color palette",
+            "dependencies": [
+              "33.2"
+            ],
+            "details": "1. Add transition utilities\n2. Create hover color variations\n3. Implement focus states\n4. Add loading animations\n5. Ensure 60fps performance",
+            "status": "pending",
+            "testStrategy": "Test all interactive elements have smooth transitions",
+            "parentTaskId": 33
+          }
+        ]
+      },
+      {
+        "id": 34,
+        "title": "Create native menu bar and application menu",
+        "description": "Implement full native menu bar with standard macOS menu structure and keyboard shortcuts",
+        "status": "pending",
+        "dependencies": [
+          31
+        ],
+        "priority": "high",
+        "details": "1. Create Menu template with standard structure (App, File, Edit, View, Window, Help)\n2. Add application menu items (About, Preferences, Quit)\n3. Implement File menu (New Agent, Open Project, Recent Projects)\n4. Add Edit menu with standard shortcuts\n5. Create View menu with zoom controls and view modes\n6. Implement Window menu with multi-window support\n7. Add keyboard accelerators (Cmd+N, Cmd+O, etc.)\n8. Handle menu state updates based on app context",
+        "testStrategy": "Test all menu items trigger correct actions, verify keyboard shortcuts work, check menu state management",
+        "subtasks": [
+          {
+            "id": "34.1",
+            "title": "Create application menu template",
+            "description": "Build standard macOS menu structure with all sections",
+            "dependencies": [],
+            "details": "1. Create menu template structure\n2. Add App menu with About, Preferences\n3. Implement File menu items\n4. Add Edit menu with clipboard ops\n5. Create View and Window menus",
+            "status": "pending",
+            "testStrategy": "Verify menu appears correctly, all sections present",
+            "parentTaskId": 34
+          },
+          {
+            "id": "34.2",
+            "title": "Implement menu actions and handlers",
+            "description": "Connect menu items to application functionality",
+            "dependencies": [
+              "34.1"
+            ],
+            "details": "1. Create IPC handlers for menu actions\n2. Implement New Agent functionality\n3. Add Open Project dialog\n4. Create Preferences window\n5. Handle About dialog",
+            "status": "pending",
+            "testStrategy": "Test each menu item triggers correct action",
+            "parentTaskId": 34
+          },
+          {
+            "id": "34.3",
+            "title": "Add keyboard shortcuts and accelerators",
+            "description": "Configure standard macOS keyboard shortcuts",
+            "dependencies": [
+              "34.1"
+            ],
+            "details": "1. Add Cmd+N for New Agent\n2. Configure Cmd+O for Open\n3. Set up standard Edit shortcuts\n4. Add View shortcuts (zoom, etc)\n5. Implement custom shortcuts",
+            "status": "pending",
+            "testStrategy": "Test all keyboard shortcuts work correctly",
+            "parentTaskId": 34
+          },
+          {
+            "id": "34.4",
+            "title": "Implement Recent Projects menu",
+            "description": "Track and display recently opened projects",
+            "dependencies": [
+              "34.2"
+            ],
+            "details": "1. Store recent projects list\n2. Update menu dynamically\n3. Handle project opening\n4. Clear recent items option\n5. Persist across sessions",
+            "status": "pending",
+            "testStrategy": "Verify recent items appear and open correctly",
+            "parentTaskId": 34
+          },
+          {
+            "id": "34.5",
+            "title": "Add contextual menu updates",
+            "description": "Update menu state based on app context",
+            "dependencies": [
+              "34.2"
+            ],
+            "details": "1. Enable/disable items based on state\n2. Update checkmarks for view modes\n3. Show/hide items conditionally\n4. Handle multi-window menus\n5. Sync with app state",
+            "status": "pending",
+            "testStrategy": "Test menu items update based on app state",
+            "parentTaskId": 34
+          }
+        ]
+      },
+      {
+        "id": 35,
+        "title": "Implement bottom status bar with quick actions",
+        "description": "Add fixed bottom status bar with quick action buttons, metrics display, and system resource monitoring",
+        "status": "pending",
+        "dependencies": [
+          31,
+          33
+        ],
+        "priority": "medium",
+        "details": "1. Create 32px fixed bottom bar component\n2. Add quick action buttons (New Agent, Start/Stop All, View Toggle)\n3. Implement connection status indicator with real-time updates\n4. Add system resource monitor (CPU, Memory usage)\n5. Create notification center button with badge\n6. Display keyboard shortcut hints on hover\n7. Add collapsible sections for extended info\n8. Implement smooth animations for state changes",
+        "testStrategy": "Verify all buttons functional, test real-time updates, check resource monitoring accuracy, test responsive behavior",
+        "subtasks": [
+          {
+            "id": "35.1",
+            "title": "Create StatusBar React component",
+            "description": "Build fixed bottom bar with proper styling",
+            "dependencies": [],
+            "details": "1. Create StatusBar component\n2. Set 32px fixed height\n3. Apply new color scheme\n4. Add flex layout for sections\n5. Ensure proper z-index",
+            "status": "pending",
+            "testStrategy": "Verify status bar renders at bottom, stays fixed on scroll",
+            "parentTaskId": 35
+          },
+          {
+            "id": "35.2",
+            "title": "Implement quick action buttons",
+            "description": "Add interactive buttons for common actions",
+            "dependencies": [
+              "35.1"
+            ],
+            "details": "1. Create New Agent button\n2. Add Start/Stop All toggle\n3. Implement View Mode switcher\n4. Style with hover effects\n5. Add keyboard shortcuts hints",
+            "status": "pending",
+            "testStrategy": "Test all buttons clickable and trigger actions",
+            "parentTaskId": 35
+          },
+          {
+            "id": "35.3",
+            "title": "Add connection status indicator",
+            "description": "Show real-time connection status with animations",
+            "dependencies": [
+              "35.1"
+            ],
+            "details": "1. Create status indicator component\n2. Connect to WebSocket state\n3. Add pulse animation for active\n4. Show error states clearly\n5. Add reconnection info",
+            "status": "pending",
+            "testStrategy": "Verify status updates in real-time",
+            "parentTaskId": 35
+          },
+          {
+            "id": "35.4",
+            "title": "Implement resource monitoring",
+            "description": "Display system CPU and memory usage",
+            "dependencies": [
+              "35.1"
+            ],
+            "details": "1. Add IPC channel for system stats\n2. Create usage display components\n3. Update every 2 seconds\n4. Show as percentages/graphs\n5. Add threshold warnings",
+            "status": "pending",
+            "testStrategy": "Test resource data updates correctly",
+            "parentTaskId": 35
+          },
+          {
+            "id": "35.5",
+            "title": "Create notification center button",
+            "description": "Add notification badge and dropdown",
+            "dependencies": [
+              "35.1"
+            ],
+            "details": "1. Create notification button\n2. Add badge for count\n3. Implement dropdown panel\n4. Store notification history\n5. Add clear all option",
+            "status": "pending",
+            "testStrategy": "Verify notifications appear with badge count",
+            "parentTaskId": 35
+          }
+        ]
+      },
+      {
+        "id": 36,
+        "title": "Enhance terminal integration with native performance",
+        "description": "Upgrade terminal component for native performance with split panes, tabs, and enhanced features",
+        "status": "pending",
+        "dependencies": [
+          31
+        ],
+        "priority": "high",
+        "details": "1. Replace web terminal with node-pty for native performance\n2. Implement terminal tab management\n3. Add split pane support (horizontal/vertical)\n4. Create terminal themes with new color palette\n5. Add font preference settings\n6. Implement better copy/paste with system clipboard\n7. Add search functionality within terminal\n8. Create picture-in-picture mode for terminals",
+        "testStrategy": "Performance benchmarks, test split panes, verify copy/paste works across platforms, test PiP mode",
+        "subtasks": [
+          {
+            "id": "36.1",
+            "title": "Replace xterm.js with node-pty",
+            "description": "Integrate native PTY for better performance",
+            "dependencies": [],
+            "details": "1. Add node-pty to Electron main\n2. Create PTY management service\n3. Handle PTY lifecycle\n4. Stream data to renderer\n5. Manage multiple PTY instances",
+            "status": "pending",
+            "testStrategy": "Test terminal launches with native performance",
+            "parentTaskId": 36
+          },
+          {
+            "id": "36.2",
+            "title": "Implement terminal tab management",
+            "description": "Add tabbed interface for multiple terminals",
+            "dependencies": [
+              "36.1"
+            ],
+            "details": "1. Create tab bar component\n2. Handle tab creation/deletion\n3. Implement tab reordering\n4. Add tab context menu\n5. Persist tab state",
+            "status": "pending",
+            "testStrategy": "Verify tabs can be created, switched, and closed",
+            "parentTaskId": 36
+          },
+          {
+            "id": "36.3",
+            "title": "Add split pane functionality",
+            "description": "Enable horizontal and vertical terminal splits",
+            "dependencies": [
+              "36.1"
+            ],
+            "details": "1. Implement split pane logic\n2. Add split controls\n3. Handle resize dragging\n4. Manage focus between panes\n5. Add keyboard navigation",
+            "status": "pending",
+            "testStrategy": "Test splitting works in both directions",
+            "parentTaskId": 36
+          },
+          {
+            "id": "36.4",
+            "title": "Create terminal theming system",
+            "description": "Implement customizable terminal colors",
+            "dependencies": [
+              "36.1"
+            ],
+            "details": "1. Define terminal color schemes\n2. Apply new dark palette\n3. Add theme picker UI\n4. Store theme preferences\n5. Support custom themes",
+            "status": "pending",
+            "testStrategy": "Verify themes apply correctly",
+            "parentTaskId": 36
+          },
+          {
+            "id": "36.5",
+            "title": "Implement picture-in-picture mode",
+            "description": "Allow terminals to float in separate windows",
+            "dependencies": [
+              "36.1"
+            ],
+            "details": "1. Create PiP window management\n2. Handle window creation\n3. Sync terminal state\n4. Add window controls\n5. Manage PiP lifecycle",
+            "status": "pending",
+            "testStrategy": "Test PiP windows open and sync correctly",
+            "parentTaskId": 36
+          }
+        ]
+      },
+      {
+        "id": 37,
+        "title": "Add system integration and notifications",
+        "description": "Implement native notifications, system tray, dock integration, and file system features",
+        "status": "pending",
+        "dependencies": [
+          31
+        ],
+        "priority": "medium",
+        "details": "1. Setup native notifications API with custom templates\n2. Create system tray icon with context menu\n3. Implement dock badge for agent counts\n4. Add drag & drop file support\n5. Create native file dialogs for project selection\n6. Implement Recent Documents menu\n7. Add Touch Bar support for macOS\n8. Setup file associations for .magents files",
+        "testStrategy": "Test notifications appear correctly, verify system tray works, check file operations, test Touch Bar on supported Macs",
+        "subtasks": [
+          {
+            "id": "37.1",
+            "title": "Setup native notifications API",
+            "description": "Implement system notifications with Electron",
+            "dependencies": [],
+            "details": "1. Create notification service\n2. Request notification permissions\n3. Design notification templates\n4. Handle notification clicks\n5. Add notification queue",
+            "status": "pending",
+            "testStrategy": "Test notifications appear in system tray",
+            "parentTaskId": 37
+          },
+          {
+            "id": "37.2",
+            "title": "Create system tray integration",
+            "description": "Add persistent system tray icon with menu",
+            "dependencies": [],
+            "details": "1. Create tray icon assets\n2. Build tray menu template\n3. Show agent status in tray\n4. Add quick actions menu\n5. Handle tray clicks",
+            "status": "pending",
+            "testStrategy": "Verify tray icon appears with working menu",
+            "parentTaskId": 37
+          },
+          {
+            "id": "37.3",
+            "title": "Implement dock badge for macOS",
+            "description": "Show agent count badge on dock icon",
+            "dependencies": [],
+            "details": "1. Track active agent count\n2. Update dock badge number\n3. Add bounce animation for alerts\n4. Handle dock menu\n5. Clear badge on focus",
+            "status": "pending",
+            "testStrategy": "Test badge updates with agent count",
+            "parentTaskId": 37
+          },
+          {
+            "id": "37.4",
+            "title": "Add drag and drop file support",
+            "description": "Enable dragging files into the application",
+            "dependencies": [],
+            "details": "1. Setup drop zones\n2. Handle file drag events\n3. Process dropped files\n4. Show drop indicators\n5. Validate file types",
+            "status": "pending",
+            "testStrategy": "Test dragging files into app works",
+            "parentTaskId": 37
+          },
+          {
+            "id": "37.5",
+            "title": "Configure Touch Bar for macOS",
+            "description": "Add Touch Bar controls for compatible Macs",
+            "dependencies": [],
+            "details": "1. Create Touch Bar template\n2. Add agent controls\n3. Show status indicators\n4. Handle Touch Bar actions\n5. Update dynamically",
+            "status": "pending",
+            "testStrategy": "Test on Touch Bar equipped Mac",
+            "parentTaskId": 37
+          }
+        ]
+      },
+      {
+        "id": 38,
+        "title": "Implement auto-updater and distribution pipeline",
+        "description": "Setup auto-update system with delta updates and create distribution packages for all platforms",
+        "status": "pending",
+        "dependencies": [
+          31
+        ],
+        "priority": "medium",
+        "details": "1. Configure electron-updater with update server\n2. Implement update UI with progress indication\n3. Setup code signing for macOS (Developer ID)\n4. Configure notarization workflow\n5. Create DMG installer with custom background\n6. Setup MSI installer for Windows\n7. Create AppImage for Linux\n8. Configure GitHub Actions for multi-platform builds",
+        "testStrategy": "Test update flow end-to-end, verify signatures, test installers on each platform, check auto-update works",
+        "subtasks": [
+          {
+            "id": "38.1",
+            "title": "Configure electron-updater",
+            "description": "Setup auto-update infrastructure",
+            "dependencies": [],
+            "details": "1. Configure update server URL\n2. Setup electron-updater\n3. Create update config\n4. Handle update events\n5. Add rollback support",
+            "status": "pending",
+            "testStrategy": "Test update check and download process",
+            "parentTaskId": 38
+          },
+          {
+            "id": "38.2",
+            "title": "Create update UI components",
+            "description": "Build user interface for update process",
+            "dependencies": [
+              "38.1"
+            ],
+            "details": "1. Create update dialog\n2. Add progress bar\n3. Show release notes\n4. Handle user choices\n5. Add force update option",
+            "status": "pending",
+            "testStrategy": "Verify update UI appears and functions",
+            "parentTaskId": 38
+          },
+          {
+            "id": "38.3",
+            "title": "Setup code signing for macOS",
+            "description": "Configure Developer ID signing",
+            "dependencies": [],
+            "details": "1. Obtain signing certificates\n2. Configure electron-builder\n3. Setup keychain access\n4. Test signing process\n5. Verify with codesign",
+            "status": "pending",
+            "testStrategy": "Verify app is properly signed",
+            "parentTaskId": 38
+          },
+          {
+            "id": "38.4",
+            "title": "Create platform installers",
+            "description": "Build DMG, MSI, and AppImage",
+            "dependencies": [
+              "38.3"
+            ],
+            "details": "1. Configure DMG with background\n2. Setup MSI with installer UI\n3. Create AppImage config\n4. Add installer icons\n5. Test installations",
+            "status": "pending",
+            "testStrategy": "Test installers on each platform",
+            "parentTaskId": 38
+          },
+          {
+            "id": "38.5",
+            "title": "Setup GitHub Actions CI/CD",
+            "description": "Automate build and release process",
+            "dependencies": [
+              "38.4"
+            ],
+            "details": "1. Create workflow files\n2. Setup build matrix\n3. Configure artifact uploads\n4. Add release creation\n5. Setup signing secrets",
+            "status": "pending",
+            "testStrategy": "Verify CI builds complete successfully",
+            "parentTaskId": 38
+          }
+        ]
+      },
+      {
+        "id": 39,
+        "title": "Add performance optimizations and monitoring",
+        "description": "Optimize app performance with lazy loading, virtual scrolling, and implement performance monitoring",
+        "status": "pending",
+        "dependencies": [
+          31,
+          33,
+          36
+        ],
+        "priority": "medium",
+        "details": "1. Implement React.lazy for code splitting\n2. Add virtual scrolling for agent lists\n3. Setup memory usage monitoring\n4. Implement background process optimization\n5. Add GPU acceleration flags\n6. Create performance profiling tools\n7. Optimize IPC message passing\n8. Add startup time tracking",
+        "testStrategy": "Measure startup time < 2s, verify memory < 200MB idle, test 60fps animations, profile performance bottlenecks",
+        "subtasks": [
+          {
+            "id": "39.1",
+            "title": "Implement React.lazy code splitting",
+            "description": "Split code bundles for faster loading",
+            "dependencies": [],
+            "details": "1. Identify split points\n2. Wrap routes in lazy()\n3. Add loading states\n4. Configure webpack chunks\n5. Analyze bundle sizes",
+            "status": "pending",
+            "testStrategy": "Measure initial bundle size reduction",
+            "parentTaskId": 39
+          },
+          {
+            "id": "39.2",
+            "title": "Add virtual scrolling for lists",
+            "description": "Optimize rendering of large agent lists",
+            "dependencies": [],
+            "details": "1. Integrate react-window\n2. Convert agent list\n3. Implement dynamic heights\n4. Add scroll restoration\n5. Handle list updates",
+            "status": "pending",
+            "testStrategy": "Test with 1000+ agents, verify smooth scrolling",
+            "parentTaskId": 39
+          },
+          {
+            "id": "39.3",
+            "title": "Setup performance monitoring",
+            "description": "Track app performance metrics",
+            "dependencies": [],
+            "details": "1. Add performance marks\n2. Track startup time\n3. Monitor memory usage\n4. Log frame rates\n5. Create perf dashboard",
+            "status": "pending",
+            "testStrategy": "Verify metrics are collected accurately",
+            "parentTaskId": 39
+          },
+          {
+            "id": "39.4",
+            "title": "Optimize IPC communication",
+            "description": "Reduce overhead in process communication",
+            "dependencies": [],
+            "details": "1. Batch IPC messages\n2. Use binary protocols\n3. Add message compression\n4. Implement caching\n5. Profile IPC usage",
+            "status": "pending",
+            "testStrategy": "Measure IPC latency improvements",
+            "parentTaskId": 39
+          },
+          {
+            "id": "39.5",
+            "title": "Configure GPU acceleration",
+            "description": "Enable hardware acceleration for rendering",
+            "dependencies": [],
+            "details": "1. Enable GPU rasterization\n2. Configure WebGL settings\n3. Test GPU compatibility\n4. Add fallback options\n5. Monitor GPU usage",
+            "status": "pending",
+            "testStrategy": "Verify smooth 60fps animations",
+            "parentTaskId": 39
+          }
+        ]
+      },
+      {
+        "id": 40,
+        "title": "Complete accessibility and testing infrastructure",
+        "description": "Ensure full accessibility compliance and setup comprehensive testing suite for Electron app",
+        "status": "pending",
+        "dependencies": [
+          31,
+          32,
+          33,
+          34,
+          35
+        ],
+        "priority": "medium",
+        "details": "1. Add ARIA labels to all interactive elements\n2. Implement keyboard navigation for all features\n3. Add screen reader announcements\n4. Create high contrast mode\n5. Setup Spectron/Playwright for E2E testing\n6. Add unit tests for main process\n7. Create integration tests for IPC\n8. Setup automated accessibility testing",
+        "testStrategy": "Run accessibility audit, test with screen readers, verify keyboard navigation complete, ensure all tests pass",
+        "subtasks": [
+          {
+            "id": "40.1",
+            "title": "Add comprehensive ARIA labels",
+            "description": "Ensure all UI elements are accessible",
+            "dependencies": [],
+            "details": "1. Audit all components\n2. Add missing ARIA labels\n3. Set proper roles\n4. Configure live regions\n5. Test with screen reader",
+            "status": "pending",
+            "testStrategy": "Pass automated accessibility audit",
+            "parentTaskId": 40
+          },
+          {
+            "id": "40.2",
+            "title": "Implement keyboard navigation",
+            "description": "Enable full keyboard control",
+            "dependencies": [],
+            "details": "1. Add focus management\n2. Implement tab order\n3. Create keyboard shortcuts\n4. Add skip links\n5. Handle modal focus",
+            "status": "pending",
+            "testStrategy": "Navigate entire app with keyboard only",
+            "parentTaskId": 40
+          },
+          {
+            "id": "40.3",
+            "title": "Create high contrast mode",
+            "description": "Add accessibility color theme",
+            "dependencies": [],
+            "details": "1. Design high contrast palette\n2. Create theme switcher\n3. Increase text contrast\n4. Add focus indicators\n5. Test with users",
+            "status": "pending",
+            "testStrategy": "Verify WCAG AA compliance",
+            "parentTaskId": 40
+          },
+          {
+            "id": "40.4",
+            "title": "Setup E2E testing with Playwright",
+            "description": "Configure end-to-end testing for Electron",
+            "dependencies": [],
+            "details": "1. Install Playwright Electron\n2. Create test helpers\n3. Write app launch tests\n4. Add user flow tests\n5. Setup CI integration",
+            "status": "pending",
+            "testStrategy": "All E2E tests pass locally and in CI",
+            "parentTaskId": 40
+          },
+          {
+            "id": "40.5",
+            "title": "Add unit tests for main process",
+            "description": "Test Electron main process code",
+            "dependencies": [],
+            "details": "1. Setup Jest for main\n2. Mock Electron APIs\n3. Test IPC handlers\n4. Test window management\n5. Achieve 80% coverage",
+            "status": "pending",
+            "testStrategy": "Unit tests pass with good coverage",
+            "parentTaskId": 40
+          }
+        ]
       }
     ],
     "metadata": {
       "created": "2025-06-30T14:18:19.843Z",
-      "updated": "2025-07-01T06:53:39.484Z",
+      "updated": "2025-07-03T12:58:00.872Z",
       "description": "Tasks for master context"
     }
   }

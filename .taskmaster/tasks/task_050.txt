@@ -1,0 +1,43 @@
+# Task ID: 50
+# Title: Implement Internal Task System
+# Status: pending
+# Dependencies: 48, 43
+# Priority: low
+# Description: Create basic internal task management system using SQLite
+# Details:
+Create InternalTaskIntegration using SQLite database. Implement CRUD operations for tasks table. Design simple schema: id, title, description, status, projectId, assignedAgentId. No external dependencies.
+
+# Test Strategy:
+CRUD operation tests, database integration tests, API tests for internal task system
+
+# Subtasks:
+## 1. Create internal task database schema [pending]
+### Dependencies: None
+### Description: Design and implement task table schema
+### Details:
+Add tasks table to database migrations. Include fields: id, title, description, status, priority, projectId, assignedAgentId, dependencies, createdAt, updatedAt.
+
+## 2. Implement TaskRepository [pending]
+### Dependencies: 50.1
+### Description: Create repository class for task data access
+### Details:
+Create TaskRepository extending BaseRepository. Implement CRUD operations. Add methods for filtering by project and agent.
+
+## 3. Create InternalTaskIntegration class [pending]
+### Dependencies: 50.2
+### Description: Implement TaskIntegration interface for internal system
+### Details:
+Create InternalTaskIntegration.ts implementing TaskIntegration. Use TaskRepository for data operations. Map between interface and database formats.
+
+## 4. Add task API endpoints [pending]
+### Dependencies: 50.3
+### Description: Create REST API for internal task operations
+### Details:
+Add CRUD endpoints for tasks when using internal integration. Reuse existing task controller structure. Ensure API compatibility.
+
+## 5. Create task import/export functionality [pending]
+### Dependencies: 50.3, 50.4
+### Description: Allow importing from Task Master to internal system
+### Details:
+Add import command to read Task Master tasks.json. Convert and insert into internal task system. Add export to Task Master format for compatibility.
+

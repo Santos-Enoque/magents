@@ -16,3 +16,55 @@
 
 # Test Strategy:
 Test all menu items trigger correct actions, verify keyboard shortcuts work, check menu state management
+
+# Subtasks:
+## 34.1. Create application menu template [pending]
+### Dependencies: None
+### Description: Build standard macOS menu structure with all sections
+### Details:
+1. Create menu template structure
+2. Add App menu with About, Preferences
+3. Implement File menu items
+4. Add Edit menu with clipboard ops
+5. Create View and Window menus
+
+## 34.2. Implement menu actions and handlers [pending]
+### Dependencies: 34.1
+### Description: Connect menu items to application functionality
+### Details:
+1. Create IPC handlers for menu actions
+2. Implement New Agent functionality
+3. Add Open Project dialog
+4. Create Preferences window
+5. Handle About dialog
+
+## 34.3. Add keyboard shortcuts and accelerators [pending]
+### Dependencies: 34.1
+### Description: Configure standard macOS keyboard shortcuts
+### Details:
+1. Add Cmd+N for New Agent
+2. Configure Cmd+O for Open
+3. Set up standard Edit shortcuts
+4. Add View shortcuts (zoom, etc)
+5. Implement custom shortcuts
+
+## 34.4. Implement Recent Projects menu [pending]
+### Dependencies: 34.2
+### Description: Track and display recently opened projects
+### Details:
+1. Store recent projects list
+2. Update menu dynamically
+3. Handle project opening
+4. Clear recent items option
+5. Persist across sessions
+
+## 34.5. Add contextual menu updates [pending]
+### Dependencies: 34.2
+### Description: Update menu state based on app context
+### Details:
+1. Enable/disable items based on state
+2. Update checkmarks for view modes
+3. Show/hide items conditionally
+4. Handle multi-window menus
+5. Sync with app state
+

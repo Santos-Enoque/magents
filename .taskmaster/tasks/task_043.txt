@@ -1,0 +1,43 @@
+# Task ID: 43
+# Title: Add Database Initialization to Startup
+# Status: pending
+# Dependencies: 41, 42
+# Priority: high
+# Description: Initialize SQLite database on application startup with automatic migration
+# Details:
+Add database initialization in backend startup sequence. Create database file at ~/.magents/magents.db if not exists. Run pending migrations automatically. Add health checks for database connectivity.
+
+# Test Strategy:
+Startup tests with fresh installation, migration tests with existing data, health check endpoint tests
+
+# Subtasks:
+## 1. Add database initialization to backend startup [pending]
+### Dependencies: None
+### Description: Initialize database when backend server starts
+### Details:
+Add database initialization code to backend/src/index.ts startup sequence. Create database file at ~/.magents/magents.db if not exists. Handle initialization errors gracefully.
+
+## 2. Implement automatic migration runner [pending]
+### Dependencies: 43.1
+### Description: Run pending migrations automatically on startup
+### Details:
+Check current database version against latest migration version. Run any pending migrations in order. Log migration progress and handle failures appropriately.
+
+## 3. Add database health check endpoint [pending]
+### Dependencies: 43.1
+### Description: Create health check endpoint for database connectivity
+### Details:
+Add GET /api/health/database endpoint that checks database connectivity, returns current version and migration status, includes basic statistics like table counts.
+
+## 4. Add CLI database initialization [pending]
+### Dependencies: 43.1
+### Description: Ensure database is initialized for CLI operations
+### Details:
+Add lazy database initialization for CLI commands that need it. Only initialize when database operations are required. Share initialization logic with backend.
+
+## 5. Create database configuration options [pending]
+### Dependencies: 43.1, 43.4
+### Description: Add configuration for database path and options
+### Details:
+Add database configuration to magents config (custom path, read-only mode, etc.). Support environment variables for database configuration. Document configuration options.
+

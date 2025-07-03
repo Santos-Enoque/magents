@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { ui } from '../ui/UIService';
 import { ConfigManager } from '../config/ConfigManager';
-import { AgentManager } from '../services/AgentManager';
+// AgentManager removed - using DockerAgentManager as the only implementation
 import { DockerAgentManager } from '../services/DockerAgentManager';
 import { execSync, spawn } from 'child_process';
 import inquirer from 'inquirer';
@@ -41,12 +41,10 @@ export interface ContainerStatus {
 
 export class StartCommand {
   private configManager: ConfigManager;
-  private agentManager: AgentManager;
   private dockerManager: DockerAgentManager;
 
   constructor() {
     this.configManager = ConfigManager.getInstance();
-    this.agentManager = new AgentManager();
     this.dockerManager = new DockerAgentManager();
   }
 
@@ -87,7 +85,7 @@ export class StartCommand {
   }
 
   private async startAllAgents(options: StartOptions): Promise<void> {
-    const agents = this.agentManager.getActiveAgents();
+    const agents = this.dockerManager.getActiveAgents();
     const stoppedAgents = agents.filter(a => a.status !== 'RUNNING');
 
     if (stoppedAgents.length === 0) {
@@ -105,7 +103,7 @@ export class StartCommand {
   }
 
   private async startSpecificAgent(agentId: string, options: StartOptions): Promise<void> {
-    const agents = this.agentManager.getActiveAgents();
+    const agents = this.dockerManager.getActiveAgents();
     const agent = agents.find(a => a.id === agentId || a.id.startsWith(agentId));
 
     if (!agent) {
@@ -169,7 +167,7 @@ export class StartCommand {
   }
 
   private async startInteractive(options: StartOptions): Promise<void> {
-    const agents = this.agentManager.getActiveAgents();
+    const agents = this.dockerManager.getActiveAgents();
     
     if (agents.length === 0) {
       ui.warning('No agents found');

@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { ui } from '../ui/UIService';
 import { ConfigManager } from '../config/ConfigManager';
-import { AgentManager } from '../services/AgentManager';
+import { DockerAgentManager } from '../services/DockerAgentManager';
 import { GitService } from '../services/GitService';
 import { execSync } from 'child_process';
 import inquirer from 'inquirer';
@@ -32,12 +32,12 @@ export interface TaskSuggestion {
 
 export class AssignCommand {
   private configManager: ConfigManager;
-  private agentManager: AgentManager;
+  private agentManager: DockerAgentManager;
   private gitService: GitService;
 
   constructor() {
     this.configManager = ConfigManager.getInstance();
-    this.agentManager = new AgentManager();
+    this.agentManager = new DockerAgentManager();
     this.gitService = new GitService();
   }
 

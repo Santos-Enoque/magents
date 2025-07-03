@@ -1,0 +1,43 @@
+# Task ID: 47
+# Title: Implement Project-Based Task Filtering
+# Status: pending
+# Dependencies: 46
+# Priority: medium
+# Description: Filter tasks based on selected project and restrict assignment to same-project agents
+# Details:
+Modify taskMasterIntegrationService.getTasks to accept and use project path parameter. Load tasks only from selected project's .taskmaster/tasks/tasks.json. Filter agent list when assigning tasks to show only same-project agents.
+
+# Test Strategy:
+API tests for filtered task loading, assignment validation tests, multi-project integration tests
+
+# Subtasks:
+## 1. Update task service API [pending]
+### Dependencies: None
+### Description: Modify task loading service to accept project path parameter
+### Details:
+Update taskMasterIntegrationService.getTasks signature to accept projectPath. Modify implementation to read from project-specific .taskmaster/tasks/tasks.json. Handle missing task files gracefully.
+
+## 2. Implement task caching per project [pending]
+### Dependencies: 47.1
+### Description: Cache tasks by project to improve performance
+### Details:
+Create task cache keyed by project ID. Invalidate cache on task updates. Implement cache expiration strategy. Consider using React Query or similar for cache management.
+
+## 3. Filter agents by project for assignment [pending]
+### Dependencies: None
+### Description: Show only same-project agents when assigning tasks
+### Details:
+When displaying agent list for task assignment, filter by projectId. Modify agent selection UI to only show eligible agents. Add clear messaging about project restrictions.
+
+## 4. Add assignment validation [pending]
+### Dependencies: 47.3
+### Description: Validate task assignment to ensure same project
+### Details:
+Add backend validation to prevent cross-project task assignment. Return clear error messages for invalid assignments. Update API documentation with constraints.
+
+## 5. Update task UI with project context [pending]
+### Dependencies: 47.1, 47.3
+### Description: Show project information in task displays
+### Details:
+Display project name in task cards. Show agent's project in assignment UI. Add visual indicators for project boundaries. Include project in task detail views.
+

@@ -1262,7 +1262,68 @@
         "dependencies": [],
         "priority": "high",
         "details": "1. Install Electron and essential dependencies (electron, electron-builder, electron-updater)\n2. Create main process entry point (main.js) with BrowserWindow configuration\n3. Setup preload script for secure context bridging\n4. Configure webpack/vite for Electron renderer process\n5. Integrate existing React app as renderer\n6. Setup IPC communication patterns\n7. Configure development environment with hot reload\n8. Add electron-devtools-installer for React DevTools",
-        "testStrategy": "Verify app launches, React components render, DevTools available, hot reload works, IPC communication functional"
+        "testStrategy": "Verify app launches, React components render, DevTools available, hot reload works, IPC communication functional",
+        "subtasks": [
+          {
+            "id": "31.1",
+            "title": "Install Electron dependencies and setup package structure",
+            "description": "Install core Electron packages and configure workspace for Electron app",
+            "dependencies": [],
+            "details": "1. Add Electron dependencies to packages/electron/package.json\n2. Install electron, electron-builder, electron-updater\n3. Add electron-devtools-installer for development\n4. Configure main and renderer entry points in package.json\n5. Setup electron-specific scripts (dev, build, dist)",
+            "status": "pending",
+            "testStrategy": "Verify all packages install correctly, check package.json scripts work",
+            "parentTaskId": 31
+          },
+          {
+            "id": "31.2",
+            "title": "Create main process architecture with BrowserWindow",
+            "description": "Implement Electron main process with proper window management and security",
+            "dependencies": [
+              "31.1"
+            ],
+            "details": "1. Create packages/electron/src/main/index.ts\n2. Implement createWindow function with security best practices\n3. Configure BrowserWindow with webPreferences\n4. Handle app lifecycle events (ready, window-all-closed, activate)\n5. Setup proper window sizing and centering",
+            "status": "pending",
+            "testStrategy": "Test app launches, window appears correctly, lifecycle events work",
+            "parentTaskId": 31
+          },
+          {
+            "id": "31.3",
+            "title": "Setup preload script and context bridge",
+            "description": "Create secure bridge between main and renderer processes",
+            "dependencies": [
+              "31.2"
+            ],
+            "details": "1. Create packages/electron/src/preload/index.ts\n2. Use contextBridge.exposeInMainWorld for secure API\n3. Define IPC channels for agent management\n4. Implement type-safe IPC communication\n5. Add validation for all IPC messages",
+            "status": "pending",
+            "testStrategy": "Verify preload script loads, test IPC communication works securely",
+            "parentTaskId": 31
+          },
+          {
+            "id": "31.4",
+            "title": "Configure build system for Electron with React",
+            "description": "Setup webpack/vite configuration for Electron renderer with React",
+            "dependencies": [
+              "31.1"
+            ],
+            "details": "1. Create electron-specific vite config\n2. Configure proper externals for Electron\n3. Setup hot module replacement for development\n4. Configure production build optimizations\n5. Ensure proper source maps for debugging",
+            "status": "pending",
+            "testStrategy": "Test dev server works with HMR, production build completes successfully",
+            "parentTaskId": 31
+          },
+          {
+            "id": "31.5",
+            "title": "Integrate existing React app as renderer",
+            "description": "Connect the web UI to run inside Electron renderer process",
+            "dependencies": [
+              "31.3",
+              "31.4"
+            ],
+            "details": "1. Update packages/web entry point for Electron\n2. Modify API calls to use IPC instead of HTTP\n3. Create ElectronProvider for React context\n4. Update routing for file:// protocol\n5. Ensure all assets load correctly in Electron",
+            "status": "pending",
+            "testStrategy": "Verify React app renders in Electron, test navigation works, check API calls",
+            "parentTaskId": 31
+          }
+        ]
       },
       {
         "id": 32,
@@ -1274,7 +1335,65 @@
         ],
         "priority": "high",
         "details": "1. Configure frameless window with traffic light buttons\n2. Implement custom title bar with draggable region\n3. Add vibrancy effect to sidebar using BrowserWindow options\n4. Setup window state management (size, position persistence)\n5. Implement full-screen mode support\n6. Add window snapping and multiple workspace support\n7. Configure rounded corners and shadows\n8. Implement SF Pro font stack",
-        "testStrategy": "Test on macOS for native feel, verify window controls work, check vibrancy effects, ensure state persistence across restarts"
+        "testStrategy": "Test on macOS for native feel, verify window controls work, check vibrancy effects, ensure state persistence across restarts",
+        "subtasks": [
+          {
+            "id": "32.1",
+            "title": "Implement frameless window with traffic lights",
+            "description": "Create custom title bar with native macOS controls",
+            "dependencies": [],
+            "details": "1. Set frame: false in BrowserWindow options\n2. Configure titleBarStyle: 'hiddenInset' for macOS\n3. Add transparent window background\n4. Position traffic lights correctly\n5. Handle window dragging regions",
+            "status": "pending",
+            "testStrategy": "Test on macOS, verify traffic lights appear and function correctly",
+            "parentTaskId": 32
+          },
+          {
+            "id": "32.2",
+            "title": "Add vibrancy effects to sidebar",
+            "description": "Implement native macOS vibrancy for visual depth",
+            "dependencies": [
+              "32.1"
+            ],
+            "details": "1. Set vibrancy: 'sidebar' in BrowserWindow\n2. Make sidebar background transparent\n3. Adjust text contrast for readability\n4. Test different vibrancy modes\n5. Add fallback for non-macOS",
+            "status": "pending",
+            "testStrategy": "Verify vibrancy effect visible on macOS, test readability",
+            "parentTaskId": 32
+          },
+          {
+            "id": "32.3",
+            "title": "Implement window state management",
+            "description": "Persist and restore window size and position",
+            "dependencies": [],
+            "details": "1. Use electron-window-state package\n2. Save window bounds on resize/move\n3. Restore position on app launch\n4. Handle multi-monitor scenarios\n5. Respect system window constraints",
+            "status": "pending",
+            "testStrategy": "Test window position persists across restarts, verify multi-monitor support",
+            "parentTaskId": 32
+          },
+          {
+            "id": "32.4",
+            "title": "Add full-screen and workspace support",
+            "description": "Implement native full-screen mode and Mission Control integration",
+            "dependencies": [
+              "32.1"
+            ],
+            "details": "1. Enable native full-screen support\n2. Handle full-screen transitions\n3. Update UI for full-screen mode\n4. Support Mission Control gestures\n5. Add keyboard shortcuts for full-screen",
+            "status": "pending",
+            "testStrategy": "Test full-screen toggle, verify Mission Control integration works",
+            "parentTaskId": 32
+          },
+          {
+            "id": "32.5",
+            "title": "Configure rounded corners and shadows",
+            "description": "Apply native macOS window styling with proper shadows",
+            "dependencies": [
+              "32.1"
+            ],
+            "details": "1. Set proper window background color\n2. Configure shadow properties\n3. Apply 12px border radius to window\n4. Ensure content doesn't overflow corners\n5. Test visual appearance on all macOS versions",
+            "status": "pending",
+            "testStrategy": "Visual inspection of window appearance, verify shadows render correctly",
+            "parentTaskId": 32
+          }
+        ]
       },
       {
         "id": 33,
@@ -1286,7 +1405,67 @@
         ],
         "priority": "high",
         "details": "1. Create CSS variables for new color palette (#1A1B1E backgrounds, #339AF0 primary, etc.)\n2. Update all component styles to use new colors\n3. Implement elevation system with subtle shadows\n4. Add 8px/12px border radius system\n5. Update typography with proper text color hierarchy\n6. Create themed scrollbar styles\n7. Implement hover/active states with new colors\n8. Add transition animations for smooth interactions",
-        "testStrategy": "Visual regression testing, verify all components use new palette, check contrast ratios, test dark/light mode switching"
+        "testStrategy": "Visual regression testing, verify all components use new palette, check contrast ratios, test dark/light mode switching",
+        "subtasks": [
+          {
+            "id": "33.1",
+            "title": "Create CSS variables for new color system",
+            "description": "Implement comprehensive color palette with CSS custom properties",
+            "dependencies": [],
+            "details": "1. Define root CSS variables for all colors\n2. Create semantic color mappings\n3. Add elevation/shadow variables\n4. Define spacing and radius tokens\n5. Ensure proper CSS cascade",
+            "status": "pending",
+            "testStrategy": "Verify all CSS variables defined, test color inheritance works",
+            "parentTaskId": 33
+          },
+          {
+            "id": "33.2",
+            "title": "Update component styles with new palette",
+            "description": "Apply new colors to all React components systematically",
+            "dependencies": [
+              "33.1"
+            ],
+            "details": "1. Update Layout components first\n2. Modify Card and Panel backgrounds\n3. Update button and form styles\n4. Adjust text and icon colors\n5. Update status indicators colors",
+            "status": "pending",
+            "testStrategy": "Visual regression testing, check all components use new colors",
+            "parentTaskId": 33
+          },
+          {
+            "id": "33.3",
+            "title": "Implement elevation and shadow system",
+            "description": "Create consistent depth hierarchy with shadows",
+            "dependencies": [
+              "33.1"
+            ],
+            "details": "1. Define 5 elevation levels\n2. Create shadow utilities\n3. Apply shadows to cards and modals\n4. Add hover elevation changes\n5. Ensure performance with shadows",
+            "status": "pending",
+            "testStrategy": "Verify shadow rendering, test performance impact",
+            "parentTaskId": 33
+          },
+          {
+            "id": "33.4",
+            "title": "Update typography and text hierarchy",
+            "description": "Implement SF Pro font stack with proper text colors",
+            "dependencies": [
+              "33.1"
+            ],
+            "details": "1. Configure SF Pro font family\n2. Define font size scale\n3. Set line heights and weights\n4. Apply text color hierarchy\n5. Add responsive typography",
+            "status": "pending",
+            "testStrategy": "Check font rendering on macOS, verify text hierarchy clear",
+            "parentTaskId": 33
+          },
+          {
+            "id": "33.5",
+            "title": "Add transitions and hover states",
+            "description": "Implement smooth animations with new color palette",
+            "dependencies": [
+              "33.2"
+            ],
+            "details": "1. Add transition utilities\n2. Create hover color variations\n3. Implement focus states\n4. Add loading animations\n5. Ensure 60fps performance",
+            "status": "pending",
+            "testStrategy": "Test all interactive elements have smooth transitions",
+            "parentTaskId": 33
+          }
+        ]
       },
       {
         "id": 34,
@@ -1298,7 +1477,67 @@
         ],
         "priority": "high",
         "details": "1. Create Menu template with standard structure (App, File, Edit, View, Window, Help)\n2. Add application menu items (About, Preferences, Quit)\n3. Implement File menu (New Agent, Open Project, Recent Projects)\n4. Add Edit menu with standard shortcuts\n5. Create View menu with zoom controls and view modes\n6. Implement Window menu with multi-window support\n7. Add keyboard accelerators (Cmd+N, Cmd+O, etc.)\n8. Handle menu state updates based on app context",
-        "testStrategy": "Test all menu items trigger correct actions, verify keyboard shortcuts work, check menu state management"
+        "testStrategy": "Test all menu items trigger correct actions, verify keyboard shortcuts work, check menu state management",
+        "subtasks": [
+          {
+            "id": "34.1",
+            "title": "Create application menu template",
+            "description": "Build standard macOS menu structure with all sections",
+            "dependencies": [],
+            "details": "1. Create menu template structure\n2. Add App menu with About, Preferences\n3. Implement File menu items\n4. Add Edit menu with clipboard ops\n5. Create View and Window menus",
+            "status": "pending",
+            "testStrategy": "Verify menu appears correctly, all sections present",
+            "parentTaskId": 34
+          },
+          {
+            "id": "34.2",
+            "title": "Implement menu actions and handlers",
+            "description": "Connect menu items to application functionality",
+            "dependencies": [
+              "34.1"
+            ],
+            "details": "1. Create IPC handlers for menu actions\n2. Implement New Agent functionality\n3. Add Open Project dialog\n4. Create Preferences window\n5. Handle About dialog",
+            "status": "pending",
+            "testStrategy": "Test each menu item triggers correct action",
+            "parentTaskId": 34
+          },
+          {
+            "id": "34.3",
+            "title": "Add keyboard shortcuts and accelerators",
+            "description": "Configure standard macOS keyboard shortcuts",
+            "dependencies": [
+              "34.1"
+            ],
+            "details": "1. Add Cmd+N for New Agent\n2. Configure Cmd+O for Open\n3. Set up standard Edit shortcuts\n4. Add View shortcuts (zoom, etc)\n5. Implement custom shortcuts",
+            "status": "pending",
+            "testStrategy": "Test all keyboard shortcuts work correctly",
+            "parentTaskId": 34
+          },
+          {
+            "id": "34.4",
+            "title": "Implement Recent Projects menu",
+            "description": "Track and display recently opened projects",
+            "dependencies": [
+              "34.2"
+            ],
+            "details": "1. Store recent projects list\n2. Update menu dynamically\n3. Handle project opening\n4. Clear recent items option\n5. Persist across sessions",
+            "status": "pending",
+            "testStrategy": "Verify recent items appear and open correctly",
+            "parentTaskId": 34
+          },
+          {
+            "id": "34.5",
+            "title": "Add contextual menu updates",
+            "description": "Update menu state based on app context",
+            "dependencies": [
+              "34.2"
+            ],
+            "details": "1. Enable/disable items based on state\n2. Update checkmarks for view modes\n3. Show/hide items conditionally\n4. Handle multi-window menus\n5. Sync with app state",
+            "status": "pending",
+            "testStrategy": "Test menu items update based on app state",
+            "parentTaskId": 34
+          }
+        ]
       },
       {
         "id": 35,
@@ -1311,7 +1550,67 @@
         ],
         "priority": "medium",
         "details": "1. Create 32px fixed bottom bar component\n2. Add quick action buttons (New Agent, Start/Stop All, View Toggle)\n3. Implement connection status indicator with real-time updates\n4. Add system resource monitor (CPU, Memory usage)\n5. Create notification center button with badge\n6. Display keyboard shortcut hints on hover\n7. Add collapsible sections for extended info\n8. Implement smooth animations for state changes",
-        "testStrategy": "Verify all buttons functional, test real-time updates, check resource monitoring accuracy, test responsive behavior"
+        "testStrategy": "Verify all buttons functional, test real-time updates, check resource monitoring accuracy, test responsive behavior",
+        "subtasks": [
+          {
+            "id": "35.1",
+            "title": "Create StatusBar React component",
+            "description": "Build fixed bottom bar with proper styling",
+            "dependencies": [],
+            "details": "1. Create StatusBar component\n2. Set 32px fixed height\n3. Apply new color scheme\n4. Add flex layout for sections\n5. Ensure proper z-index",
+            "status": "pending",
+            "testStrategy": "Verify status bar renders at bottom, stays fixed on scroll",
+            "parentTaskId": 35
+          },
+          {
+            "id": "35.2",
+            "title": "Implement quick action buttons",
+            "description": "Add interactive buttons for common actions",
+            "dependencies": [
+              "35.1"
+            ],
+            "details": "1. Create New Agent button\n2. Add Start/Stop All toggle\n3. Implement View Mode switcher\n4. Style with hover effects\n5. Add keyboard shortcuts hints",
+            "status": "pending",
+            "testStrategy": "Test all buttons clickable and trigger actions",
+            "parentTaskId": 35
+          },
+          {
+            "id": "35.3",
+            "title": "Add connection status indicator",
+            "description": "Show real-time connection status with animations",
+            "dependencies": [
+              "35.1"
+            ],
+            "details": "1. Create status indicator component\n2. Connect to WebSocket state\n3. Add pulse animation for active\n4. Show error states clearly\n5. Add reconnection info",
+            "status": "pending",
+            "testStrategy": "Verify status updates in real-time",
+            "parentTaskId": 35
+          },
+          {
+            "id": "35.4",
+            "title": "Implement resource monitoring",
+            "description": "Display system CPU and memory usage",
+            "dependencies": [
+              "35.1"
+            ],
+            "details": "1. Add IPC channel for system stats\n2. Create usage display components\n3. Update every 2 seconds\n4. Show as percentages/graphs\n5. Add threshold warnings",
+            "status": "pending",
+            "testStrategy": "Test resource data updates correctly",
+            "parentTaskId": 35
+          },
+          {
+            "id": "35.5",
+            "title": "Create notification center button",
+            "description": "Add notification badge and dropdown",
+            "dependencies": [
+              "35.1"
+            ],
+            "details": "1. Create notification button\n2. Add badge for count\n3. Implement dropdown panel\n4. Store notification history\n5. Add clear all option",
+            "status": "pending",
+            "testStrategy": "Verify notifications appear with badge count",
+            "parentTaskId": 35
+          }
+        ]
       },
       {
         "id": 36,
@@ -1323,7 +1622,67 @@
         ],
         "priority": "high",
         "details": "1. Replace web terminal with node-pty for native performance\n2. Implement terminal tab management\n3. Add split pane support (horizontal/vertical)\n4. Create terminal themes with new color palette\n5. Add font preference settings\n6. Implement better copy/paste with system clipboard\n7. Add search functionality within terminal\n8. Create picture-in-picture mode for terminals",
-        "testStrategy": "Performance benchmarks, test split panes, verify copy/paste works across platforms, test PiP mode"
+        "testStrategy": "Performance benchmarks, test split panes, verify copy/paste works across platforms, test PiP mode",
+        "subtasks": [
+          {
+            "id": "36.1",
+            "title": "Replace xterm.js with node-pty",
+            "description": "Integrate native PTY for better performance",
+            "dependencies": [],
+            "details": "1. Add node-pty to Electron main\n2. Create PTY management service\n3. Handle PTY lifecycle\n4. Stream data to renderer\n5. Manage multiple PTY instances",
+            "status": "pending",
+            "testStrategy": "Test terminal launches with native performance",
+            "parentTaskId": 36
+          },
+          {
+            "id": "36.2",
+            "title": "Implement terminal tab management",
+            "description": "Add tabbed interface for multiple terminals",
+            "dependencies": [
+              "36.1"
+            ],
+            "details": "1. Create tab bar component\n2. Handle tab creation/deletion\n3. Implement tab reordering\n4. Add tab context menu\n5. Persist tab state",
+            "status": "pending",
+            "testStrategy": "Verify tabs can be created, switched, and closed",
+            "parentTaskId": 36
+          },
+          {
+            "id": "36.3",
+            "title": "Add split pane functionality",
+            "description": "Enable horizontal and vertical terminal splits",
+            "dependencies": [
+              "36.1"
+            ],
+            "details": "1. Implement split pane logic\n2. Add split controls\n3. Handle resize dragging\n4. Manage focus between panes\n5. Add keyboard navigation",
+            "status": "pending",
+            "testStrategy": "Test splitting works in both directions",
+            "parentTaskId": 36
+          },
+          {
+            "id": "36.4",
+            "title": "Create terminal theming system",
+            "description": "Implement customizable terminal colors",
+            "dependencies": [
+              "36.1"
+            ],
+            "details": "1. Define terminal color schemes\n2. Apply new dark palette\n3. Add theme picker UI\n4. Store theme preferences\n5. Support custom themes",
+            "status": "pending",
+            "testStrategy": "Verify themes apply correctly",
+            "parentTaskId": 36
+          },
+          {
+            "id": "36.5",
+            "title": "Implement picture-in-picture mode",
+            "description": "Allow terminals to float in separate windows",
+            "dependencies": [
+              "36.1"
+            ],
+            "details": "1. Create PiP window management\n2. Handle window creation\n3. Sync terminal state\n4. Add window controls\n5. Manage PiP lifecycle",
+            "status": "pending",
+            "testStrategy": "Test PiP windows open and sync correctly",
+            "parentTaskId": 36
+          }
+        ]
       },
       {
         "id": 37,
@@ -1335,7 +1694,59 @@
         ],
         "priority": "medium",
         "details": "1. Setup native notifications API with custom templates\n2. Create system tray icon with context menu\n3. Implement dock badge for agent counts\n4. Add drag & drop file support\n5. Create native file dialogs for project selection\n6. Implement Recent Documents menu\n7. Add Touch Bar support for macOS\n8. Setup file associations for .magents files",
-        "testStrategy": "Test notifications appear correctly, verify system tray works, check file operations, test Touch Bar on supported Macs"
+        "testStrategy": "Test notifications appear correctly, verify system tray works, check file operations, test Touch Bar on supported Macs",
+        "subtasks": [
+          {
+            "id": "37.1",
+            "title": "Setup native notifications API",
+            "description": "Implement system notifications with Electron",
+            "dependencies": [],
+            "details": "1. Create notification service\n2. Request notification permissions\n3. Design notification templates\n4. Handle notification clicks\n5. Add notification queue",
+            "status": "pending",
+            "testStrategy": "Test notifications appear in system tray",
+            "parentTaskId": 37
+          },
+          {
+            "id": "37.2",
+            "title": "Create system tray integration",
+            "description": "Add persistent system tray icon with menu",
+            "dependencies": [],
+            "details": "1. Create tray icon assets\n2. Build tray menu template\n3. Show agent status in tray\n4. Add quick actions menu\n5. Handle tray clicks",
+            "status": "pending",
+            "testStrategy": "Verify tray icon appears with working menu",
+            "parentTaskId": 37
+          },
+          {
+            "id": "37.3",
+            "title": "Implement dock badge for macOS",
+            "description": "Show agent count badge on dock icon",
+            "dependencies": [],
+            "details": "1. Track active agent count\n2. Update dock badge number\n3. Add bounce animation for alerts\n4. Handle dock menu\n5. Clear badge on focus",
+            "status": "pending",
+            "testStrategy": "Test badge updates with agent count",
+            "parentTaskId": 37
+          },
+          {
+            "id": "37.4",
+            "title": "Add drag and drop file support",
+            "description": "Enable dragging files into the application",
+            "dependencies": [],
+            "details": "1. Setup drop zones\n2. Handle file drag events\n3. Process dropped files\n4. Show drop indicators\n5. Validate file types",
+            "status": "pending",
+            "testStrategy": "Test dragging files into app works",
+            "parentTaskId": 37
+          },
+          {
+            "id": "37.5",
+            "title": "Configure Touch Bar for macOS",
+            "description": "Add Touch Bar controls for compatible Macs",
+            "dependencies": [],
+            "details": "1. Create Touch Bar template\n2. Add agent controls\n3. Show status indicators\n4. Handle Touch Bar actions\n5. Update dynamically",
+            "status": "pending",
+            "testStrategy": "Test on Touch Bar equipped Mac",
+            "parentTaskId": 37
+          }
+        ]
       },
       {
         "id": 38,
@@ -1347,7 +1758,65 @@
         ],
         "priority": "medium",
         "details": "1. Configure electron-updater with update server\n2. Implement update UI with progress indication\n3. Setup code signing for macOS (Developer ID)\n4. Configure notarization workflow\n5. Create DMG installer with custom background\n6. Setup MSI installer for Windows\n7. Create AppImage for Linux\n8. Configure GitHub Actions for multi-platform builds",
-        "testStrategy": "Test update flow end-to-end, verify signatures, test installers on each platform, check auto-update works"
+        "testStrategy": "Test update flow end-to-end, verify signatures, test installers on each platform, check auto-update works",
+        "subtasks": [
+          {
+            "id": "38.1",
+            "title": "Configure electron-updater",
+            "description": "Setup auto-update infrastructure",
+            "dependencies": [],
+            "details": "1. Configure update server URL\n2. Setup electron-updater\n3. Create update config\n4. Handle update events\n5. Add rollback support",
+            "status": "pending",
+            "testStrategy": "Test update check and download process",
+            "parentTaskId": 38
+          },
+          {
+            "id": "38.2",
+            "title": "Create update UI components",
+            "description": "Build user interface for update process",
+            "dependencies": [
+              "38.1"
+            ],
+            "details": "1. Create update dialog\n2. Add progress bar\n3. Show release notes\n4. Handle user choices\n5. Add force update option",
+            "status": "pending",
+            "testStrategy": "Verify update UI appears and functions",
+            "parentTaskId": 38
+          },
+          {
+            "id": "38.3",
+            "title": "Setup code signing for macOS",
+            "description": "Configure Developer ID signing",
+            "dependencies": [],
+            "details": "1. Obtain signing certificates\n2. Configure electron-builder\n3. Setup keychain access\n4. Test signing process\n5. Verify with codesign",
+            "status": "pending",
+            "testStrategy": "Verify app is properly signed",
+            "parentTaskId": 38
+          },
+          {
+            "id": "38.4",
+            "title": "Create platform installers",
+            "description": "Build DMG, MSI, and AppImage",
+            "dependencies": [
+              "38.3"
+            ],
+            "details": "1. Configure DMG with background\n2. Setup MSI with installer UI\n3. Create AppImage config\n4. Add installer icons\n5. Test installations",
+            "status": "pending",
+            "testStrategy": "Test installers on each platform",
+            "parentTaskId": 38
+          },
+          {
+            "id": "38.5",
+            "title": "Setup GitHub Actions CI/CD",
+            "description": "Automate build and release process",
+            "dependencies": [
+              "38.4"
+            ],
+            "details": "1. Create workflow files\n2. Setup build matrix\n3. Configure artifact uploads\n4. Add release creation\n5. Setup signing secrets",
+            "status": "pending",
+            "testStrategy": "Verify CI builds complete successfully",
+            "parentTaskId": 38
+          }
+        ]
       },
       {
         "id": 39,
@@ -1361,7 +1830,59 @@
         ],
         "priority": "medium",
         "details": "1. Implement React.lazy for code splitting\n2. Add virtual scrolling for agent lists\n3. Setup memory usage monitoring\n4. Implement background process optimization\n5. Add GPU acceleration flags\n6. Create performance profiling tools\n7. Optimize IPC message passing\n8. Add startup time tracking",
-        "testStrategy": "Measure startup time < 2s, verify memory < 200MB idle, test 60fps animations, profile performance bottlenecks"
+        "testStrategy": "Measure startup time < 2s, verify memory < 200MB idle, test 60fps animations, profile performance bottlenecks",
+        "subtasks": [
+          {
+            "id": "39.1",
+            "title": "Implement React.lazy code splitting",
+            "description": "Split code bundles for faster loading",
+            "dependencies": [],
+            "details": "1. Identify split points\n2. Wrap routes in lazy()\n3. Add loading states\n4. Configure webpack chunks\n5. Analyze bundle sizes",
+            "status": "pending",
+            "testStrategy": "Measure initial bundle size reduction",
+            "parentTaskId": 39
+          },
+          {
+            "id": "39.2",
+            "title": "Add virtual scrolling for lists",
+            "description": "Optimize rendering of large agent lists",
+            "dependencies": [],
+            "details": "1. Integrate react-window\n2. Convert agent list\n3. Implement dynamic heights\n4. Add scroll restoration\n5. Handle list updates",
+            "status": "pending",
+            "testStrategy": "Test with 1000+ agents, verify smooth scrolling",
+            "parentTaskId": 39
+          },
+          {
+            "id": "39.3",
+            "title": "Setup performance monitoring",
+            "description": "Track app performance metrics",
+            "dependencies": [],
+            "details": "1. Add performance marks\n2. Track startup time\n3. Monitor memory usage\n4. Log frame rates\n5. Create perf dashboard",
+            "status": "pending",
+            "testStrategy": "Verify metrics are collected accurately",
+            "parentTaskId": 39
+          },
+          {
+            "id": "39.4",
+            "title": "Optimize IPC communication",
+            "description": "Reduce overhead in process communication",
+            "dependencies": [],
+            "details": "1. Batch IPC messages\n2. Use binary protocols\n3. Add message compression\n4. Implement caching\n5. Profile IPC usage",
+            "status": "pending",
+            "testStrategy": "Measure IPC latency improvements",
+            "parentTaskId": 39
+          },
+          {
+            "id": "39.5",
+            "title": "Configure GPU acceleration",
+            "description": "Enable hardware acceleration for rendering",
+            "dependencies": [],
+            "details": "1. Enable GPU rasterization\n2. Configure WebGL settings\n3. Test GPU compatibility\n4. Add fallback options\n5. Monitor GPU usage",
+            "status": "pending",
+            "testStrategy": "Verify smooth 60fps animations",
+            "parentTaskId": 39
+          }
+        ]
       },
       {
         "id": 40,
@@ -1377,12 +1898,737 @@
         ],
         "priority": "medium",
         "details": "1. Add ARIA labels to all interactive elements\n2. Implement keyboard navigation for all features\n3. Add screen reader announcements\n4. Create high contrast mode\n5. Setup Spectron/Playwright for E2E testing\n6. Add unit tests for main process\n7. Create integration tests for IPC\n8. Setup automated accessibility testing",
-        "testStrategy": "Run accessibility audit, test with screen readers, verify keyboard navigation complete, ensure all tests pass"
+        "testStrategy": "Run accessibility audit, test with screen readers, verify keyboard navigation complete, ensure all tests pass",
+        "subtasks": [
+          {
+            "id": "40.1",
+            "title": "Add comprehensive ARIA labels",
+            "description": "Ensure all UI elements are accessible",
+            "dependencies": [],
+            "details": "1. Audit all components\n2. Add missing ARIA labels\n3. Set proper roles\n4. Configure live regions\n5. Test with screen reader",
+            "status": "pending",
+            "testStrategy": "Pass automated accessibility audit",
+            "parentTaskId": 40
+          },
+          {
+            "id": "40.2",
+            "title": "Implement keyboard navigation",
+            "description": "Enable full keyboard control",
+            "dependencies": [],
+            "details": "1. Add focus management\n2. Implement tab order\n3. Create keyboard shortcuts\n4. Add skip links\n5. Handle modal focus",
+            "status": "pending",
+            "testStrategy": "Navigate entire app with keyboard only",
+            "parentTaskId": 40
+          },
+          {
+            "id": "40.3",
+            "title": "Create high contrast mode",
+            "description": "Add accessibility color theme",
+            "dependencies": [],
+            "details": "1. Design high contrast palette\n2. Create theme switcher\n3. Increase text contrast\n4. Add focus indicators\n5. Test with users",
+            "status": "pending",
+            "testStrategy": "Verify WCAG AA compliance",
+            "parentTaskId": 40
+          },
+          {
+            "id": "40.4",
+            "title": "Setup E2E testing with Playwright",
+            "description": "Configure end-to-end testing for Electron",
+            "dependencies": [],
+            "details": "1. Install Playwright Electron\n2. Create test helpers\n3. Write app launch tests\n4. Add user flow tests\n5. Setup CI integration",
+            "status": "pending",
+            "testStrategy": "All E2E tests pass locally and in CI",
+            "parentTaskId": 40
+          },
+          {
+            "id": "40.5",
+            "title": "Add unit tests for main process",
+            "description": "Test Electron main process code",
+            "dependencies": [],
+            "details": "1. Setup Jest for main\n2. Mock Electron APIs\n3. Test IPC handlers\n4. Test window management\n5. Achieve 80% coverage",
+            "status": "pending",
+            "testStrategy": "Unit tests pass with good coverage",
+            "parentTaskId": 40
+          }
+        ]
+      },
+      {
+        "id": 41,
+        "title": "Create Database Migration Infrastructure",
+        "description": "Set up migration scripts and tools to migrate existing JSON files to SQLite database",
+        "status": "in-progress",
+        "dependencies": [],
+        "priority": "high",
+        "details": "Create JsonToSqliteMigration class in packages/shared/src/database/migrations/. Implement methods to read existing JSON files (projects.json, agent configs), convert to unified format, and insert into SQLite database. Add rollback functionality and backup creation. Create CLI command 'magents migrate' with --rollback option.",
+        "testStrategy": "Unit tests for migration logic, integration tests with sample JSON data, manual testing of rollback functionality",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create migration class structure and interfaces",
+            "description": "Set up the base JsonToSqliteMigration class with proper interfaces and error handling",
+            "dependencies": [],
+            "details": "Create JsonToSqliteMigration class in packages/shared/src/database/migrations/migrate-json-to-sqlite.ts. Define interfaces for migration results, configuration options. Set up constructor with dependency injection for database service, project service, and config service.",
+            "status": "in-progress",
+            "testStrategy": "Unit tests for class instantiation and interface compliance"
+          },
+          {
+            "id": 2,
+            "title": "Implement project migration logic",
+            "description": "Create method to read and migrate projects from JSON to SQLite",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement migrateProjects() method to read projects.json from ~/.magents/projects/, convert to UnifiedProjectData format, handle missing fields with defaults, and insert into database using ProjectRepository.",
+            "status": "pending",
+            "testStrategy": "Integration tests with sample projects.json files"
+          },
+          {
+            "id": 3,
+            "title": "Implement agent migration logic",
+            "description": "Create method to read and migrate agents from individual JSON files to SQLite",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement migrateAgents() method to scan agents directory, read each agent JSON file, convert to UnifiedAgentData format, auto-assign projects for orphaned agents, and insert into database using AgentRepository.",
+            "status": "pending",
+            "testStrategy": "Integration tests with various agent configurations"
+          },
+          {
+            "id": 4,
+            "title": "Add backup and rollback functionality",
+            "description": "Implement backup creation before migration and rollback capability",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Create backup copies of all JSON files with .backup extension before migration. Implement rollback() method to restore from backups and remove SQLite database. Add transaction support for atomic migrations.",
+            "status": "pending",
+            "testStrategy": "Test backup creation, rollback scenarios, and data integrity"
+          },
+          {
+            "id": 5,
+            "title": "Create CLI migrate command",
+            "description": "Add 'magents migrate' command to CLI with options and progress feedback",
+            "dependencies": [
+              4
+            ],
+            "details": "Create migrate.ts command file, add --rollback flag support, implement progress indicators and confirmation prompts, integrate with main CLI program, add proper error handling and user feedback.",
+            "status": "done",
+            "testStrategy": "CLI integration tests, user interaction tests"
+          }
+        ]
+      },
+      {
+        "id": 42,
+        "title": "Update Backend Services for Database",
+        "description": "Modify backend services to use database repositories instead of file operations",
+        "status": "pending",
+        "dependencies": [
+          41
+        ],
+        "priority": "high",
+        "details": "Update ProjectService to use ProjectRepository, modify agent management to use AgentRepository. Maintain backward compatibility with existing API contracts. Add transaction support for complex operations like creating agent with project.",
+        "testStrategy": "Unit tests for repository integration, API integration tests, regression tests for existing functionality",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Update ProjectService to use repositories",
+            "description": "Refactor ProjectService to use ProjectRepository instead of file operations",
+            "dependencies": [],
+            "details": "Modify all methods in ProjectService to use database repositories. Replace fs.readJson/writeJson with repository.create/update/find methods. Maintain same public API to ensure backward compatibility.",
+            "status": "pending",
+            "testStrategy": "Unit tests for each service method, regression tests"
+          },
+          {
+            "id": 2,
+            "title": "Update agent management services",
+            "description": "Refactor agent-related services to use AgentRepository",
+            "dependencies": [],
+            "details": "Update DockerAgentManager and related services to use AgentRepository for persistence. Replace file-based agent storage with database operations. Ensure status updates are persisted to database.",
+            "status": "pending",
+            "testStrategy": "Integration tests for agent lifecycle operations"
+          },
+          {
+            "id": 3,
+            "title": "Implement transaction support",
+            "description": "Add database transaction support for complex operations",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Wrap complex operations like creating agent with project in database transactions. Implement rollback on failure. Use UnifiedDatabaseService.transaction() method for atomic operations.",
+            "status": "pending",
+            "testStrategy": "Test transaction rollback scenarios, concurrent operations"
+          },
+          {
+            "id": 4,
+            "title": "Update API controllers",
+            "description": "Modify API controllers to use updated services with repositories",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Update all API endpoints in backend controllers to use the refactored services. Ensure proper error handling and response formats remain unchanged.",
+            "status": "pending",
+            "testStrategy": "API integration tests, endpoint response validation"
+          },
+          {
+            "id": 5,
+            "title": "Add database connection management",
+            "description": "Implement proper database connection lifecycle in backend",
+            "dependencies": [
+              3,
+              4
+            ],
+            "details": "Add database connection initialization in backend startup, implement connection pooling if needed, add graceful shutdown to close database connections properly.",
+            "status": "pending",
+            "testStrategy": "Connection lifecycle tests, load testing"
+          }
+        ]
+      },
+      {
+        "id": 43,
+        "title": "Add Database Initialization to Startup",
+        "description": "Initialize SQLite database on application startup with automatic migration",
+        "status": "pending",
+        "dependencies": [
+          41,
+          42
+        ],
+        "priority": "high",
+        "details": "Add database initialization in backend startup sequence. Create database file at ~/.magents/magents.db if not exists. Run pending migrations automatically. Add health checks for database connectivity.",
+        "testStrategy": "Startup tests with fresh installation, migration tests with existing data, health check endpoint tests",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Add database initialization to backend startup",
+            "description": "Initialize database when backend server starts",
+            "dependencies": [],
+            "details": "Add database initialization code to backend/src/index.ts startup sequence. Create database file at ~/.magents/magents.db if not exists. Handle initialization errors gracefully.",
+            "status": "pending",
+            "testStrategy": "Startup tests with missing database, corrupted database"
+          },
+          {
+            "id": 2,
+            "title": "Implement automatic migration runner",
+            "description": "Run pending migrations automatically on startup",
+            "dependencies": [
+              1
+            ],
+            "details": "Check current database version against latest migration version. Run any pending migrations in order. Log migration progress and handle failures appropriately.",
+            "status": "pending",
+            "testStrategy": "Test with various migration states, version mismatches"
+          },
+          {
+            "id": 3,
+            "title": "Add database health check endpoint",
+            "description": "Create health check endpoint for database connectivity",
+            "dependencies": [
+              1
+            ],
+            "details": "Add GET /api/health/database endpoint that checks database connectivity, returns current version and migration status, includes basic statistics like table counts.",
+            "status": "pending",
+            "testStrategy": "Health check endpoint tests, failure scenarios"
+          },
+          {
+            "id": 4,
+            "title": "Add CLI database initialization",
+            "description": "Ensure database is initialized for CLI operations",
+            "dependencies": [
+              1
+            ],
+            "details": "Add lazy database initialization for CLI commands that need it. Only initialize when database operations are required. Share initialization logic with backend.",
+            "status": "pending",
+            "testStrategy": "CLI command tests with fresh installation"
+          },
+          {
+            "id": 5,
+            "title": "Create database configuration options",
+            "description": "Add configuration for database path and options",
+            "dependencies": [
+              1,
+              4
+            ],
+            "details": "Add database configuration to magents config (custom path, read-only mode, etc.). Support environment variables for database configuration. Document configuration options.",
+            "status": "pending",
+            "testStrategy": "Configuration tests with various options"
+          }
+        ]
+      },
+      {
+        "id": 44,
+        "title": "Make ProjectId Mandatory for Agents",
+        "description": "Update agent data model and creation flow to require project association",
+        "status": "pending",
+        "dependencies": [
+          42
+        ],
+        "priority": "high",
+        "details": "Update UnifiedAgentData schema to make projectId required field. Add validation in agent creation endpoints. Update database schema with foreign key constraints. Modify CLI and API to enforce project association.",
+        "testStrategy": "Schema validation tests, API tests for agent creation without projectId, foreign key constraint tests",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Update UnifiedAgentData schema",
+            "description": "Make projectId a required field in agent data model",
+            "dependencies": [],
+            "details": "Modify UnifiedAgentData interface and Zod schema to make projectId required. Remove optional modifier from projectId field. Update all TypeScript types that depend on this.",
+            "status": "pending",
+            "testStrategy": "Type checking tests, schema validation tests"
+          },
+          {
+            "id": 2,
+            "title": "Add database foreign key constraints",
+            "description": "Create foreign key relationship between agents and projects",
+            "dependencies": [
+              1
+            ],
+            "details": "Add migration to create foreign key constraint on agents.projectId referencing projects.id. Set up cascade rules for updates and restrict deletes. Add appropriate indexes.",
+            "status": "pending",
+            "testStrategy": "Constraint violation tests, cascade behavior tests"
+          },
+          {
+            "id": 3,
+            "title": "Update agent creation validation",
+            "description": "Add validation to ensure projectId is provided when creating agents",
+            "dependencies": [
+              1
+            ],
+            "details": "Update agent creation endpoints to validate projectId presence. Return clear error messages when projectId is missing. Check that referenced project exists.",
+            "status": "pending",
+            "testStrategy": "API validation tests, error message tests"
+          },
+          {
+            "id": 4,
+            "title": "Update CLI agent creation",
+            "description": "Modify CLI create command to handle project requirement",
+            "dependencies": [
+              3
+            ],
+            "details": "Update magents create command to check for projectId. Implement logic to auto-create project if not provided (task 45). Show clear messages about project association.",
+            "status": "pending",
+            "testStrategy": "CLI integration tests with various scenarios"
+          },
+          {
+            "id": 5,
+            "title": "Update existing data migration",
+            "description": "Handle existing agents without projects in migration",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "In migration script, handle agents that don't have projectId. Either assign to existing project based on path matching or create new project. Log decisions made during migration.",
+            "status": "pending",
+            "testStrategy": "Migration tests with legacy agent data"
+          }
+        ]
+      },
+      {
+        "id": 45,
+        "title": "Auto-Create Projects for Terminal Agents",
+        "description": "Automatically create projects when agents are created from terminal without explicit project",
+        "status": "pending",
+        "dependencies": [
+          44
+        ],
+        "priority": "medium",
+        "details": "In DockerAgentManager.createAgent, check if projectId is provided. If not, create project using current working directory as path and basename as name. Link Docker volumes to project path. Update agent with auto-created projectId.",
+        "testStrategy": "Integration tests for CLI agent creation, tests for project auto-creation logic, Docker volume mapping tests",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Add project detection logic",
+            "description": "Detect when agent is created without explicit project",
+            "dependencies": [],
+            "details": "In DockerAgentManager.createAgent, check if projectId is provided in options. If not, flag for auto-creation. Get current working directory for project path.",
+            "status": "pending",
+            "testStrategy": "Unit tests for detection logic"
+          },
+          {
+            "id": 2,
+            "title": "Implement project auto-creation",
+            "description": "Create project based on current directory when not specified",
+            "dependencies": [
+              1
+            ],
+            "details": "Use process.cwd() as project path. Use path.basename() for project name. Generate unique project ID. Set appropriate defaults for project settings.",
+            "status": "pending",
+            "testStrategy": "Project creation tests with various directory names"
+          },
+          {
+            "id": 3,
+            "title": "Link Docker volumes to project",
+            "description": "Ensure Docker volumes are created from project path",
+            "dependencies": [
+              2
+            ],
+            "details": "Update Docker volume mounting to use project path as base. Ensure agent worktree is within project directory. Update volume permissions appropriately.",
+            "status": "pending",
+            "testStrategy": "Docker volume mounting tests"
+          },
+          {
+            "id": 4,
+            "title": "Update agent with project association",
+            "description": "Associate newly created agent with auto-created project",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "After project creation, update agent record with projectId. Update project's agentIds array to include new agent. Ensure bidirectional relationship is maintained.",
+            "status": "pending",
+            "testStrategy": "Relationship integrity tests"
+          },
+          {
+            "id": 5,
+            "title": "Add user feedback for auto-creation",
+            "description": "Provide clear feedback when project is auto-created",
+            "dependencies": [
+              4
+            ],
+            "details": "Show message indicating project was auto-created. Display project name and path. Suggest using explicit project for better organization. Log auto-creation for debugging.",
+            "status": "pending",
+            "testStrategy": "User interaction tests, message clarity tests"
+          }
+        ]
+      },
+      {
+        "id": 46,
+        "title": "Add Project Selector to Task Browser",
+        "description": "Create UI component for selecting project in task browser interface",
+        "status": "pending",
+        "dependencies": [
+          43
+        ],
+        "priority": "medium",
+        "details": "Create dropdown component in TaskBrowser.tsx to select active project. Load projects list from API. Store selected project in component state. Update task loading to use selected project path.",
+        "testStrategy": "Component unit tests, integration tests for project switching, UI tests for dropdown functionality",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create project selector component",
+            "description": "Build dropdown component for project selection",
+            "dependencies": [],
+            "details": "Create ProjectSelector.tsx component with dropdown UI. Use existing UI library components for consistency. Include search/filter functionality for many projects.",
+            "status": "pending",
+            "testStrategy": "Component rendering tests, interaction tests"
+          },
+          {
+            "id": 2,
+            "title": "Integrate project API calls",
+            "description": "Connect selector to backend project API",
+            "dependencies": [
+              1
+            ],
+            "details": "Add API call to fetch projects list on component mount. Handle loading and error states. Cache project list to avoid repeated calls. Set up proper TypeScript types.",
+            "status": "pending",
+            "testStrategy": "API integration tests, error handling tests"
+          },
+          {
+            "id": 3,
+            "title": "Add state management for selection",
+            "description": "Manage selected project state in TaskBrowser",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Add selectedProjectId state to TaskBrowser component. Update state when project is selected. Persist selection in localStorage for user convenience.",
+            "status": "pending",
+            "testStrategy": "State management tests, persistence tests"
+          },
+          {
+            "id": 4,
+            "title": "Update task loading with project filter",
+            "description": "Modify task fetching to use selected project",
+            "dependencies": [
+              3
+            ],
+            "details": "Pass selectedProjectId to task loading API calls. Update taskMasterIntegrationService.getTasks to accept project parameter. Handle case when no project is selected.",
+            "status": "pending",
+            "testStrategy": "Task filtering tests, API parameter tests"
+          },
+          {
+            "id": 5,
+            "title": "Add UI polish and feedback",
+            "description": "Enhance UX with loading states and clear feedback",
+            "dependencies": [
+              4
+            ],
+            "details": "Show loading spinner while switching projects. Display current project name prominently. Add empty states for projects without tasks. Include project task count in selector.",
+            "status": "pending",
+            "testStrategy": "UI/UX tests, visual regression tests"
+          }
+        ]
+      },
+      {
+        "id": 47,
+        "title": "Implement Project-Based Task Filtering",
+        "description": "Filter tasks based on selected project and restrict assignment to same-project agents",
+        "status": "pending",
+        "dependencies": [
+          46
+        ],
+        "priority": "medium",
+        "details": "Modify taskMasterIntegrationService.getTasks to accept and use project path parameter. Load tasks only from selected project's .taskmaster/tasks/tasks.json. Filter agent list when assigning tasks to show only same-project agents.",
+        "testStrategy": "API tests for filtered task loading, assignment validation tests, multi-project integration tests",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Update task service API",
+            "description": "Modify task loading service to accept project path parameter",
+            "dependencies": [],
+            "details": "Update taskMasterIntegrationService.getTasks signature to accept projectPath. Modify implementation to read from project-specific .taskmaster/tasks/tasks.json. Handle missing task files gracefully.",
+            "status": "pending",
+            "testStrategy": "Service unit tests with various project paths"
+          },
+          {
+            "id": 2,
+            "title": "Implement task caching per project",
+            "description": "Cache tasks by project to improve performance",
+            "dependencies": [
+              1
+            ],
+            "details": "Create task cache keyed by project ID. Invalidate cache on task updates. Implement cache expiration strategy. Consider using React Query or similar for cache management.",
+            "status": "pending",
+            "testStrategy": "Cache behavior tests, performance tests"
+          },
+          {
+            "id": 3,
+            "title": "Filter agents by project for assignment",
+            "description": "Show only same-project agents when assigning tasks",
+            "dependencies": [],
+            "details": "When displaying agent list for task assignment, filter by projectId. Modify agent selection UI to only show eligible agents. Add clear messaging about project restrictions.",
+            "status": "pending",
+            "testStrategy": "Agent filtering tests, UI interaction tests"
+          },
+          {
+            "id": 4,
+            "title": "Add assignment validation",
+            "description": "Validate task assignment to ensure same project",
+            "dependencies": [
+              3
+            ],
+            "details": "Add backend validation to prevent cross-project task assignment. Return clear error messages for invalid assignments. Update API documentation with constraints.",
+            "status": "pending",
+            "testStrategy": "Validation tests, error response tests"
+          },
+          {
+            "id": 5,
+            "title": "Update task UI with project context",
+            "description": "Show project information in task displays",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Display project name in task cards. Show agent's project in assignment UI. Add visual indicators for project boundaries. Include project in task detail views.",
+            "status": "pending",
+            "testStrategy": "UI rendering tests, visual consistency tests"
+          }
+        ]
+      },
+      {
+        "id": 48,
+        "title": "Create Task Integration Interface",
+        "description": "Design pluggable task system architecture with common interface",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "medium",
+        "details": "Create TaskIntegration interface in packages/shared/src/integrations/ with methods: getTasks, createTask, updateTask, deleteTask, getTaskDetails. Design for multiple implementations (Task Master, internal, none).",
+        "testStrategy": "Interface design tests, mock implementation tests, type safety tests",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define TaskIntegration interface",
+            "description": "Create the core interface for task system integrations",
+            "dependencies": [],
+            "details": "Create TaskIntegration.ts in packages/shared/src/integrations/. Define methods: getTasks, getTask, createTask, updateTask, deleteTask, assignTask. Use generic types for flexibility.",
+            "status": "pending",
+            "testStrategy": "TypeScript compilation tests, interface usage tests"
+          },
+          {
+            "id": 2,
+            "title": "Create integration factory pattern",
+            "description": "Implement factory for creating task integrations",
+            "dependencies": [
+              1
+            ],
+            "details": "Create TaskIntegrationFactory class to instantiate correct implementation. Support registration of new integrations. Configure based on settings.",
+            "status": "pending",
+            "testStrategy": "Factory pattern tests, registration tests"
+          },
+          {
+            "id": 3,
+            "title": "Define task data models",
+            "description": "Create common task data structures",
+            "dependencies": [
+              1
+            ],
+            "details": "Define Task, TaskStatus, TaskPriority interfaces. Ensure compatibility with existing Task Master structure. Add fields for internal task system needs.",
+            "status": "pending",
+            "testStrategy": "Data model tests, serialization tests"
+          },
+          {
+            "id": 4,
+            "title": "Create mock implementation",
+            "description": "Build mock task integration for testing",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Create MockTaskIntegration implementing the interface. Use in-memory storage for testing. Helpful for development without external dependencies.",
+            "status": "pending",
+            "testStrategy": "Mock implementation behavior tests"
+          },
+          {
+            "id": 5,
+            "title": "Add integration configuration",
+            "description": "Design configuration structure for integrations",
+            "dependencies": [
+              2
+            ],
+            "details": "Define configuration schema for task integrations. Support integration-specific settings. Add to main magents configuration structure.",
+            "status": "pending",
+            "testStrategy": "Configuration loading tests, validation tests"
+          }
+        ]
+      },
+      {
+        "id": 49,
+        "title": "Decouple Task Master as Optional Integration",
+        "description": "Move Task Master code to integration layer and make it optional",
+        "status": "pending",
+        "dependencies": [
+          48
+        ],
+        "priority": "medium",
+        "details": "Create TaskMasterIntegration implementing TaskIntegration interface. Move existing Task Master code to packages/shared/src/integrations/taskmaster/. Update Dockerfile to conditionally install Task Master. Add configuration for enabling/disabling Task Master.",
+        "testStrategy": "Integration tests with Task Master enabled/disabled, Docker build tests, configuration tests",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create TaskMasterIntegration class",
+            "description": "Implement TaskIntegration interface for Task Master",
+            "dependencies": [],
+            "details": "Create TaskMasterIntegration.ts implementing TaskIntegration interface. Wrap existing Task Master CLI calls. Handle Task Master not being installed gracefully.",
+            "status": "pending",
+            "testStrategy": "Integration tests with Task Master CLI"
+          },
+          {
+            "id": 2,
+            "title": "Move Task Master code to integration layer",
+            "description": "Relocate Task Master specific code",
+            "dependencies": [
+              1
+            ],
+            "details": "Move taskMasterIntegrationService to packages/shared/src/integrations/taskmaster/. Update all imports throughout codebase. Maintain backward compatibility.",
+            "status": "pending",
+            "testStrategy": "Import resolution tests, functionality tests"
+          },
+          {
+            "id": 3,
+            "title": "Update Dockerfile for conditional installation",
+            "description": "Make Task Master installation optional in Docker",
+            "dependencies": [],
+            "details": "Add INSTALL_TASKMASTER build arg to Dockerfile. Conditionally run npm install -g task-master-ai. Document build options in README.",
+            "status": "pending",
+            "testStrategy": "Docker build tests with/without Task Master"
+          },
+          {
+            "id": 4,
+            "title": "Add feature toggle configuration",
+            "description": "Create configuration to enable/disable Task Master",
+            "dependencies": [
+              2
+            ],
+            "details": "Add taskIntegration.type config option. Support values: 'taskmaster', 'internal', 'none'. Update mode configurations to reflect choice.",
+            "status": "pending",
+            "testStrategy": "Configuration switching tests"
+          },
+          {
+            "id": 5,
+            "title": "Update UI for optional Task Master",
+            "description": "Modify UI to handle Task Master being optional",
+            "dependencies": [
+              4
+            ],
+            "details": "Conditionally show Task Master UI elements. Add messages when Task Master is disabled. Provide UI to switch task integrations.",
+            "status": "pending",
+            "testStrategy": "UI conditional rendering tests"
+          }
+        ]
+      },
+      {
+        "id": 50,
+        "title": "Implement Internal Task System",
+        "description": "Create basic internal task management system using SQLite",
+        "status": "pending",
+        "dependencies": [
+          48,
+          43
+        ],
+        "priority": "low",
+        "details": "Create InternalTaskIntegration using SQLite database. Implement CRUD operations for tasks table. Design simple schema: id, title, description, status, projectId, assignedAgentId. No external dependencies.",
+        "testStrategy": "CRUD operation tests, database integration tests, API tests for internal task system",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create internal task database schema",
+            "description": "Design and implement task table schema",
+            "dependencies": [],
+            "details": "Add tasks table to database migrations. Include fields: id, title, description, status, priority, projectId, assignedAgentId, dependencies, createdAt, updatedAt.",
+            "status": "pending",
+            "testStrategy": "Schema creation tests, migration tests"
+          },
+          {
+            "id": 2,
+            "title": "Implement TaskRepository",
+            "description": "Create repository class for task data access",
+            "dependencies": [
+              1
+            ],
+            "details": "Create TaskRepository extending BaseRepository. Implement CRUD operations. Add methods for filtering by project and agent.",
+            "status": "pending",
+            "testStrategy": "Repository CRUD tests, query tests"
+          },
+          {
+            "id": 3,
+            "title": "Create InternalTaskIntegration class",
+            "description": "Implement TaskIntegration interface for internal system",
+            "dependencies": [
+              2
+            ],
+            "details": "Create InternalTaskIntegration.ts implementing TaskIntegration. Use TaskRepository for data operations. Map between interface and database formats.",
+            "status": "pending",
+            "testStrategy": "Integration implementation tests"
+          },
+          {
+            "id": 4,
+            "title": "Add task API endpoints",
+            "description": "Create REST API for internal task operations",
+            "dependencies": [
+              3
+            ],
+            "details": "Add CRUD endpoints for tasks when using internal integration. Reuse existing task controller structure. Ensure API compatibility.",
+            "status": "pending",
+            "testStrategy": "API endpoint tests, compatibility tests"
+          },
+          {
+            "id": 5,
+            "title": "Create task import/export functionality",
+            "description": "Allow importing from Task Master to internal system",
+            "dependencies": [
+              3,
+              4
+            ],
+            "details": "Add import command to read Task Master tasks.json. Convert and insert into internal task system. Add export to Task Master format for compatibility.",
+            "status": "pending",
+            "testStrategy": "Import/export tests, format conversion tests"
+          }
+        ]
       }
     ],
     "metadata": {
       "created": "2025-06-30T14:18:19.843Z",
-      "updated": "2025-07-03T12:50:55.140Z",
+      "updated": "2025-07-03T13:54:40.827Z",
       "description": "Tasks for master context"
     }
   }

@@ -16,3 +16,55 @@
 
 # Test Strategy:
 Visual regression testing, verify all components use new palette, check contrast ratios, test dark/light mode switching
+
+# Subtasks:
+## 33.1. Create CSS variables for new color system [pending]
+### Dependencies: None
+### Description: Implement comprehensive color palette with CSS custom properties
+### Details:
+1. Define root CSS variables for all colors
+2. Create semantic color mappings
+3. Add elevation/shadow variables
+4. Define spacing and radius tokens
+5. Ensure proper CSS cascade
+
+## 33.2. Update component styles with new palette [pending]
+### Dependencies: 33.1
+### Description: Apply new colors to all React components systematically
+### Details:
+1. Update Layout components first
+2. Modify Card and Panel backgrounds
+3. Update button and form styles
+4. Adjust text and icon colors
+5. Update status indicators colors
+
+## 33.3. Implement elevation and shadow system [pending]
+### Dependencies: 33.1
+### Description: Create consistent depth hierarchy with shadows
+### Details:
+1. Define 5 elevation levels
+2. Create shadow utilities
+3. Apply shadows to cards and modals
+4. Add hover elevation changes
+5. Ensure performance with shadows
+
+## 33.4. Update typography and text hierarchy [pending]
+### Dependencies: 33.1
+### Description: Implement SF Pro font stack with proper text colors
+### Details:
+1. Configure SF Pro font family
+2. Define font size scale
+3. Set line heights and weights
+4. Apply text color hierarchy
+5. Add responsive typography
+
+## 33.5. Add transitions and hover states [pending]
+### Dependencies: 33.2
+### Description: Implement smooth animations with new color palette
+### Details:
+1. Add transition utilities
+2. Create hover color variations
+3. Implement focus states
+4. Add loading animations
+5. Ensure 60fps performance
+

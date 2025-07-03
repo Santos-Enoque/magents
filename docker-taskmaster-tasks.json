@@ -1,0 +1,136 @@
+{
+  "tasks": [
+    {
+      "id": 41,
+      "title": "Remove Deprecated tmux-based AgentManager",
+      "description": "Delete AgentManager.ts file and update all imports to use DockerAgentManager. Remove tmux-specific configuration options and ensure Docker is the only agent management implementation.",
+      "details": "1. Delete packages/cli/src/services/AgentManager.ts file\n2. Update all imports from AgentManager to DockerAgentManager in:\n   - packages/cli/src/commands/start.ts\n   - packages/cli/src/commands/assign.ts\n   - packages/cli/src/__tests__/*.test.ts\n3. Remove TMUX_SESSION_PREFIX from ConfigManager defaults\n4. Update configuration files to remove tmux references\n5. Clean up tmux-related types and interfaces from shared types",
+      "testStrategy": "1. Verify all files compile without AgentManager import errors\n2. Run existing tests to ensure no functionality is broken\n3. Check that agent creation still works with Docker\n4. Verify configuration files no longer contain tmux references",
+      "priority": "high",
+      "dependencies": [],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 42,
+      "title": "Update Docker Implementation to be Fully Standalone",
+      "description": "Ensure Docker implementation doesn't require Task Master and works independently by creating conditional installation and proper build arguments.",
+      "details": "1. Add INCLUDE_TASKMASTER build argument to Dockerfile.multi-stage\n2. Create conditional Task Master installation logic in Dockerfile\n3. Update docker-entrypoint.sh to handle missing Task Master gracefully\n4. Create build script that supports --with-taskmaster flag\n5. Build and publish separate Docker images (with and without Task Master)\n6. Update Docker image selection logic in DockerAgentManager",
+      "testStrategy": "1. Build Docker image without Task Master and verify it works\n2. Build Docker image with Task Master and verify Task Master is available\n3. Test agent creation with both image variants\n4. Verify entrypoint script handles both scenarios properly",
+      "priority": "high",
+      "dependencies": [41],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 43,
+      "title": "Create Task Master Integration Service",
+      "description": "Decouple Task Master integration by creating a plugin-like TaskMasterIntegrationService that handles all Task Master operations as optional functionality.",
+      "details": "1. Create packages/cli/src/services/TaskMasterIntegrationService.ts\n2. Move all Task Master logic from DockerAgentManager to integration service\n3. Implement feature detection to check if Task Master is available\n4. Add fallback behaviors when Task Master is not available\n5. Create interface for Task Master operations with null object pattern\n6. Update agent creation flow to work without Task Master",
+      "testStrategy": "1. Test service initialization with and without Task Master\n2. Verify fallback behaviors work correctly\n3. Test agent creation without Task Master integration\n4. Ensure existing Task Master functionality still works when enabled",
+      "priority": "high",
+      "dependencies": [41, 42],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 44,
+      "title": "Update Configuration System for Optional Task Master",
+      "description": "Add proper configuration options for Task Master as an optional feature with auto-install capabilities and separate configuration management.",
+      "details": "1. Add TASKMASTER_AUTO_INSTALL configuration option to MagentsConfig interface\n2. Update default configurations to have Task Master disabled by default\n3. Create separate Task Master configuration file structure (.taskmaster.config.json)\n4. Update ConfigManager to handle Task Master settings separately\n5. Add configuration migration for existing users\n6. Update mode configurations to reflect Task Master as optional",
+      "testStrategy": "1. Verify new configuration options are properly loaded\n2. Test configuration migration from old to new format\n3. Verify Task Master settings can be toggled independently\n4. Test auto-install functionality when enabled",
+      "priority": "medium",
+      "dependencies": [43],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 45,
+      "title": "Add CLI Commands and Flags for Task Master Control",
+      "description": "Create new CLI commands and flags to properly handle Task Master as an optional integration with explicit enable/disable controls.",
+      "details": "1. Add --no-taskmaster flag to create command\n2. Add --with-taskmaster flag for explicit enablement\n3. Create 'magents taskmaster' subcommand with enable/disable/status/install actions\n4. Update help text to show Docker as default and Task Master as optional\n5. Remove any remaining tmux-specific command options\n6. Add interactive prompts for Task Master when not installed",
+      "testStrategy": "1. Test create command with --no-taskmaster flag\n2. Test create command with --with-taskmaster flag\n3. Verify taskmaster subcommand works for all actions\n4. Test help text displays correct information\n5. Verify interactive prompts work correctly",
+      "priority": "medium",
+      "dependencies": [43, 44],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 46,
+      "title": "Update Mode System for Task Master as Optional",
+      "description": "Ensure complexity modes properly reflect Task Master as an optional feature that can be enabled or disabled independently of mode selection.",
+      "details": "1. Update simple mode to clearly exclude Task Master by default\n2. Make Task Master opt-in for standard mode instead of automatic\n3. Update mode switching logic to preserve Task Master preference\n4. Update mode documentation and help text\n5. Add mode upgrade prompts that mention Task Master as optional\n6. Create clear separation between mode features and Task Master integration",
+      "testStrategy": "1. Test mode switching preserves Task Master settings\n2. Verify simple mode works without Task Master\n3. Test standard mode with Task Master disabled\n4. Verify upgrade prompts correctly describe Task Master as optional",
+      "priority": "medium",
+      "dependencies": [44, 45],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 47,
+      "title": "Update Web UI for Optional Task Master",
+      "description": "Modify the web interface components to properly handle Task Master as an optional integration with appropriate UI indicators and controls.",
+      "details": "1. Update AgentCreationWizard to show Task Master as optional toggle\n2. Add Task Master toggle in AdvancedConfigurationStep component\n3. Update PreviewCreateStep to handle agents without Task Master\n4. Add Task Master status indicator in agent cards\n5. Update API calls to check Task Master availability before operations\n6. Add UI messaging when Task Master operations are unavailable",
+      "testStrategy": "1. Test agent creation wizard with Task Master disabled\n2. Verify Task Master toggle works in advanced configuration\n3. Test preview step shows correct information\n4. Verify agent cards display Task Master status\n5. Test API calls handle missing Task Master gracefully",
+      "priority": "medium",
+      "dependencies": [43, 45],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 48,
+      "title": "Create Migration Tools for tmux to Docker",
+      "description": "Develop migration scripts and tools to help users transition from deprecated tmux-based agents to Docker agents seamlessly.",
+      "details": "1. Create migration script to convert tmux agents to Docker agents\n2. Add 'magents migrate' command to CLI\n3. Create backup mechanism for tmux session data\n4. Build migration status tracking and reporting\n5. Add rollback capability in case of migration issues\n6. Create migration guide documentation",
+      "testStrategy": "1. Test migration script with various tmux agent configurations\n2. Verify backup and restore functionality\n3. Test migration command with edge cases\n4. Verify rollback works correctly\n5. Test migration status reporting",
+      "priority": "medium",
+      "dependencies": [41, 42],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 49,
+      "title": "Update Documentation for Docker-First Approach",
+      "description": "Comprehensive documentation updates to reflect Docker as the primary method and Task Master as an optional integration.",
+      "details": "1. Update README to emphasize Docker usage and remove tmux references\n2. Create Docker-specific usage guide with examples\n3. Write Task Master integration guide as optional feature\n4. Create troubleshooting guide for common Docker issues\n5. Update API documentation to reflect changes\n6. Add migration guide from tmux to Docker",
+      "testStrategy": "1. Review all documentation for accuracy\n2. Test all code examples in documentation\n3. Verify links and references are correct\n4. Get user feedback on documentation clarity\n5. Test troubleshooting steps work correctly",
+      "priority": "low",
+      "dependencies": [41, 42, 43, 44, 45, 46, 47, 48],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 50,
+      "title": "Testing and Validation Suite",
+      "description": "Create comprehensive test suite to ensure all Docker-only and no-Task Master scenarios work correctly across the platform.",
+      "details": "1. Create unit tests for Docker-only agent operations\n2. Create integration tests for agents without Task Master\n3. Update existing tests to use Docker instead of tmux\n4. Add tests for Task Master toggle functionality\n5. Create performance tests comparing Docker agents\n6. Add end-to-end tests for complete workflows",
+      "testStrategy": "1. Run all tests in CI/CD pipeline\n2. Verify test coverage meets requirements\n3. Test on multiple platforms (Linux, macOS, Windows)\n4. Performance benchmarks meet expectations\n5. All edge cases are covered",
+      "priority": "high",
+      "dependencies": [41, 42, 43, 44, 45, 46, 47],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 51,
+      "title": "Update Backend Services for Optional Task Master",
+      "description": "Modify backend services to handle Task Master as an optional feature with proper availability checks and fallback responses.",
+      "details": "1. Update taskMasterIntegration service to check availability\n2. Add feature flags for Task Master operations\n3. Update WebSocket messages to include Task Master status\n4. Create fallback responses when Task Master unavailable\n5. Update project discovery to work without Task Master\n6. Add Task Master availability endpoint",
+      "testStrategy": "1. Test backend services with Task Master disabled\n2. Verify WebSocket messages include correct status\n3. Test fallback responses work correctly\n4. Verify project discovery works without Task Master\n5. Test availability endpoint returns correct status",
+      "priority": "medium",
+      "dependencies": [43, 44],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 52,
+      "title": "Error Handling and User Experience Improvements",
+      "description": "Enhance error messages and user guidance for Docker requirements and optional Task Master integration.",
+      "details": "1. Add clear error messages when Docker is not available\n2. Create helpful messages when Task Master is disabled but required\n3. Add setup guides for Docker installation on different platforms\n4. Improve error recovery mechanisms\n5. Add diagnostic commands for troubleshooting\n6. Create user-friendly onboarding for new users",
+      "testStrategy": "1. Test error messages in various failure scenarios\n2. Verify setup guides are accurate for each platform\n3. Test diagnostic commands provide useful information\n4. Verify error recovery works correctly\n5. Test onboarding flow for new users",
+      "priority": "low",
+      "dependencies": [41, 42, 43, 44, 45],
+      "status": "pending",
+      "subtasks": []
+    }
+  ]
+}
