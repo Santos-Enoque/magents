@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { TaskMasterTask } from '@magents/shared';
+import { TaskMasterTask, Project } from '@magents/shared';
 import { apiService } from '../services/api';
 import { StatusIndicator } from './StatusIndicator';
 import { TaskCreationWizard } from './TaskCreationWizard';
+import { ProjectSelector } from './ProjectSelector';
 import { ChevronRight, Search, Filter, RefreshCw, AlertCircle, Plus } from 'lucide-react';
 
 interface TaskBrowserProps {
-  projectPath: string;
+  projectPath?: string; // Make optional as we'll use project selector
   onTaskSelect?: (task: TaskMasterTask) => void;
 }
 
@@ -93,7 +94,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onSelect, isSelected }) => {
   );
 };
 
-export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath, onTaskSelect }) => {
+export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath: initialProjectPath, onTaskSelect }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [tasks, setTasks] = useState<TaskMasterTask[]>([]);
   const [filteredTasks, setFilteredTasks] = useState<TaskMasterTask[]>([]);
@@ -101,6 +102,15 @@ export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath, onTaskSel
   const [error, setError] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<TaskMasterTask | null>(null);
   const [showCreateWizard, setShowCreateWizard] = useState(false);
+  
+  // Project selection state
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(
+    searchParams.get('projectId') || undefined
+  );
+  
+  // Derive effective project path from selected project or initial prop
+  const effectiveProjectPath = selectedProject?.path || initialProjectPath;
   
   // Initialize state from URL params
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
@@ -117,7 +127,7 @@ export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath, onTaskSel
     const newParams = new URLSearchParams(searchParams);
     
     Object.entries(updates).forEach(([key, value]) => {
-      if (value === '' || (key !== 'search' && value === 'all')) {
+      if (value === '' || (key !== 'search' && key !== 'projectId' && value === 'all')) {
         newParams.delete(key);
       } else {
         newParams.set(key, value);
@@ -127,15 +137,36 @@ export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath, onTaskSel
     setSearchParams(newParams, { replace: true });
   }, [searchParams, setSearchParams]);
 
+  // Handle project selection
+  const handleProjectSelect = useCallback((project: Project | null) => {
+    setSelectedProject(project);
+    setSelectedProjectId(project?.id);
+    
+    // Update URL params
+    updateUrlParams({ projectId: project?.id || '' });
+    
+    // Store in localStorage for persistence
+    if (project) {
+      localStorage.setItem('magents-selected-project', project.id);
+    } else {
+      localStorage.removeItem('magents-selected-project');
+    }
+  }, [updateUrlParams]);
+
   // Fetch tasks
   const fetchTasks = useCallback(async () => {
-    if (!projectPath) return;
+    if (!effectiveProjectPath) {
+      setTasks([]);
+      setFilteredTasks([]);
+      setLoading(false);
+      return;
+    }
     
     setLoading(true);
     setError(null);
     
     try {
-      const tasksData = await apiService.getTaskMasterTasks(projectPath);
+      const tasksData = await apiService.getTaskMasterTasks(effectiveProjectPath);
       setTasks(tasksData);
       setFilteredTasks(tasksData);
     } catch (err) {
@@ -145,11 +176,20 @@ export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath, onTaskSel
     } finally {
       setLoading(false);
     }
-  }, [projectPath]);
+  }, [effectiveProjectPath]);
 
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
+
+  // Restore selected project from localStorage on mount
+  useEffect(() => {
+    const savedProjectId = localStorage.getItem('magents-selected-project');
+    if (savedProjectId && !selectedProjectId) {
+      setSelectedProjectId(savedProjectId);
+      updateUrlParams({ projectId: savedProjectId });
+    }
+  }, []); // Only run on mount
 
   // Filter and sort tasks
   useEffect(() => {
@@ -252,7 +292,9 @@ export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath, onTaskSel
       // Cmd/Ctrl + N: New task
       if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
         e.preventDefault();
-        setShowCreateWizard(true);
+        if (effectiveProjectPath) {
+          setShowCreateWizard(true);
+        }
       }
 
       // Number keys 1-5: Quick status filters
@@ -284,7 +326,41 @@ export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath, onTaskSel
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [fetchTasks, updateUrlParams]);
+  }, [fetchTasks, updateUrlParams, effectiveProjectPath]);
+
+  // Show project selection prompt when no project is selected
+  if (!effectiveProjectPath && !loading) {
+    return (
+      <div className="h-full flex flex-col bg-background">
+        {/* Header */}
+        <div className="p-4 border-b border-border bg-background-card">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-4">
+              <h2 className="text-lg font-semibold text-foreground">TaskMaster Tasks</h2>
+              {/* Project Selector */}
+              <div className="min-w-0 flex-1 max-w-xs">
+                <ProjectSelector
+                  selectedProjectId={selectedProjectId}
+                  onProjectSelect={handleProjectSelect}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* No project selected message */}
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <AlertCircle className="w-12 h-12 text-foreground-tertiary mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-foreground mb-2">No Project Selected</h3>
+            <p className="text-foreground-secondary mb-4 max-w-md">
+              Please select a project from the dropdown above to view and manage its TaskMaster tasks.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -315,12 +391,26 @@ export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath, onTaskSel
       {/* Header */}
       <div className="p-4 border-b border-border bg-background-card">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground">TaskMaster Tasks</h2>
+          <div className="flex items-center space-x-4">
+            <h2 className="text-lg font-semibold text-foreground">TaskMaster Tasks</h2>
+            {/* Project Selector */}
+            <div className="min-w-0 flex-1 max-w-xs">
+              <ProjectSelector
+                selectedProjectId={selectedProjectId}
+                onProjectSelect={handleProjectSelect}
+              />
+            </div>
+          </div>
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setShowCreateWizard(true)}
-              className="px-3 py-1.5 bg-brand text-white rounded-md hover:bg-brand-hover transition-colors flex items-center space-x-2 text-sm"
-              title="Create new task (⌘N)"
+              disabled={!effectiveProjectPath}
+              className={`px-3 py-1.5 rounded-md transition-colors flex items-center space-x-2 text-sm ${
+                effectiveProjectPath 
+                  ? 'bg-brand text-white hover:bg-brand-hover' 
+                  : 'bg-foreground-tertiary/20 text-foreground-tertiary cursor-not-allowed'
+              }`}
+              title={effectiveProjectPath ? "Create new task (⌘N)" : "Select a project first"}
             >
               <Plus className="w-4 h-4" />
               <span>New Task</span>
@@ -488,9 +578,9 @@ export const TaskBrowser: React.FC<TaskBrowserProps> = ({ projectPath, onTaskSel
       </div>
 
       {/* Task Creation Wizard */}
-      {showCreateWizard && (
+      {showCreateWizard && effectiveProjectPath && (
         <TaskCreationWizard
-          projectPath={projectPath}
+          projectPath={effectiveProjectPath}
           onClose={() => setShowCreateWizard(false)}
           onTaskCreated={handleTaskCreated}
           existingTasks={tasks}
