@@ -1,6 +1,5 @@
 import { Command } from 'commander';
-import { JsonToSqliteMigration } from '@magents/shared/database/migrations/JsonToSqliteMigration';
-import { Logger } from '@magents/shared/utils/logger';
+import { JsonToSqliteMigration, Logger } from '@magents/shared';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 
@@ -53,7 +52,8 @@ export function createMigrateCommand(): Command {
         }
       } catch (error) {
         logger.error('Migration failed:', error);
-        console.error(chalk.red('\n✗ Migration failed:'), error.message);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error(chalk.red('\n✗ Migration failed:'), errorMessage);
         console.error(chalk.gray('\nPlease check the logs for more details.'));
         process.exit(1);
       }

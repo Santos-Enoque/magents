@@ -61,6 +61,20 @@ export * from './utils';
 // Export database functionality
 export * from './database';
 
+// Export migration infrastructure with renamed exports to avoid conflicts
+export {
+  IMigration,
+  MigrationConfig,
+  MigrationError,
+  BackupInfo,
+  MigrationProgress,
+  MigrationProgressCallback
+} from './database/migrations';
+export { MigrationResult as DatabaseMigrationResult } from './database/migrations';
+export { BaseMigration } from './database/migrations/BaseMigration';
+export { JsonToSqliteMigration } from './database/migrations/JsonToSqliteMigration';
+export { Logger } from './utils/logger';
+
 // Export services
 export * from './services/DataSync';
 export * from './services/AtomicOperations';

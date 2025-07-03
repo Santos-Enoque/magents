@@ -24,7 +24,7 @@
         "test:ci": "npm run test:ci --workspaces --if-present",
         "test:e2e": "tsx tests/e2e/run-tests.ts",
         "test:e2e:core": "tsx tests/e2e/run-tests.ts --category core",
-        "test:e2e:performance": "tsx tests/e2e/run-tests.ts --category performance", 
+        "test:e2e:performance": "tsx tests/e2e/run-tests.ts --category performance",
         "test:e2e:integration": "tsx tests/e2e/run-tests.ts --category integration",
         "test:e2e:errors": "tsx tests/e2e/run-tests.ts --category error-handling",
         "test:e2e:wizard": "tsx tests/e2e/run-tests.ts --suite wizard",
@@ -77,6 +77,7 @@
         "linux"
     ],
     "dependencies": {
+        "better-sqlite3": "^12.2.0",
         "boxen": "^8.0.1",
         "chalk": "^5.3.0",
         "cli-spinners": "^3.2.0",
