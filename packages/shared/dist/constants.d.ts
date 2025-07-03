@@ -12,7 +12,7 @@ export declare const PORT_RANGES: {
     readonly DEFAULT_START: 3000;
     readonly DEFAULT_END: 3999;
     readonly BACKEND_DEFAULT: 3001;
-    readonly FRONTEND_DEFAULT: 3000;
+    readonly FRONTEND_DEFAULT: 4000;
     readonly WS_DEFAULT: 3002;
 };
 export declare const AGENT_STATUS: {

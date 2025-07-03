@@ -4,6 +4,19 @@ export * from './types';
 // Export error handling system
 export * from './errors';
 
+// Export auto-configuration system
+export { 
+  autoConfig, 
+  AutoConfigService,
+  PROJECT_PATTERNS,
+  ProjectDetectionResult,
+  MCPServerInfo,
+  AutoConfigContext,
+  EncryptedValue,
+  ConfigLevel,
+  PORT_RANGES as AUTO_CONFIG_PORT_RANGES
+} from './autoconfig';
+
 // Export unified types with explicit naming to avoid conflicts
 export {
   UnifiedAgentData,
@@ -69,6 +82,9 @@ export { MigrationResult as ConfigMigrationResult } from './migration/ConfigMigr
 
 // Export constants
 export * from './constants';
+
+// Export core GUI-CLI integration functionality
+export * from './core';
 
 // Re-export specific commonly used items for convenience
 export {

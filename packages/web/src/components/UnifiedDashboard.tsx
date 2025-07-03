@@ -1,25 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Agent as SharedAgent, Project as SharedProject } from '@magents/shared';
 import { apiService } from '../services/api';
+import { mockApiService } from '../services/mockApi';
+import { useDemoMode } from './DemoModeProvider';
 import { AgentCard } from './AgentCard';
 import { QuickActions } from './QuickActions';
 import { CollapsibleSection } from './CollapsibleSection';
 import { StatusOverview } from './StatusOverview';
-import { useWebSocket } from '../hooks/useWebSocket';
+import { InlineTerminal } from './InlineTerminal';
+import { KeyboardShortcutsModal } from './KeyboardShortcutsModal';
+import { CommandPalette } from './CommandPalette';
+import { useRealTime } from './RealTimeProvider';
+import { useKeyboardShortcuts, createCommonShortcuts } from '../hooks/useKeyboardShortcuts';
 import {
   ChevronDownIcon,
   ChevronUpIcon,
   Squares2X2Icon,
   ListBulletIcon,
+  QuestionMarkCircleIcon,
 } from '@heroicons/react/24/outline';
 
+// Create local interfaces that are compatible with the dashboard components
 interface Agent {
   id: string;
   status: 'RUNNING' | 'STOPPED' | 'ERROR';
   branch: string;
   project?: string;
-  lastActivity?: string;
-  createdAt?: string;
+  lastActivity?: string | Date;
+  createdAt?: string | Date;
   worktreePath?: string;
   tmuxSession?: string;
   dockerContainer?: string;
@@ -32,7 +41,7 @@ interface Project {
   name: string;
   path: string;
   description?: string;
-  agents?: Agent[];
+  agents?: Agent[] | string[];
 }
 
 export const UnifiedDashboard: React.FC = () => {
@@ -43,44 +52,50 @@ export const UnifiedDashboard: React.FC = () => {
     projects: false,
     advanced: false,
   });
+  const [showShortcutsModal, setShowShortcutsModal] = useState(false);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
 
-  // WebSocket for real-time updates
-  const { socket, isConnected } = useWebSocket();
+  // Demo mode detection
+  const { isDemoMode } = useDemoMode();
+  
+  // Select appropriate API service
+  const currentApiService = isDemoMode ? mockApiService : apiService;
+
+  // Real-time updates via WebSocket or SSE
+  const { isConnected, connectionType, lastUpdate, setRefreshCallback } = useRealTime();
+
+  // Helper function to transform shared types to local types
+  const transformAgent = (agent: SharedAgent): Agent => ({
+    ...agent,
+    lastActivity: agent.updatedAt || agent.createdAt,
+    cpuUsage: Math.random() * 100, // Mock data - replace with real data
+    memoryUsage: Math.random() * 100, // Mock data - replace with real data
+  });
+
+  const transformProject = (project: SharedProject): Project => ({
+    ...project,
+  });
 
   // Data queries
-  const { data: agents = [], isLoading: agentsLoading, refetch: refetchAgents } = useQuery({
-    queryKey: ['agents'],
-    queryFn: () => apiService.getAgents(),
-    refetchInterval: 5000, // Refetch every 5 seconds
+  const { data: sharedAgents = [], isLoading: agentsLoading, refetch: refetchAgents } = useQuery({
+    queryKey: ['agents', isDemoMode ? 'demo' : 'real'],
+    queryFn: () => currentApiService.getAgents(),
+    refetchInterval: isDemoMode ? 10000 : 5000, // Slower refresh in demo mode
   });
 
-  const { data: projects = [], isLoading: projectsLoading } = useQuery({
-    queryKey: ['projects'],
-    queryFn: () => apiService.getProjects(),
+  const { data: sharedProjects = [], isLoading: projectsLoading } = useQuery({
+    queryKey: ['projects', isDemoMode ? 'demo' : 'real'],
+    queryFn: () => currentApiService.getProjects(),
   });
 
-  // Real-time updates via WebSocket
+  // Transform the data
+  const agents = sharedAgents.map(transformAgent);
+  const projects = sharedProjects.map(transformProject);
+
+  // Set up real-time updates callback
   useEffect(() => {
-    if (socket) {
-      socket.on('agent-status-changed', () => {
-        refetchAgents();
-      });
-
-      socket.on('agent-created', () => {
-        refetchAgents();
-      });
-
-      socket.on('agent-deleted', () => {
-        refetchAgents();
-      });
-
-      return () => {
-        socket.off('agent-status-changed');
-        socket.off('agent-created');
-        socket.off('agent-deleted');
-      };
-    }
-  }, [socket, refetchAgents]);
+    setRefreshCallback(refetchAgents);
+  }, [refetchAgents, setRefreshCallback]);
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({
@@ -93,14 +108,68 @@ export const UnifiedDashboard: React.FC = () => {
   const stoppedAgents = agents.filter(agent => agent.status === 'STOPPED');
   const errorAgents = agents.filter(agent => agent.status === 'ERROR');
 
+  // Keyboard shortcuts
+  const handleCreateAgent = () => {
+    window.open('/agents/new', '_blank');
+  };
+
+  const handleOpenTerminal = () => {
+    window.dispatchEvent(new CustomEvent('open-terminal', { 
+      detail: { agentId: undefined } 
+    }));
+  };
+
+  const handleStartAllAgents = () => {
+    stoppedAgents.forEach(agent => {
+      window.dispatchEvent(new CustomEvent('start-agent', { 
+        detail: { agentId: agent.id } 
+      }));
+    });
+  };
+
+  const handleStopAllAgents = () => {
+    runningAgents.forEach(agent => {
+      window.dispatchEvent(new CustomEvent('stop-agent', { 
+        detail: { agentId: agent.id } 
+      }));
+    });
+  };
+
+  const shortcuts = createCommonShortcuts({
+    createAgent: handleCreateAgent,
+    openTerminal: handleOpenTerminal,
+    refreshData: refetchAgents,
+    toggleViewMode: () => setViewMode(prev => prev === 'grid' ? 'list' : 'grid'),
+    showHelp: () => setShowShortcutsModal(true),
+    closeModal: () => {
+      setShowShortcutsModal(false);
+      setShowCommandPalette(false);
+    },
+    startAllAgents: handleStartAllAgents,
+    stopAllAgents: handleStopAllAgents,
+    openCommandPalette: () => setShowCommandPalette(true),
+  });
+
+  useKeyboardShortcuts(shortcuts);
+
   return (
     <div className="space-y-6 p-6 bg-background min-h-screen">
       {/* Header with Quick Actions */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Development Dashboard</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-foreground">Development Dashboard</h1>
+            {isDemoMode && (
+              <span className="px-3 py-1 bg-purple-600 text-white text-sm font-medium rounded-full">
+                Demo Mode
+              </span>
+            )}
+          </div>
           <p className="text-foreground-secondary mt-1">
-            Manage your multi-agent development workflow
+            {isDemoMode 
+              ? 'Explore the dashboard with sample data'
+              : 'Manage your multi-agent development workflow'
+            }
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -108,8 +177,13 @@ export const UnifiedDashboard: React.FC = () => {
           <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-status-success' : 'bg-status-error'}`} />
             <span className="text-sm text-foreground-secondary">
-              {isConnected ? 'Connected' : 'Disconnected'}
+              {isConnected ? `Connected (${connectionType.toUpperCase()})` : 'Disconnected'}
             </span>
+            {lastUpdate && (
+              <span className="text-xs text-foreground-tertiary">
+                • Last update: {new Date(lastUpdate).toLocaleTimeString()}
+              </span>
+            )}
           </div>
           
           {/* View Mode Toggle */}
@@ -121,6 +195,7 @@ export const UnifiedDashboard: React.FC = () => {
                   ? 'bg-background-card text-foreground' 
                   : 'text-foreground-secondary hover:text-foreground'
               }`}
+              title="Grid view (Ctrl+V)"
             >
               <Squares2X2Icon className="w-4 h-4" />
             </button>
@@ -131,10 +206,20 @@ export const UnifiedDashboard: React.FC = () => {
                   ? 'bg-background-card text-foreground' 
                   : 'text-foreground-secondary hover:text-foreground'
               }`}
+              title="List view (Ctrl+V)"
             >
               <ListBulletIcon className="w-4 h-4" />
             </button>
           </div>
+
+          {/* Keyboard Shortcuts Help */}
+          <button
+            onClick={() => setShowShortcutsModal(true)}
+            className="p-2 text-foreground-secondary hover:text-foreground hover:bg-background-tertiary rounded-lg transition-colors"
+            title="Keyboard shortcuts (Ctrl+?)"
+          >
+            <QuestionMarkCircleIcon className="w-5 h-5" />
+          </button>
         </div>
       </div>
 
@@ -153,11 +238,8 @@ export const UnifiedDashboard: React.FC = () => {
 
       {/* Quick Actions */}
       <QuickActions 
-        onAgentCreate={() => {/* Navigate to create */}}
-        onAgentStart={(id) => {/* Start agent */}}
-        onAgentStop={(id) => {/* Stop agent */}}
-        onTaskAssign={() => {/* Navigate to task assignment */}}
         agents={agents}
+        onRefresh={refetchAgents}
       />
 
       {/* Agents Section */}
@@ -184,6 +266,7 @@ export const UnifiedDashboard: React.FC = () => {
                     key={agent.id} 
                     agent={agent} 
                     viewMode={viewMode}
+                    onRefresh={refetchAgents}
                   />
                 ))}
               </div>
@@ -207,6 +290,7 @@ export const UnifiedDashboard: React.FC = () => {
                     key={agent.id} 
                     agent={agent} 
                     viewMode={viewMode}
+                    onRefresh={refetchAgents}
                   />
                 ))}
               </div>
@@ -230,6 +314,7 @@ export const UnifiedDashboard: React.FC = () => {
                     key={agent.id} 
                     agent={agent} 
                     viewMode={viewMode}
+                    onRefresh={refetchAgents}
                   />
                 ))}
               </div>
@@ -311,6 +396,28 @@ export const UnifiedDashboard: React.FC = () => {
           </div>
         </div>
       </CollapsibleSection>
+
+      {/* Inline Terminal */}
+      <InlineTerminal />
+
+      {/* Keyboard Shortcuts Modal */}
+      <KeyboardShortcutsModal
+        isOpen={showShortcutsModal}
+        onClose={() => setShowShortcutsModal(false)}
+        shortcuts={shortcuts}
+      />
+
+      {/* Command Palette */}
+      <CommandPalette
+        isOpen={showCommandPalette}
+        onClose={() => setShowCommandPalette(false)}
+        onCommandExecuted={(result) => {
+          console.log('Command executed:', result);
+          if (result.success) {
+            refetchAgents(); // Refresh data on successful command
+          }
+        }}
+      />
     </div>
   );
 };

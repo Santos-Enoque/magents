@@ -51,13 +51,13 @@ export declare const UnifiedAgentDataSchema: z.ZodObject<{
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
     metadata: z.ZodDefault<z.ZodRecord<z.ZodString, z.ZodAny>>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     name: string;
-    projectId: string;
     status: "RUNNING" | "STOPPED" | "ERROR" | "CREATED" | "STARTING" | "STOPPING" | "SUSPENDED";
+    id: string;
+    projectId: string;
     createdAt: Date;
     updatedAt: Date;
-    mode: "tmux" | "docker" | "hybrid";
+    mode: "docker" | "tmux" | "hybrid";
     branch: string;
     worktreePath: string;
     dockerPorts: string[];
@@ -81,13 +81,13 @@ export declare const UnifiedAgentDataSchema: z.ZodObject<{
     } | undefined;
     description?: string | undefined;
 }, {
-    id: string;
     name: string;
-    projectId: string;
     status: "RUNNING" | "STOPPED" | "ERROR" | "CREATED" | "STARTING" | "STOPPING" | "SUSPENDED";
+    id: string;
+    projectId: string;
     createdAt: Date;
     updatedAt: Date;
-    mode: "tmux" | "docker" | "hybrid";
+    mode: "docker" | "tmux" | "hybrid";
     branch: string;
     worktreePath: string;
     lastAccessedAt?: Date | undefined;
@@ -171,12 +171,12 @@ export declare const UnifiedProjectDataSchema: z.ZodObject<{
         frameworks: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
         detectedAt: z.ZodDate;
     }, "strip", z.ZodTypeAny, {
-        type: "unknown" | "node" | "python" | "java" | "go" | "rust";
+        type: "unknown" | "python" | "rust" | "go" | "java" | "node";
         frameworks: string[];
         detectedAt: Date;
         packageManager?: string | undefined;
     }, {
-        type: "unknown" | "node" | "python" | "java" | "go" | "rust";
+        type: "unknown" | "python" | "rust" | "go" | "java" | "node";
         detectedAt: Date;
         packageManager?: string | undefined;
         frameworks?: string[] | undefined;
@@ -185,10 +185,10 @@ export declare const UnifiedProjectDataSchema: z.ZodObject<{
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
     metadata: z.ZodDefault<z.ZodRecord<z.ZodString, z.ZodAny>>;
 }, "strip", z.ZodTypeAny, {
-    path: string;
-    id: string;
     name: string;
+    path: string;
     status: "ERROR" | "ACTIVE" | "INACTIVE" | "ARCHIVED";
+    id: string;
     createdAt: Date;
     updatedAt: Date;
     tags: string[];
@@ -215,16 +215,16 @@ export declare const UnifiedProjectDataSchema: z.ZodObject<{
         lastSync?: Date | undefined;
     } | undefined;
     projectType?: {
-        type: "unknown" | "node" | "python" | "java" | "go" | "rust";
+        type: "unknown" | "python" | "rust" | "go" | "java" | "node";
         frameworks: string[];
         detectedAt: Date;
         packageManager?: string | undefined;
     } | undefined;
 }, {
-    path: string;
-    id: string;
     name: string;
+    path: string;
     status: "ERROR" | "ACTIVE" | "INACTIVE" | "ARCHIVED";
+    id: string;
     createdAt: Date;
     updatedAt: Date;
     lastAccessedAt?: Date | undefined;
@@ -251,7 +251,7 @@ export declare const UnifiedProjectDataSchema: z.ZodObject<{
         lastSync?: Date | undefined;
     } | undefined;
     projectType?: {
-        type: "unknown" | "node" | "python" | "java" | "go" | "rust";
+        type: "unknown" | "python" | "rust" | "go" | "java" | "node";
         detectedAt: Date;
         packageManager?: string | undefined;
         frameworks?: string[] | undefined;
@@ -302,9 +302,9 @@ export declare const UnifiedTaskDataSchema: z.ZodObject<{
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
     metadata: z.ZodDefault<z.ZodRecord<z.ZodString, z.ZodAny>>;
 }, "strip", z.ZodTypeAny, {
+    status: "pending" | "in-progress" | "done" | "blocked" | "cancelled" | "assigned" | "deferred";
     id: string;
     projectId: string;
-    status: "pending" | "in-progress" | "done" | "blocked" | "cancelled" | "assigned" | "deferred";
     createdAt: Date;
     updatedAt: Date;
     tags: string[];
@@ -331,9 +331,9 @@ export declare const UnifiedTaskDataSchema: z.ZodObject<{
     estimatedEffort?: number | undefined;
     actualEffort?: number | undefined;
 }, {
+    status: "pending" | "in-progress" | "done" | "blocked" | "cancelled" | "assigned" | "deferred";
     id: string;
     projectId: string;
-    status: "pending" | "in-progress" | "done" | "blocked" | "cancelled" | "assigned" | "deferred";
     createdAt: Date;
     updatedAt: Date;
     title: string;
@@ -392,9 +392,9 @@ export declare const UnifiedConfigDataSchema: z.ZodObject<{
             memory?: string | undefined;
             cpu?: number | undefined;
         };
+        network?: string | undefined;
         enabled?: boolean | undefined;
         defaultImage?: string | undefined;
-        network?: string | undefined;
     }>>;
     ports: z.ZodDefault<z.ZodObject<{
         defaultRange: z.ZodObject<{
@@ -464,7 +464,7 @@ export declare const UnifiedConfigDataSchema: z.ZodObject<{
     updatedAt: Date;
     autoAccept: boolean;
     maxAgents: number;
-    defaultMode: "tmux" | "docker" | "hybrid";
+    defaultMode: "docker" | "tmux" | "hybrid";
     ports: {
         defaultRange: {
             start: number;
@@ -492,13 +492,13 @@ export declare const UnifiedConfigDataSchema: z.ZodObject<{
             memory?: string | undefined;
             cpu?: number | undefined;
         };
+        network?: string | undefined;
         enabled?: boolean | undefined;
         defaultImage?: string | undefined;
-        network?: string | undefined;
     } | undefined;
     autoAccept?: boolean | undefined;
     maxAgents?: number | undefined;
-    defaultMode?: "tmux" | "docker" | "hybrid" | undefined;
+    defaultMode?: "docker" | "tmux" | "hybrid" | undefined;
     ports?: {
         defaultRange: {
             start?: number | undefined;
@@ -533,24 +533,24 @@ export declare const UnifiedEventDataSchema: z.ZodObject<{
     userId: z.ZodOptional<z.ZodString>;
     metadata: z.ZodDefault<z.ZodRecord<z.ZodString, z.ZodAny>>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    type: "agent.created" | "agent.started" | "agent.stopped" | "agent.error" | "agent.updated" | "agent.deleted" | "project.created" | "project.updated" | "project.deleted" | "task.created" | "task.assigned" | "task.completed" | "task.updated" | "task.deleted" | "config.updated" | "sync.started" | "sync.completed" | "sync.error";
-    metadata: Record<string, any>;
     timestamp: Date;
+    type: "agent.created" | "agent.started" | "agent.stopped" | "agent.error" | "agent.updated" | "agent.deleted" | "project.created" | "project.updated" | "project.deleted" | "task.created" | "task.assigned" | "task.completed" | "task.updated" | "task.deleted" | "config.updated" | "sync.started" | "sync.completed" | "sync.error";
+    id: string;
+    metadata: Record<string, any>;
     entityId: string;
     entityType: "agent" | "project" | "task" | "config";
     data: Record<string, any>;
-    source: "cli" | "gui" | "api" | "system" | "external";
+    source: "system" | "api" | "cli" | "gui" | "external";
     projectId?: string | undefined;
     previousData?: Record<string, any> | undefined;
     userId?: string | undefined;
 }, {
-    id: string;
-    type: "agent.created" | "agent.started" | "agent.stopped" | "agent.error" | "agent.updated" | "agent.deleted" | "project.created" | "project.updated" | "project.deleted" | "task.created" | "task.assigned" | "task.completed" | "task.updated" | "task.deleted" | "config.updated" | "sync.started" | "sync.completed" | "sync.error";
     timestamp: Date;
+    type: "agent.created" | "agent.started" | "agent.stopped" | "agent.error" | "agent.updated" | "agent.deleted" | "project.created" | "project.updated" | "project.deleted" | "task.created" | "task.assigned" | "task.completed" | "task.updated" | "task.deleted" | "config.updated" | "sync.started" | "sync.completed" | "sync.error";
+    id: string;
     entityId: string;
     entityType: "agent" | "project" | "task" | "config";
-    source: "cli" | "gui" | "api" | "system" | "external";
+    source: "system" | "api" | "cli" | "gui" | "external";
     projectId?: string | undefined;
     metadata?: Record<string, any> | undefined;
     data?: Record<string, any> | undefined;

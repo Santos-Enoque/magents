@@ -14,11 +14,18 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PACKAGE_INFO = exports.VERSION = exports.API_ENDPOINTS = exports.WS_EVENTS = exports.ERROR_CODES = exports.TASK_PRIORITY = exports.TASK_STATUS = exports.PROJECT_STATUS = exports.AGENT_STATUS = exports.DEFAULT_CONFIG = exports.getRelativeTime = exports.formatDate = exports.deepMerge = exports.retry = exports.delay = exports.createErrorResult = exports.createSuccessResult = exports.sanitizeBranchName = exports.generateAgentId = exports.generateId = exports.runMigration = exports.createMigrator = exports.ConfigMigrator = exports.EventTypeSchema = exports.EntityIdSchema = exports.DATABASE_VERSION = exports.MIGRATIONS = exports.INDEXES = exports.TABLE_SCHEMAS = exports.isUnifiedEventData = exports.isUnifiedConfigData = exports.isUnifiedTaskData = exports.isUnifiedProjectData = exports.isUnifiedAgentData = exports.UnifiedDataValidator = exports.UnifiedEventDataSchema = exports.UnifiedConfigDataSchema = exports.UnifiedTaskDataSchema = exports.UnifiedProjectDataSchema = exports.UnifiedAgentDataSchema = void 0;
+exports.PACKAGE_INFO = exports.VERSION = exports.API_ENDPOINTS = exports.WS_EVENTS = exports.ERROR_CODES = exports.TASK_PRIORITY = exports.TASK_STATUS = exports.PROJECT_STATUS = exports.AGENT_STATUS = exports.DEFAULT_CONFIG = exports.getRelativeTime = exports.formatDate = exports.deepMerge = exports.retry = exports.delay = exports.createErrorResult = exports.createSuccessResult = exports.sanitizeBranchName = exports.generateAgentId = exports.generateId = exports.runMigration = exports.createMigrator = exports.ConfigMigrator = exports.EventTypeSchema = exports.EntityIdSchema = exports.DATABASE_VERSION = exports.MIGRATIONS = exports.INDEXES = exports.TABLE_SCHEMAS = exports.isUnifiedEventData = exports.isUnifiedConfigData = exports.isUnifiedTaskData = exports.isUnifiedProjectData = exports.isUnifiedAgentData = exports.UnifiedDataValidator = exports.UnifiedEventDataSchema = exports.UnifiedConfigDataSchema = exports.UnifiedTaskDataSchema = exports.UnifiedProjectDataSchema = exports.UnifiedAgentDataSchema = exports.AUTO_CONFIG_PORT_RANGES = exports.ConfigLevel = exports.PROJECT_PATTERNS = exports.AutoConfigService = exports.autoConfig = void 0;
 // Export all types
 __exportStar(require("./types"), exports);
 // Export error handling system
 __exportStar(require("./errors"), exports);
+// Export auto-configuration system
+var autoconfig_1 = require("./autoconfig");
+Object.defineProperty(exports, "autoConfig", { enumerable: true, get: function () { return autoconfig_1.autoConfig; } });
+Object.defineProperty(exports, "AutoConfigService", { enumerable: true, get: function () { return autoconfig_1.AutoConfigService; } });
+Object.defineProperty(exports, "PROJECT_PATTERNS", { enumerable: true, get: function () { return autoconfig_1.PROJECT_PATTERNS; } });
+Object.defineProperty(exports, "ConfigLevel", { enumerable: true, get: function () { return autoconfig_1.ConfigLevel; } });
+Object.defineProperty(exports, "AUTO_CONFIG_PORT_RANGES", { enumerable: true, get: function () { return autoconfig_1.PORT_RANGES; } });
 // Export unified types with explicit naming to avoid conflicts
 var unified_1 = require("./types/unified");
 Object.defineProperty(exports, "UnifiedAgentDataSchema", { enumerable: true, get: function () { return unified_1.UnifiedAgentDataSchema; } });
@@ -52,6 +59,8 @@ Object.defineProperty(exports, "createMigrator", { enumerable: true, get: functi
 Object.defineProperty(exports, "runMigration", { enumerable: true, get: function () { return ConfigMigrator_1.runMigration; } });
 // Export constants
 __exportStar(require("./constants"), exports);
+// Export core GUI-CLI integration functionality
+__exportStar(require("./core"), exports);
 // Re-export specific commonly used items for convenience
 var utils_1 = require("./utils");
 Object.defineProperty(exports, "generateId", { enumerable: true, get: function () { return utils_1.generateId; } });

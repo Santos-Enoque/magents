@@ -1,4 +1,5 @@
 import React from 'react';
+import { LiveMetrics } from './LiveMetrics';
 import {
   ServerIcon,
   FolderIcon,
@@ -19,7 +20,7 @@ interface Agent {
 interface Project {
   id: string;
   name: string;
-  agents?: Agent[];
+  agents?: Agent[] | string[];
 }
 
 interface StatusOverviewProps {
@@ -62,102 +63,63 @@ export const StatusOverview: React.FC<StatusOverviewProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-      {/* Active Agents */}
-      <div className="bg-background-tertiary rounded-lg p-4 border border-border">
-        <div className="flex items-center justify-between mb-3">
-          <div className="p-2 rounded-lg bg-status-success/20">
-            <ServerIcon className="h-5 w-5 text-status-success" />
+    <div className="space-y-6">
+      {/* Agent and Project Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Active Agents */}
+        <div className="bg-background-tertiary rounded-lg p-4 border border-border">
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2 rounded-lg bg-status-success/20">
+              <ServerIcon className="h-5 w-5 text-status-success" />
+            </div>
+            <div className={`w-2 h-2 rounded-full ${runningAgents.length > 0 ? 'bg-status-success' : 'bg-foreground-tertiary'}`} />
           </div>
-          <div className={`w-2 h-2 rounded-full ${runningAgents.length > 0 ? 'bg-status-success' : 'bg-foreground-tertiary'}`} />
+          <p className="text-sm font-medium text-foreground-secondary mb-1">Active Agents</p>
+          <p className="text-2xl font-bold text-foreground">
+            {isLoading ? '...' : runningAgents.length}
+          </p>
+          <p className="text-xs text-foreground-tertiary mt-1">
+            {agents.length} total
+          </p>
         </div>
-        <p className="text-sm font-medium text-foreground-secondary mb-1">Active Agents</p>
-        <p className="text-2xl font-bold text-foreground">
-          {isLoading ? '...' : runningAgents.length}
-        </p>
-        <p className="text-xs text-foreground-tertiary mt-1">
-          {agents.length} total
-        </p>
+
+        {/* Total Projects */}
+        <div className="bg-background-tertiary rounded-lg p-4 border border-border">
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2 rounded-lg bg-brand/20">
+              <FolderIcon className="h-5 w-5 text-brand" />
+            </div>
+          </div>
+          <p className="text-sm font-medium text-foreground-secondary mb-1">Projects</p>
+          <p className="text-2xl font-bold text-foreground">
+            {isLoading ? '...' : projects.length}
+          </p>
+          <p className="text-xs text-foreground-tertiary mt-1">
+            Active workspaces
+          </p>
+        </div>
+
+        {/* System Health */}
+        <div className="bg-background-tertiary rounded-lg p-4 border border-border">
+          <div className="flex items-center justify-between mb-3">
+            <div className={`p-2 rounded-lg ${getHealthColor(systemHealth)}/20`}>
+              {getHealthIcon(systemHealth)}
+            </div>
+          </div>
+          <p className="text-sm font-medium text-foreground-secondary mb-1">System Health</p>
+          <p className={`text-2xl font-bold ${getHealthColor(systemHealth)}`}>
+            {isLoading ? '...' : `${systemHealth}%`}
+          </p>
+          <p className="text-xs text-foreground-tertiary mt-1">
+            {errorAgents.length} error{errorAgents.length !== 1 ? 's' : ''}
+          </p>
+        </div>
       </div>
 
-      {/* Total Projects */}
-      <div className="bg-background-tertiary rounded-lg p-4 border border-border">
-        <div className="flex items-center justify-between mb-3">
-          <div className="p-2 rounded-lg bg-brand/20">
-            <FolderIcon className="h-5 w-5 text-brand" />
-          </div>
-        </div>
-        <p className="text-sm font-medium text-foreground-secondary mb-1">Projects</p>
-        <p className="text-2xl font-bold text-foreground">
-          {isLoading ? '...' : projects.length}
-        </p>
-        <p className="text-xs text-foreground-tertiary mt-1">
-          Active workspaces
-        </p>
-      </div>
-
-      {/* System Health */}
-      <div className="bg-background-tertiary rounded-lg p-4 border border-border">
-        <div className="flex items-center justify-between mb-3">
-          <div className={`p-2 rounded-lg ${getHealthColor(systemHealth)}/20`}>
-            {getHealthIcon(systemHealth)}
-          </div>
-        </div>
-        <p className="text-sm font-medium text-foreground-secondary mb-1">System Health</p>
-        <p className={`text-2xl font-bold ${getHealthColor(systemHealth)}`}>
-          {isLoading ? '...' : `${systemHealth}%`}
-        </p>
-        <p className="text-xs text-foreground-tertiary mt-1">
-          {errorAgents.length} error{errorAgents.length !== 1 ? 's' : ''}
-        </p>
-      </div>
-
-      {/* Average CPU Usage */}
-      <div className="bg-background-tertiary rounded-lg p-4 border border-border">
-        <div className="flex items-center justify-between mb-3">
-          <div className="p-2 rounded-lg bg-blue-500/20">
-            <CpuChipIcon className="h-5 w-5 text-blue-500" />
-          </div>
-        </div>
-        <p className="text-sm font-medium text-foreground-secondary mb-1">Avg CPU</p>
-        <p className="text-2xl font-bold text-foreground">
-          {isLoading ? '...' : `${avgCpuUsage.toFixed(1)}%`}
-        </p>
-        <p className="text-xs text-foreground-tertiary mt-1">
-          Running agents
-        </p>
-      </div>
-
-      {/* Average Memory Usage */}
-      <div className="bg-background-tertiary rounded-lg p-4 border border-border">
-        <div className="flex items-center justify-between mb-3">
-          <div className="p-2 rounded-lg bg-purple-500/20">
-            <ChartBarIcon className="h-5 w-5 text-purple-500" />
-          </div>
-        </div>
-        <p className="text-sm font-medium text-foreground-secondary mb-1">Avg Memory</p>
-        <p className="text-2xl font-bold text-foreground">
-          {isLoading ? '...' : `${avgMemoryUsage.toFixed(1)}%`}
-        </p>
-        <p className="text-xs text-foreground-tertiary mt-1">
-          Running agents
-        </p>
-      </div>
-
-      {/* Uptime / Status */}
-      <div className="bg-background-tertiary rounded-lg p-4 border border-border">
-        <div className="flex items-center justify-between mb-3">
-          <div className="p-2 rounded-lg bg-green-500/20">
-            <ClockIcon className="h-5 w-5 text-green-500" />
-          </div>
-        </div>
-        <p className="text-sm font-medium text-foreground-secondary mb-1">Uptime</p>
-        <p className="text-2xl font-bold text-foreground">
-          {isLoading ? '...' : '24h'}
-        </p>
-        <p className="text-xs text-foreground-tertiary mt-1">
-          System online
-        </p>
+      {/* Live System Metrics via SSE */}
+      <div>
+        <h3 className="text-sm font-medium text-foreground-secondary mb-3">Live System Metrics</h3>
+        <LiveMetrics />
       </div>
     </div>
   );

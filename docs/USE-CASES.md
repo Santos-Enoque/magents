@@ -31,7 +31,7 @@ magents create feature/frontend web-app \
   --task "Build Next.js marketplace frontend" \
   --env "PORT=3000" \
   --env "API_URL=http://localhost:3002" \
-  --service "web=http://localhost:3000"
+  --service "web=http://localhost:5000"
 
 magents create feature/payments payment-service \
   --task "Integrate Stripe payment processing" \

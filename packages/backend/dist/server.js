@@ -24,7 +24,7 @@ const server = (0, http_1.createServer)(app);
 exports.server = server;
 const io = new socket_io_1.Server(server, {
     cors: {
-        origin: process.env.FRONTEND_URL || "http://localhost:3000",
+        origin: process.env.FRONTEND_URL || "http://localhost:4000",
         methods: ["GET", "POST"]
     }
 });

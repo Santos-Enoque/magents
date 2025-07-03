@@ -1,4 +1,8 @@
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
+import { apiService } from '../services/api';
+import { mockApiService } from '../services/mockApi';
+import { useDemoMode } from './DemoModeProvider';
 import {
   PlayIcon,
   StopIcon,
@@ -16,8 +20,8 @@ interface Agent {
   status: 'RUNNING' | 'STOPPED' | 'ERROR';
   branch: string;
   project?: string;
-  lastActivity?: string;
-  createdAt?: string;
+  lastActivity?: string | Date;
+  createdAt?: string | Date;
   worktreePath?: string;
   tmuxSession?: string;
   dockerContainer?: string;
@@ -28,21 +32,79 @@ interface Agent {
 interface AgentCardProps {
   agent: Agent;
   viewMode: 'grid' | 'list';
-  onStart?: (id: string) => void;
-  onStop?: (id: string) => void;
-  onAttach?: (id: string) => void;
-  onDelete?: (id: string) => void;
+  onRefresh?: () => void;
 }
 
 export const AgentCard: React.FC<AgentCardProps> = ({
   agent,
   viewMode,
-  onStart,
-  onStop,
-  onAttach,
-  onDelete,
+  onRefresh,
 }) => {
   const [showActions, setShowActions] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Use appropriate API service
+  const { isDemoMode } = useDemoMode();
+  const currentApiService = isDemoMode ? mockApiService : apiService;
+
+  const handleStart = async () => {
+    setIsLoading(true);
+    try {
+      await currentApiService.startAgent(agent.id);
+      toast.success(`Agent ${agent.id} started successfully`);
+      onRefresh?.();
+    } catch (error) {
+      toast.error(`Failed to start agent ${agent.id}`);
+      console.error('Failed to start agent:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStop = async () => {
+    setIsLoading(true);
+    try {
+      await currentApiService.stopAgent(agent.id);
+      toast.success(`Agent ${agent.id} stopped successfully`);
+      onRefresh?.();
+    } catch (error) {
+      toast.error(`Failed to stop agent ${agent.id}`);
+      console.error('Failed to stop agent:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAttach = () => {
+    // Open inline terminal or navigate to terminal page
+    if (window.innerWidth >= 1024) {
+      // On larger screens, trigger inline terminal
+      window.dispatchEvent(new CustomEvent('open-terminal', { 
+        detail: { agentId: agent.id } 
+      }));
+    } else {
+      // On smaller screens, navigate to dedicated terminal page
+      window.open(`/terminal?agent=${agent.id}`, '_blank');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm(`Are you sure you want to delete agent ${agent.id}?`)) {
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      await currentApiService.deleteAgent(agent.id);
+      toast.success(`Agent ${agent.id} deleted successfully`);
+      onRefresh?.();
+    } catch (error) {
+      toast.error(`Failed to delete agent ${agent.id}`);
+      console.error('Failed to delete agent:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -66,9 +128,9 @@ export const AgentCard: React.FC<AgentCardProps> = ({
     }
   };
 
-  const formatTime = (timestamp?: string) => {
+  const formatTime = (timestamp?: string | Date) => {
     if (!timestamp) return 'Never';
-    const date = new Date(timestamp);
+    const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     
@@ -118,27 +180,30 @@ export const AgentCard: React.FC<AgentCardProps> = ({
             {agent.status === 'RUNNING' ? (
               <>
                 <button
-                  onClick={() => onAttach?.(agent.id)}
+                  onClick={handleAttach}
                   className="p-2 text-brand hover:bg-brand/20 rounded-lg transition-colors"
                   title="Attach to agent"
+                  disabled={isLoading}
                 >
                   <ComputerDesktopIcon className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => onStop?.(agent.id)}
-                  className="p-2 text-foreground-secondary hover:bg-background-tertiary rounded-lg transition-colors"
+                  onClick={handleStop}
+                  className="p-2 text-foreground-secondary hover:bg-background-tertiary rounded-lg transition-colors disabled:opacity-50"
                   title="Stop agent"
+                  disabled={isLoading}
                 >
-                  <StopIcon className="w-4 h-4" />
+                  <StopIcon className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
                 </button>
               </>
             ) : (
               <button
-                onClick={() => onStart?.(agent.id)}
-                className="p-2 text-status-success hover:bg-status-success/20 rounded-lg transition-colors"
+                onClick={handleStart}
+                className="p-2 text-status-success hover:bg-status-success/20 rounded-lg transition-colors disabled:opacity-50"
                 title="Start agent"
+                disabled={isLoading}
               >
-                <PlayIcon className="w-4 h-4" />
+                <PlayIcon className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
               </button>
             )}
             
@@ -163,10 +228,11 @@ export const AgentCard: React.FC<AgentCardProps> = ({
                   </button>
                   <hr className="my-1 border-border" />
                   <button 
-                    onClick={() => onDelete?.(agent.id)}
-                    className="w-full px-3 py-2 text-left text-sm text-status-error hover:bg-status-error/20 transition-colors"
+                    onClick={handleDelete}
+                    className="w-full px-3 py-2 text-left text-sm text-status-error hover:bg-status-error/20 transition-colors disabled:opacity-50"
+                    disabled={isLoading}
                   >
-                    Delete Agent
+                    {isLoading ? 'Deleting...' : 'Delete Agent'}
                   </button>
                 </div>
               )}
@@ -210,10 +276,11 @@ export const AgentCard: React.FC<AgentCardProps> = ({
               </button>
               <hr className="my-1 border-border" />
               <button 
-                onClick={() => onDelete?.(agent.id)}
-                className="w-full px-3 py-2 text-left text-sm text-status-error hover:bg-status-error/20 transition-colors"
+                onClick={handleDelete}
+                className="w-full px-3 py-2 text-left text-sm text-status-error hover:bg-status-error/20 transition-colors disabled:opacity-50"
+                disabled={isLoading}
               >
-                Delete Agent
+                {isLoading ? 'Deleting...' : 'Delete Agent'}
               </button>
             </div>
           )}
@@ -259,25 +326,28 @@ export const AgentCard: React.FC<AgentCardProps> = ({
         {agent.status === 'RUNNING' ? (
           <>
             <button
-              onClick={() => onAttach?.(agent.id)}
-              className="flex-1 px-3 py-2 bg-brand text-white rounded-lg hover:bg-brand-hover transition-colors text-sm font-medium"
+              onClick={handleAttach}
+              className="flex-1 px-3 py-2 bg-brand text-white rounded-lg hover:bg-brand-hover transition-colors text-sm font-medium disabled:opacity-50"
+              disabled={isLoading}
             >
               Attach
             </button>
             <button
-              onClick={() => onStop?.(agent.id)}
-              className="px-3 py-2 bg-background-tertiary text-foreground-secondary rounded-lg hover:bg-background-card-hover transition-colors text-sm"
+              onClick={handleStop}
+              className="px-3 py-2 bg-background-tertiary text-foreground-secondary rounded-lg hover:bg-background-card-hover transition-colors text-sm disabled:opacity-50"
+              disabled={isLoading}
             >
-              Stop
+              {isLoading ? 'Stopping...' : 'Stop'}
             </button>
           </>
         ) : (
           <button
-            onClick={() => onStart?.(agent.id)}
-            className="w-full px-3 py-2 bg-status-success text-white rounded-lg hover:bg-status-success/80 transition-colors text-sm font-medium flex items-center justify-center gap-2"
+            onClick={handleStart}
+            className="w-full px-3 py-2 bg-status-success text-white rounded-lg hover:bg-status-success/80 transition-colors text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50"
+            disabled={isLoading}
           >
-            <PlayIcon className="w-4 h-4" />
-            Start
+            <PlayIcon className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            {isLoading ? 'Starting...' : 'Start'}
           </button>
         )}
       </div>

@@ -4,7 +4,7 @@ export interface TaskMasterTask {
     title: string;
     description?: string;
     status: 'pending' | 'in-progress' | 'done' | 'blocked' | 'cancelled';
-    priority?: 'low' | 'medium' | 'high';
+    priority: 'low' | 'medium' | 'high';
     dependencies?: string[];
     details?: string;
     testStrategy?: string;
