@@ -38,26 +38,26 @@ const TaskCard: React.FC<{ task: TaskMasterTask; index: number; isDragging?: boo
   const getStatusIcon = () => {
     switch (task.status) {
       case 'done':
-        return <CheckCircle className="w-4 h-4 text-green-600" />;
+        return <CheckCircle className="w-4 h-4 text-status-success" />;
       case 'in-progress':
-        return <Clock className="w-4 h-4 text-blue-600" />;
+        return <Clock className="w-4 h-4 text-brand" />;
       case 'blocked':
-        return <AlertCircle className="w-4 h-4 text-red-600" />;
+        return <AlertCircle className="w-4 h-4 text-status-error" />;
       default:
-        return <Circle className="w-4 h-4 text-yellow-600" />;
+        return <Circle className="w-4 h-4 text-status-warning" />;
     }
   };
 
   const getPriorityColor = () => {
     switch (task.priority) {
       case 'high':
-        return 'border-red-300 bg-red-50';
+        return 'border-red-700 bg-red-900/20';
       case 'medium':
-        return 'border-yellow-300 bg-yellow-50';
+        return 'border-yellow-700 bg-yellow-900/20';
       case 'low':
-        return 'border-green-300 bg-green-50';
+        return 'border-green-700 bg-green-900/20';
       default:
-        return 'border-gray-300 bg-gray-50';
+        return 'border-border bg-background-secondary';
     }
   };
 
@@ -79,25 +79,25 @@ const TaskCard: React.FC<{ task: TaskMasterTask; index: number; isDragging?: boo
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-2">
               {getStatusIcon()}
-              <span className="text-sm font-mono text-gray-600">#{task.id}</span>
+              <span className="text-sm font-mono text-foreground-secondary">#{task.id}</span>
               <span className={`text-xs px-2 py-1 rounded-full font-medium ${
                 task.priority === 'high' 
-                  ? 'bg-red-200 text-red-800' 
+                  ? 'bg-red-900 text-red-200' 
                   : task.priority === 'medium'
-                  ? 'bg-yellow-200 text-yellow-800'
-                  : 'bg-green-200 text-green-800'
+                  ? 'bg-yellow-900 text-yellow-200'
+                  : 'bg-green-900 text-green-200'
               }`}>
                 {task.priority}
               </span>
             </div>
-            <ChevronRight className="w-4 h-4 text-gray-400" />
+            <ChevronRight className="w-4 h-4 text-foreground-tertiary" />
           </div>
-          <h4 className="mt-2 font-medium text-gray-900">{task.title}</h4>
+          <h4 className="mt-2 font-medium text-foreground">{task.title}</h4>
           {task.description && (
-            <p className="mt-1 text-sm text-gray-600 line-clamp-2">{task.description}</p>
+            <p className="mt-1 text-sm text-foreground-secondary line-clamp-2">{task.description}</p>
           )}
           {task.dependencies && task.dependencies.length > 0 && (
-            <div className="mt-2 text-xs text-gray-500">
+            <div className="mt-2 text-xs text-foreground-tertiary">
               Dependencies: {task.dependencies.join(', ')}
             </div>
           )}
@@ -116,12 +116,12 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, droppableId, isDraggingOver 
           {...provided.droppableProps}
           className={`h-full p-4 rounded-lg transition-colors ${
             isDraggingOver || snapshot.isDraggingOver
-              ? 'bg-blue-50 border-2 border-blue-300 border-dashed'
-              : 'bg-gray-50'
+              ? 'bg-brand/10 border-2 border-brand border-dashed'
+              : 'bg-background-secondary'
           }`}
         >
           {tasks.length === 0 ? (
-            <p className="text-center text-gray-500 py-8">
+            <p className="text-center text-foreground-tertiary py-8">
               {droppableId === 'unassigned' 
                 ? 'No unassigned tasks' 
                 : 'Drop tasks here to assign'}
@@ -142,30 +142,30 @@ const AgentPanel: React.FC<AgentPanelProps> = ({ agent, assignedTasks, isDraggin
   const getStatusColor = () => {
     switch (agent.status) {
       case 'RUNNING':
-        return 'text-green-600 bg-green-100';
+        return 'text-status-success bg-status-success/20';
       case 'STOPPED':
-        return 'text-red-600 bg-red-100';
+        return 'text-status-error bg-status-error/20';
       case 'ERROR':
-        return 'text-red-600 bg-red-100';
+        return 'text-status-error bg-status-error/20';
       default:
-        return 'text-gray-600 bg-gray-100';
+        return 'text-foreground-secondary bg-background-tertiary';
     }
   };
 
   return (
-    <div className="border rounded-lg overflow-hidden h-full flex flex-col">
-      <div className="p-4 bg-white border-b">
+    <div className="border border-border rounded-lg overflow-hidden h-full flex flex-col">
+      <div className="p-4 bg-background-card border-b border-border">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <User className="w-5 h-5 text-gray-600" />
-            <h3 className="font-semibold text-gray-900">{agent.id}</h3>
+            <User className="w-5 h-5 text-foreground-secondary" />
+            <h3 className="font-semibold text-foreground">{agent.id}</h3>
           </div>
           <span className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusColor()}`}>
             {agent.status}
           </span>
         </div>
-        <p className="mt-1 text-sm text-gray-600">{agent.branch}</p>
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-sm text-foreground-secondary">{agent.branch}</p>
+        <p className="mt-1 text-xs text-foreground-tertiary">
           {assignedTasks.length} task{assignedTasks.length !== 1 ? 's' : ''} assigned
         </p>
       </div>
@@ -316,26 +316,26 @@ export const TaskAssignment: React.FC<TaskAssignmentProps> = ({ projectPath }) =
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <RefreshCw className="w-8 h-8 text-gray-400 animate-spin" />
+        <RefreshCw className="w-8 h-8 text-foreground-tertiary animate-spin" />
       </div>
     );
   }
 
   return (
     <div className="h-full flex flex-col">
-      <div className="p-4 border-b bg-white">
+      <div className="p-4 border-b border-border bg-background-card">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Task Assignment</h2>
+          <h2 className="text-lg font-semibold text-foreground">Task Assignment</h2>
           <button
             onClick={fetchData}
             disabled={refreshing}
-            className="p-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors disabled:opacity-50"
+            className="p-2 text-foreground-secondary hover:bg-background-secondary rounded-md transition-colors disabled:opacity-50"
             title="Refresh"
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
           </button>
         </div>
-        <p className="mt-1 text-sm text-gray-600">
+        <p className="mt-1 text-sm text-foreground-secondary">
           Drag tasks from the left panel to assign them to agents
         </p>
       </div>
@@ -343,10 +343,10 @@ export const TaskAssignment: React.FC<TaskAssignmentProps> = ({ projectPath }) =
       <div className="flex-1 flex overflow-hidden">
         <DragDropContext onDragEnd={handleDragEnd}>
           {/* Unassigned Tasks */}
-          <div className="w-1/3 border-r flex flex-col">
-            <div className="p-4 bg-gray-50 border-b">
-              <h3 className="font-medium text-gray-900">Unassigned Tasks</h3>
-              <p className="text-sm text-gray-600 mt-1">
+          <div className="w-1/3 border-r border-border flex flex-col">
+            <div className="p-4 bg-background-secondary border-b border-border">
+              <h3 className="font-medium text-foreground">Unassigned Tasks</h3>
+              <p className="text-sm text-foreground-secondary mt-1">
                 {getUnassignedTasks().length} tasks available
               </p>
             </div>
@@ -358,9 +358,9 @@ export const TaskAssignment: React.FC<TaskAssignmentProps> = ({ projectPath }) =
           {/* Agents */}
           <div className="flex-1 p-4">
             {agents.length === 0 ? (
-              <div className="flex items-center justify-center h-full text-gray-500">
+              <div className="flex items-center justify-center h-full text-foreground-tertiary">
                 <div className="text-center">
-                  <User className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <User className="w-12 h-12 mx-auto mb-4 text-foreground-tertiary" />
                   <p>No running agents available</p>
                   <p className="text-sm mt-2">Start an agent to assign tasks</p>
                 </div>

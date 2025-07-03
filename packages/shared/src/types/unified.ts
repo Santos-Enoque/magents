@@ -24,7 +24,7 @@ export type EntityId = z.infer<typeof EntityIdSchema>;
 export const AgentStatusSchema = z.enum(['CREATED', 'STARTING', 'RUNNING', 'STOPPING', 'STOPPED', 'ERROR', 'SUSPENDED']);
 export type AgentStatus = z.infer<typeof AgentStatusSchema>;
 
-export const AgentModeSchema = z.enum(['tmux', 'docker', 'hybrid']);
+export const AgentModeSchema = z.enum(['docker', 'hybrid']);
 export type AgentMode = z.infer<typeof AgentModeSchema>;
 
 export const UnifiedAgentDataSchema = z.object({

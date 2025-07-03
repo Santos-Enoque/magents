@@ -1,0 +1,18 @@
+# Task ID: 38
+# Title: Implement auto-updater and distribution pipeline
+# Status: pending
+# Dependencies: 31
+# Priority: medium
+# Description: Setup auto-update system with delta updates and create distribution packages for all platforms
+# Details:
+1. Configure electron-updater with update server
+2. Implement update UI with progress indication
+3. Setup code signing for macOS (Developer ID)
+4. Configure notarization workflow
+5. Create DMG installer with custom background
+6. Setup MSI installer for Windows
+7. Create AppImage for Linux
+8. Configure GitHub Actions for multi-platform builds
+
+# Test Strategy:
+Test update flow end-to-end, verify signatures, test installers on each platform, check auto-update works

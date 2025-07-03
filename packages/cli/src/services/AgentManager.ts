@@ -3,19 +3,21 @@ import * as path from 'path';
 import { Agent, AgentRecord, CreateAgentOptions, CommandResult, AgentStatus, CreateAgentResult, CleanupResult } from '../types';
 import { ConfigManager } from '../config/ConfigManager';
 import { GitService } from './GitService';
-import { TmuxService } from './TmuxService';
 import { ui } from '../ui/UIService';
 
+/**
+ * @deprecated AgentManager is deprecated in favor of DockerAgentManager.
+ * This class uses tmux sessions which have been removed in favor of Docker-only approach.
+ * Use DockerAgentManager for all new implementations.
+ */
 export class AgentManager {
   private configManager: ConfigManager;
   private gitService: GitService;
-  private tmuxService: TmuxService;
   private activeAgentsFile: string;
 
   constructor() {
     this.configManager = ConfigManager.getInstance();
     this.gitService = new GitService();
-    this.tmuxService = new TmuxService();
     this.activeAgentsFile = path.join(this.configManager.getAgentsDir(), 'active_agents');
   }
 
@@ -59,8 +61,7 @@ export class AgentManager {
       // Copy Claude configuration and CLAUDE.md
       await this.copyClaudeConfiguration(repoRoot, worktreePath);
 
-      // Create tmux session
-      await this.tmuxService.createSession(tmuxSession, worktreePath, config);
+      // Note: Docker container will handle session creation internally
 
       // Record the agent
       this.recordAgent({
@@ -89,8 +90,8 @@ export class AgentManager {
     }
   }
 
-  public getTmuxService(): TmuxService {
-    return this.tmuxService;
+  public getTmuxService(): any {
+    throw new Error('TmuxService has been removed. Use DockerAgentManager instead.');
   }
 
   public getActiveAgents(): Agent[] {
@@ -106,7 +107,8 @@ export class AgentManager {
       if (trimmed) {
         const [id, branch, worktreePath, tmuxSession] = trimmed.split(':');
         if (id && branch && worktreePath && tmuxSession) {
-          const status = this.tmuxService.sessionExists(tmuxSession) ? 'RUNNING' : 'STOPPED';
+          // Since tmux is now internal to Docker, we can't check session status from host
+          const status = 'UNKNOWN';
           agents.push({
             id,
             branch,
@@ -134,14 +136,11 @@ export class AgentManager {
     }
 
     try {
-      if (!this.tmuxService.sessionExists(agent.tmuxSession)) {
-        // Recreate session if it doesn't exist
-        const config = this.configManager.loadConfig();
-        await this.tmuxService.createSession(agent.tmuxSession, agent.worktreePath, config);
-      }
-
-      // Attach to session (this will replace current process)
-      await this.tmuxService.attachToSession(agent.tmuxSession);
+      // Tmux sessions are now managed inside Docker containers
+      return {
+        success: false,
+        message: `AgentManager is deprecated. Use 'magents shell ${agentId}' to connect to Docker container instead.`
+      };
 
       return {
         success: true,
@@ -168,10 +167,8 @@ export class AgentManager {
     }
 
     try {
-      // Kill tmux session
-      if (this.tmuxService.sessionExists(agent.tmuxSession)) {
-        await this.tmuxService.killSession(agent.tmuxSession);
-      }
+      // Tmux sessions are now managed inside Docker containers
+      // This method is deprecated - use DockerAgentManager instead
 
       // Remove worktree if requested
       if (removeWorktree && fs.existsSync(agent.worktreePath)) {
@@ -209,10 +206,8 @@ export class AgentManager {
 
     for (const agent of agents) {
       try {
-        // Kill tmux session
-        if (this.tmuxService.sessionExists(agent.tmuxSession)) {
-          await this.tmuxService.killSession(agent.tmuxSession);
-        }
+        // Tmux sessions are now managed inside Docker containers
+        // This method is deprecated - use DockerAgentManager instead
 
         // Remove worktree if requested
         if (removeWorktrees && fs.existsSync(agent.worktreePath)) {

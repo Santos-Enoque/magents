@@ -243,7 +243,7 @@ class ModeManager {
                     'Task Master integration for project management',
                     'GitHub issue and PR creation',
                     'MCP server connections',
-                    'Docker and tmux modes',
+                    'Docker container support',
                     'Branch management automation'
                 ]);
                 UIService_1.ui.example('magents create feature --task 1.2 --create-issue');

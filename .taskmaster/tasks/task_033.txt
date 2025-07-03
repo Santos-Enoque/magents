@@ -1,0 +1,18 @@
+# Task ID: 33
+# Title: Update UI with new color palette and design system
+# Status: pending
+# Dependencies: 31
+# Priority: high
+# Description: Apply new dark theme color palette with improved visual hierarchy and macOS design language
+# Details:
+1. Create CSS variables for new color palette (#1A1B1E backgrounds, #339AF0 primary, etc.)
+2. Update all component styles to use new colors
+3. Implement elevation system with subtle shadows
+4. Add 8px/12px border radius system
+5. Update typography with proper text color hierarchy
+6. Create themed scrollbar styles
+7. Implement hover/active states with new colors
+8. Add transition animations for smooth interactions
+
+# Test Strategy:
+Visual regression testing, verify all components use new palette, check contrast ratios, test dark/light mode switching

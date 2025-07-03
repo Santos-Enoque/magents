@@ -15,6 +15,21 @@ export default defineConfig({
                 target: 'http://localhost:3001',
                 ws: true,
             },
+            '/socket.io': {
+                target: 'http://localhost:3001',
+                ws: true,
+                changeOrigin: true,
+            },
+            '/system-terminal': {
+                target: 'http://localhost:3001',
+                ws: true,
+                changeOrigin: true,
+            },
+            '/terminal': {
+                target: 'http://localhost:3001',
+                ws: true,
+                changeOrigin: true,
+            },
         },
     },
     resolve: {

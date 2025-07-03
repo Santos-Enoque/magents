@@ -166,7 +166,7 @@ export const Agents: React.FC = () => {
           </p>
         </div>
         <button
-          onClick={() => navigate('/agents/create')}
+          onClick={() => navigate('/agents/new')}
           className="px-4 py-2 bg-brand hover:bg-brand-hover text-white rounded-lg font-medium transition-colors flex items-center gap-2"
         >
           <PlusIcon className="h-4 w-4" />
@@ -273,7 +273,7 @@ export const Agents: React.FC = () => {
           </p>
           {!searchTerm && statusFilter === 'all' && projectFilter === 'all' && (
             <button
-              onClick={() => navigate('/agents/create')}
+              onClick={() => navigate('/agents/new')}
               className="px-4 py-2 bg-brand hover:bg-brand-hover text-white rounded-lg font-medium transition-colors flex items-center gap-2"
             >
               <PlusIcon className="h-4 w-4" />

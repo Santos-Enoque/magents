@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub Issues](https://img.shields.io/github/issues/Santos-Enoque/magents.svg)](https://github.com/Santos-Enoque/magents/issues)
 
-Magents is a powerful CLI tool for managing multiple Claude Code instances across different git branches, enabling parallel AI-assisted development with intelligent task management and Docker/tmux isolation.
+Magents is a powerful CLI tool for managing multiple Claude Code instances across different git branches, enabling parallel AI-assisted development with intelligent task management and Docker containerization.
 
 ## 🚀 Why Magents?
 
@@ -17,7 +17,7 @@ Magents enables you to run multiple Claude Code agents simultaneously, each work
 - **📋 Task Master Integration**: Automatic task assignment and tracking with AI-powered task management
 - **🔄 Instant Creation**: Smart defaults and minimal configuration - create agents in seconds
 - **🎯 Context Awareness**: Each agent knows its role, boundaries, and available resources
-- **🖥️ Dashboard View**: Monitor all agents in a unified tmux dashboard
+- **🖥️ Dashboard View**: Monitor all agents through web interface or terminal
 
 ## 📋 Table of Contents
 
@@ -51,11 +51,11 @@ magents/
 
 ### Core Components
 
-1. **Agent Manager**: Creates and manages Claude Code instances
-2. **Tmux Service**: Handles persistent tmux sessions for agents
-3. **Docker Service**: Manages containerized agents with volume sharing
-4. **Task Master Integration**: AI-powered task management and assignment
-5. **Configuration Service**: Manages settings and Claude authentication
+1. **Agent Manager**: Creates and manages Claude Code instances in Docker containers
+2. **Docker Service**: Manages containerized agents with persistent sessions
+3. **Task Master Integration**: AI-powered task management and assignment
+4. **Configuration Service**: Manages settings and Claude authentication
+5. **Web Dashboard**: Real-time monitoring and control interface
 
 ## 🛠️ Installation
 
@@ -63,9 +63,8 @@ magents/
 
 - Node.js 18+ and npm
 - Git 2.20+ (for worktree support)
-- tmux (for local mode)
-- Docker & docker-compose (for Docker mode)
-- Claude Code CLI installed globally
+- Docker & docker-compose
+- Claude Code CLI installed globally (optional, for Claude integration)
 
 ### Install from npm
 
@@ -91,8 +90,6 @@ magents init
 
 ## 🏃 Quick Start
 
-### Traditional Mode (tmux)
-
 ```bash
 # Create an agent for a new feature
 magents create auth-system
@@ -100,31 +97,16 @@ magents create auth-system
 # List active agents
 magents list
 
-# Attach to agent's session
+# Attach to agent's Docker container
 magents attach auth-system
 
 # Stop when done
 magents stop auth-system
 ```
 
-### Docker Mode (Recommended)
+## 🐳 Docker Architecture
 
-```bash
-# First-time setup: Build images and authenticate Claude
-cd packages/cli/docker
-./build-images.sh
-./setup-and-test-claude.sh
-
-# Create Docker-based agent
-magents create payment-api --docker
-
-# Attach to Docker agent
-magents attach payment-api
-```
-
-## 🐳 Docker Mode
-
-Docker mode provides complete isolation and is recommended for production use.
+All agents run in Docker containers with isolated environments and persistent sessions.
 
 ### Initial Setup (One-Time)
 
@@ -154,20 +136,20 @@ Docker mode provides complete isolation and is recommended for production use.
    export OPENAI_API_KEY="your-key"      # Optional fallback
    ```
 
-### Creating Docker Agents
+### Creating Agents
 
 ```bash
-# Basic Docker agent
-magents create feature-x --docker
+# Basic agent creation
+magents create feature-x
 
 # With specific task
-magents create api-refactor --docker --task 24.1
+magents create api-refactor --task 24.1
 
 # Advanced mode with full Task Master
-magents create complex-feature --docker --mode advanced
+magents create complex-feature --mode advanced
 
 # Preview without creating
-magents create test-agent --docker --dry-run
+magents create test-agent --dry-run
 ```
 
 ### Docker Architecture
@@ -233,8 +215,6 @@ magents create <name> [agent-id]
   --branch <branch>      # Git branch name
   --task <taskId>        # Task Master task ID
   --mode <mode>          # simple|standard|advanced
-  --docker               # Use Docker mode
-  --no-docker            # Force tmux mode
   --dry-run              # Preview only
   --interactive          # Interactive setup
 ```
@@ -297,7 +277,6 @@ Located at `~/.magents/config.json`:
 
 ```json
 {
-  "runtime": "docker",
   "dockerImage": "magents/agent:latest",
   "defaultMode": "standard",
   "apiKeys": {
@@ -339,7 +318,6 @@ DOCKER_ENABLED=true
 DOCKER_IMAGE=magents/agent:custom
 
 # Runtime Options
-MAGENTS_MODE=docker
 MAGENTS_DEBUG=true
 ```
 
@@ -414,8 +392,8 @@ docker logs magents-<agent-id>
 # Interactive debugging
 docker exec -it magents-<agent-id> bash
 
-# Check tmux sessions
-tmux ls | grep magents
+# Check container tmux sessions
+docker exec magents-<agent-id> tmux ls
 ```
 
 ## 🔧 Troubleshooting

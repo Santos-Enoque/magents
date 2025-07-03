@@ -16,6 +16,7 @@ export declare class DockerAgentManager {
     stopAgent(agentId: string, removeContainer?: boolean): Promise<CommandResult>;
     cleanupAllAgents(removeContainers?: boolean): Promise<CommandResult<CleanupResult>>;
     private buildDockerCommand;
+    private buildTmuxInitCommand;
     private getApiKeys;
     private setupSharedConfiguration;
     private copyDirectory;

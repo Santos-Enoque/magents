@@ -63,7 +63,8 @@ export const TerminalPage: React.FC = () => {
       {/* Terminal Content */}
       <div className="flex-1 p-6">
         <Terminal
-          agentId={agentId}
+          agentId={agentId || undefined} // Only connect to agent if specified
+          isSystemTerminal={!agentId} // Connect to system terminal if no agent specified
           isFullscreen={false}
           className="h-full"
         />

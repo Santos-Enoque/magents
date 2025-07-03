@@ -1,5 +1,10 @@
 import React from 'react';
-import { BellIcon, UserCircleIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { 
+  BellIcon, 
+  UserCircleIcon, 
+  MagnifyingGlassIcon,
+  Bars3Icon,
+} from '@heroicons/react/24/outline';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useLocation } from 'react-router-dom';
 
@@ -14,15 +19,34 @@ const pageNames: Record<string, string> = {
   '/terminal': 'Terminal',
 };
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+  onToggleSidebar: () => void;
+  isSidebarCollapsed: boolean;
+}
+
+export const Header: React.FC<HeaderProps> = ({ 
+  onToggleSidebar, 
+  isSidebarCollapsed 
+}) => {
   const { isConnected } = useWebSocket();
   const location = useLocation();
   const currentPage = pageNames[location.pathname] || 'Dashboard';
   
   return (
-    <header className="bg-background border-b border-border">
-      <div className="flex items-center justify-between px-6 py-4">
-        <div className="flex items-center flex-1">
+    <header className="bg-background/80 backdrop-blur-md border-b border-border/50">
+      <div className="flex items-center justify-between px-6 py-3">
+        <div className="flex items-center flex-1 space-x-4">
+          {/* Sidebar Toggle - only show when collapsed */}
+          {isSidebarCollapsed && (
+            <button
+              onClick={onToggleSidebar}
+              className="p-2 text-foreground-secondary hover:text-foreground hover:bg-background-tertiary rounded-lg transition-colors"
+              title="Expand sidebar"
+            >
+              <Bars3Icon className="w-5 h-5" />
+            </button>
+          )}
+          
           <div>
             <h2 className="text-xl font-semibold text-foreground">
               {currentPage}
@@ -39,7 +63,7 @@ export const Header: React.FC = () => {
             <input
               type="text"
               placeholder="Search..."
-              className="w-64 pl-10 pr-4 py-2 bg-background-tertiary border border-border rounded-lg text-sm text-foreground placeholder-foreground-tertiary focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+              className="w-64 pl-10 pr-4 py-2 bg-background-tertiary/80 border border-border/50 rounded-lg text-sm text-foreground placeholder-foreground-tertiary focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/30 focus:bg-background-tertiary transition-all duration-200"
             />
             <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-foreground-tertiary" />
           </div>

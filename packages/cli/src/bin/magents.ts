@@ -13,10 +13,8 @@ const program = new Command();
 const configManager = ConfigManager.getInstance();
 const config = configManager.loadConfig();
 
-// Use DockerAgentManager if Docker mode is enabled
-const agentManager: AgentManager | DockerAgentManager = config.DOCKER_ENABLED 
-  ? new DockerAgentManager() 
-  : new AgentManager();
+// Always use DockerAgentManager (tmux mode removed)
+const agentManager = new DockerAgentManager();
 
 // Helper function to parse Task Master output when --json is not supported
 function parseTaskMasterOutput(taskId: string, output: string): any {
@@ -537,9 +535,9 @@ if (process.argv.length === 2) {
   ui.command('magents work-issue <id>', 'Structured development workflow (PLAN→CREATE→TEST→DEPLOY)');
   ui.command('magents sync-taskmaster <id>', 'Sync Task Master config to agent');
   ui.command('magents doctor', 'Check system requirements');
-  ui.command('magents config --docker', 'Enable Docker mode');
+  ui.command('magents config', 'View and edit configuration');
   ui.divider();
-  ui.info(`Mode: ${config.DOCKER_ENABLED ? 'Docker containers' : 'tmux/git worktrees'}`);
+  ui.info('Runtime: Docker containers with isolated environments');
   ui.info('Run "magents --help" for detailed examples');
 }
 
@@ -554,8 +552,6 @@ program
   .option('--mode <mode>', 'Creation mode: simple, standard, or advanced', 'simple')
   .option('--dry-run', 'Show what would be created without creating')
   .option('--no-auto-accept', 'Disable automatic command acceptance in Claude Code')
-  .option('--docker', 'Force Docker mode for this agent')
-  .option('--no-docker', 'Force tmux mode for this agent')
   .option('--interactive', 'Use interactive mode for missing parameters')
   .action(async (name: string, agentId?: string, options?: { 
     branch?: string; 
@@ -607,7 +603,7 @@ program
       
       let creationConfig: any = {
         autoAccept: options?.autoAccept !== false, // Default to true for instant creation
-        useDocker: options?.docker !== undefined ? options.docker : config.DOCKER_ENABLED
+        useDocker: true // Always use Docker
       };
       
       switch (mode) {
@@ -776,7 +772,7 @@ program
         ui.command(`magents a 1`, 'Or use shorthand to attach');
         
         ui.divider('Agent Setup Complete');
-        ui.success(`✅ Mode: ${mode} (${creationConfig.useDocker ? 'Docker' : 'tmux'})`);
+        ui.success(`✅ Mode: ${mode} (Docker container)`);
         if (creationConfig.setupTaskMaster) {
           ui.success('✅ Task Master environment ready');
         }
@@ -824,7 +820,7 @@ program
 program
   .command('attach')
   .alias('a')
-  .description('Attach to an existing agent\'s tmux session')
+  .description('Attach to an existing agent\'s Docker container')
   .argument('<agent-id-or-number>', 'Agent ID or list position number (1, 2, etc.)')
   .option('--no-briefing', 'Skip showing task briefing before attaching')
   .action(async (agentIdOrNumber: string, options: { briefing?: boolean }) => {
@@ -1936,13 +1932,6 @@ program
       ui.error('Git: Not installed');
     }
     
-    // Check Tmux
-    try {
-      execSync('which tmux', { stdio: 'ignore' });
-      ui.success('Tmux: Installed');
-    } catch {
-      ui.warning('Tmux: Not installed (required for non-Docker agent sessions)');
-    }
     
     // Check Claude Code
     try {
@@ -2024,132 +2013,87 @@ program
     ui.command('task-master init && task-master parse-prd', 'Initialize if needed');
   });
 
-// Dashboard command - open all agents in split tmux view
+// Dashboard command - web interface
 program
   .command('dashboard')
   .alias('dash')
-  .description('Open all Claude agents in a split-screen tmux dashboard')
-  .option('-l, --layout <layout>', 'Layout type: grid, horizontal, vertical', 'grid')
-  .action(async (options: { layout?: string }) => {
-    const { execSync } = await import('child_process');
+  .description('Open web dashboard to monitor all agents')
+  .option('-p, --port <port>', 'Port for web dashboard', '3000')
+  .action(async (options: { port?: string }) => {
+    const { spawn } = await import('child_process');
+    const path = await import('path');
     const agents = agentManager.getActiveAgents();
-    const runningAgents = agents.filter(agent => agent.status === 'RUNNING');
     
-    if (runningAgents.length === 0) {
-      ui.warning('No running agents found. Start some agents first!');
+    if (agents.length === 0) {
+      ui.warning('No agents found. Create some agents first!');
       return;
     }
     
-    ui.header('Claude Agent Dashboard');
-    ui.info(`Opening dashboard with ${runningAgents.length} agents...\n`);
-    
-    // Create a new tmux session for the dashboard
-    const dashboardSession = 'magents-dashboard';
+    ui.header('Magents Web Dashboard');
+    ui.info(`Starting web dashboard on port ${options.port || '3000'}...\n`);
     
     try {
-      // Kill existing dashboard session if it exists
+      // Start the backend server
+      ui.info('Starting backend server...');
+      const backendProcess = spawn('npm', ['run', 'backend:dev'], {
+        cwd: path.join(__dirname, '../../..'),
+        detached: false,
+        stdio: 'pipe'
+      });
+      
+      // Start the web UI
+      ui.info('Starting web interface...');
+      const webProcess = spawn('npm', ['run', 'web:dev'], {
+        cwd: path.join(__dirname, '../../..'),
+        detached: false,
+        stdio: 'pipe'
+      });
+      
+      // Wait a moment for servers to start
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      ui.success('Dashboard started successfully!');
+      ui.divider('Access Information');
+      ui.keyValue('Web Interface', `http://localhost:${options.port || '4000'}`);
+      ui.keyValue('API Endpoint', 'http://localhost:3001/api');
+      ui.divider('Active Agents');
+      agents.forEach((agent, index) => {
+        ui.keyValue(`${index + 1}. ${agent.id}`, `${agent.status} - ${agent.branch}`);
+      });
+      ui.divider('Controls');
+      ui.info('Press Ctrl+C to stop the dashboard\n');
+      
+      // Open browser
+      const { execSync } = await import('child_process');
+      const platform = process.platform;
+      const openCmd = platform === 'darwin' ? 'open' : platform === 'win32' ? 'start' : 'xdg-open';
       try {
-        execSync(`tmux kill-session -t ${dashboardSession}`, { stdio: 'ignore' });
+        execSync(`${openCmd} http://localhost:${options.port || '4000'}`);
       } catch {
-        // Session doesn't exist, that's fine
+        // Browser opening failed, that's okay
       }
       
-      // First, link all claude windows from agents to the dashboard session
-      runningAgents.forEach((agent, index) => {
-        try {
-          // Link each agent's claude window to the dashboard session
-          execSync(`tmux link-window -s ${agent.tmuxSession}:claude -t ${dashboardSession}:${index}`, { stdio: 'pipe' });
-        } catch (e) {
-          // If linking fails, create a new session first
-          if (index === 0) {
-            // For first agent, create new session with their claude window
-            execSync(`tmux new-session -d -s ${dashboardSession} -t ${agent.tmuxSession}:claude`, { stdio: 'pipe' });
-          }
-        }
+      // Handle graceful shutdown
+      process.on('SIGINT', () => {
+        ui.info('\nShutting down dashboard...');
+        backendProcess.kill();
+        webProcess.kill();
+        process.exit(0);
       });
       
-      // Now create the split layout in a new window
-      execSync(`tmux new-window -t ${dashboardSession} -n dashboard`, { stdio: 'pipe' });
-      const dashWindow = `${dashboardSession}:dashboard`;
-      
-      // For each agent, create a pane that switches to their claude window
-      runningAgents.forEach((agent, index) => {
-        if (index === 0) {
-          // First pane - clear and set up
-          execSync(`tmux send-keys -t ${dashWindow} "clear" Enter`, { stdio: 'pipe' });
-          execSync(`tmux send-keys -t ${dashWindow} "echo 'Agent: ${agent.id}'" Enter`, { stdio: 'pipe' });
-          execSync(`tmux send-keys -t ${dashWindow} "echo 'Session: ${agent.tmuxSession}:claude'" Enter`, { stdio: 'pipe' });
-          execSync(`tmux send-keys -t ${dashWindow} "echo ''" Enter`, { stdio: 'pipe' });
-          execSync(`tmux send-keys -t ${dashWindow} "echo 'Switching to Claude window...'" Enter`, { stdio: 'pipe' });
-          execSync(`tmux send-keys -t ${dashWindow} "sleep 1 && tmux switch-client -t ${agent.tmuxSession}:claude" Enter`, { stdio: 'pipe' });
-        } else {
-          // Create new panes
-          let splitCmd = '';
-          
-          switch (options.layout) {
-            case 'horizontal':
-              splitCmd = '-h';
-              break;
-            case 'vertical':
-              splitCmd = '-v';
-              break;
-            case 'grid':
-            default:
-              splitCmd = index % 2 === 0 ? '-v' : '-h';
-              break;
-          }
-          
-          execSync(`tmux split-window -t ${dashWindow} ${splitCmd}`, { stdio: 'pipe' });
-          execSync(`tmux send-keys -t ${dashWindow}.${index} "clear" Enter`, { stdio: 'pipe' });
-          execSync(`tmux send-keys -t ${dashWindow}.${index} "echo 'Agent: ${agent.id}'" Enter`, { stdio: 'pipe' });
-          execSync(`tmux send-keys -t ${dashWindow}.${index} "echo 'Session: ${agent.tmuxSession}:claude'" Enter`, { stdio: 'pipe' });
-          execSync(`tmux send-keys -t ${dashWindow}.${index} "echo ''" Enter`, { stdio: 'pipe' });
-          execSync(`tmux send-keys -t ${dashWindow}.${index} "echo 'Switching to Claude window...'" Enter`, { stdio: 'pipe' });
-          execSync(`tmux send-keys -t ${dashWindow}.${index} "sleep 1 && tmux switch-client -t ${agent.tmuxSession}:claude" Enter`, { stdio: 'pipe' });
-        }
-      });
-      
-      // Apply layout
-      if (options.layout === 'grid') {
-        execSync(`tmux select-layout -t ${dashWindow} tiled`, { stdio: 'pipe' });
-      } else if (options.layout === 'horizontal') {
-        execSync(`tmux select-layout -t ${dashWindow} even-horizontal`, { stdio: 'pipe' });
-      } else if (options.layout === 'vertical') {
-        execSync(`tmux select-layout -t ${dashWindow} even-vertical`, { stdio: 'pipe' });
-      }
-      
-      ui.success('Dashboard created successfully!');
-      ui.divider('Dashboard Windows');
-      runningAgents.forEach((agent, index) => {
-        ui.keyValue(`Window ${index}`, `${agent.id} (${agent.tmuxSession}:claude)`);
-      });
-      ui.divider('Navigation');
-      ui.keyValue('Switch windows', 'Ctrl+b then window number (0-9)');
-      ui.keyValue('Switch panes', 'Ctrl+b then arrow keys');
-      ui.keyValue('Next window', 'Ctrl+b then n');
-      ui.keyValue('Previous window', 'Ctrl+b then p');
-      ui.keyValue('List windows', 'Ctrl+b then w');
-      ui.keyValue('Exit dashboard', 'Ctrl+b then d');
-      ui.divider();
-      
-      // Attach to the dashboard
-      if (process.stdout.isTTY) {
-        execSync(`tmux attach-session -t ${dashboardSession}`, { stdio: 'inherit' });
-      } else {
-        ui.info(`Run this command to attach: tmux attach-session -t ${dashboardSession}`);
-      }
+      // Keep the process running
+      await new Promise(() => {});
       
     } catch (error) {
-      ui.error(`Failed to create dashboard: ${error instanceof Error ? error.message : String(error)}`);
-      ui.info('\nTip: Make sure tmux is installed and you have running agents.');
+      ui.error(`Failed to start dashboard: ${error instanceof Error ? error.message : String(error)}`);
+      ui.info('\nTip: Make sure you have run "npm install" in the project root.');
     }
   });
-
-// Monitor command - preview all tmux sessions
+// Monitor command - preview Docker container logs
 program
   .command('monitor')
   .alias('preview')
-  .description('Show live preview of all Claude agent sessions')
+  .description('Show live preview of all agent container logs')
   .option('-r, --refresh <seconds>', 'Refresh interval in seconds', '2')
   .option('-l, --lines <number>', 'Number of lines to show per session', '10')
   .action(async (options: { refresh?: string; lines?: string }) => {
@@ -2160,17 +2104,17 @@ program
     ui.header('Claude Agent Monitor', true);
     ui.info('Press Ctrl+C to exit monitor mode\n');
     
-    // Function to get tmux pane content
-    const getPaneContent = (sessionName: string, paneName: string): string[] => {
+    // Function to get Docker container logs
+    const getContainerLogs = (containerName: string): string[] => {
       try {
-        // Capture the pane content
+        // Get the last N lines of container logs
         const output = execSync(
-          `tmux capture-pane -t "${sessionName}:${paneName}" -p -S -${linesToShow}`, 
+          `docker logs --tail ${linesToShow} ${containerName}`, 
           { encoding: 'utf8', stdio: 'pipe' }
         );
-        return output.split('\n').slice(-linesToShow).filter(line => line.trim());
+        return output.split('\n').filter(line => line.trim());
       } catch {
-        return ['[Session not accessible]'];
+        return ['[Container not accessible]'];
       }
     };
     
@@ -2188,35 +2132,39 @@ program
         return;
       }
       
-      // Get all magent tmux sessions
-      const tmuxSessions = agentManager.getTmuxService().listSessions()
-        .filter((session: string) => session.startsWith('magent-'));
-      
       agents.forEach(agent => {
-        const isRunning = tmuxSessions.includes(agent.tmuxSession);
+        const containerName = `magents-${agent.id}`;
+        const isRunning = agent.status === 'RUNNING';
         
         ui.divider(`Agent: ${agent.id} (${agent.status})`);
         ui.keyValue('Branch', agent.branch);
-        ui.keyValue('Session', agent.tmuxSession);
+        ui.keyValue('Container', containerName);
         
-        if (isRunning && agent.status === 'RUNNING') {
-          // Get claude window content (where Claude Code runs)
-          const claudeContent = getPaneContent(agent.tmuxSession, 'claude');
+        if (isRunning) {
+          // Get container logs
+          const containerLogs = getContainerLogs(containerName);
           
-          ui.muted('\nClaude Code Output:');
+          ui.muted('\nContainer Output:');
           ui.box(
-            claudeContent.join('\n') || '[No output yet]',
+            containerLogs.join('\n') || '[No output yet]',
             undefined,
-            claudeContent.some(line => line.includes('error') || line.includes('Error')) ? 'error' : 'info'
+            containerLogs.some(line => line.includes('error') || line.includes('Error')) ? 'error' : 'info'
           );
           
-          // Check if Claude is currently processing
-          const lastLine = claudeContent[claudeContent.length - 1] || '';
-          if (lastLine.includes('Thinking') || lastLine.includes('...')) {
-            ui.spinner('Claude is thinking...').start();
+          // Check container health
+          try {
+            const healthStatus = execSync(
+              `docker inspect ${containerName} --format='{{.State.Health.Status}}'`,
+              { encoding: 'utf8', stdio: 'pipe' }
+            ).trim();
+            if (healthStatus && healthStatus !== 'none') {
+              ui.keyValue('Health', healthStatus);
+            }
+          } catch {
+            // Container might not have health check
           }
         } else {
-          ui.warning('Session not running or not accessible');
+          ui.warning('Container not running or not accessible');
         }
         
         console.log(''); // Add spacing between agents
@@ -2246,16 +2194,14 @@ program
   .command('config')
   .description('View or edit configuration')
   .option('-e, --edit', 'Edit configuration interactively')
-  .option('--docker', 'Enable Docker mode for agents')
-  .option('--no-docker', 'Disable Docker mode (use tmux/worktrees)')
-  .action(async (options: { edit?: boolean; docker?: boolean }) => {
+  .option('--docker-image <image>', 'Set default Docker image for agents')
+  .action(async (options: { edit?: boolean; dockerImage?: string }) => {
     const config = configManager.loadConfig();
     
-    // Handle docker mode toggle
-    if (options.docker !== undefined) {
-      configManager.updateConfig({ DOCKER_ENABLED: options.docker });
-      ui.success(`Docker mode ${options.docker ? 'enabled' : 'disabled'}`);
-      ui.info(`Agents will now be created using ${options.docker ? 'Docker containers' : 'tmux sessions and git worktrees'}`);
+    // Handle docker image update
+    if (options.dockerImage) {
+      configManager.updateConfig({ DOCKER_IMAGE: options.dockerImage });
+      ui.success(`Default Docker image set to: ${options.dockerImage}`);
       return;
     }
     

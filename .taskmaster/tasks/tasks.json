@@ -1174,7 +1174,62 @@
           24,
           25
         ],
-        "status": "pending"
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Simple Mode UI and Configuration",
+            "description": "Create the Simple mode interface with only essential options (agent name and project path). Build the minimal UI components and state management for this mode.",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 28
+          },
+          {
+            "id": 2,
+            "title": "Build Standard Mode with Common Configurations",
+            "description": "Implement Standard mode interface that exposes commonly used configuration options while hiding advanced complexity. Include project settings, basic Docker options, and environment variables.",
+            "details": "",
+            "status": "done",
+            "dependencies": [
+              "28.1"
+            ],
+            "parentTaskId": 28
+          },
+          {
+            "id": 3,
+            "title": "Implement Advanced Mode with Full Feature Access",
+            "description": "Create Advanced mode that provides complete access to Task Master integration, MCP configuration, Docker settings, and all other power-user features with comprehensive customization options.",
+            "details": "",
+            "status": "done",
+            "dependencies": [
+              "28.2"
+            ],
+            "parentTaskId": 28
+          },
+          {
+            "id": 4,
+            "title": "Add Mode Switching and Data Persistence",
+            "description": "Implement seamless mode switching functionality that preserves user data and configurations. Create migration paths between modes without losing settings or requiring re-configuration.",
+            "details": "",
+            "status": "done",
+            "dependencies": [
+              "28.3"
+            ],
+            "parentTaskId": 28
+          },
+          {
+            "id": 5,
+            "title": "Create Contextual Help and Guided Upgrade System",
+            "description": "Build contextual help system that adapts to each mode level. Implement guided upgrade paths that suggest when users might benefit from more advanced features, with step-by-step tutorials and feature discovery mechanisms.",
+            "details": "",
+            "status": "done",
+            "dependencies": [
+              "28.4"
+            ],
+            "parentTaskId": 28
+          }
+        ]
       },
       {
         "id": 29,
@@ -1198,11 +1253,136 @@
           24
         ],
         "status": "pending"
+      },
+      {
+        "id": 31,
+        "title": "Setup Electron project foundation",
+        "description": "Initialize Electron app structure with main/renderer process architecture and integrate existing React codebase",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "high",
+        "details": "1. Install Electron and essential dependencies (electron, electron-builder, electron-updater)\n2. Create main process entry point (main.js) with BrowserWindow configuration\n3. Setup preload script for secure context bridging\n4. Configure webpack/vite for Electron renderer process\n5. Integrate existing React app as renderer\n6. Setup IPC communication patterns\n7. Configure development environment with hot reload\n8. Add electron-devtools-installer for React DevTools",
+        "testStrategy": "Verify app launches, React components render, DevTools available, hot reload works, IPC communication functional"
+      },
+      {
+        "id": 32,
+        "title": "Implement macOS native window controls and styling",
+        "description": "Add native macOS traffic light controls, vibrancy effects, and system-integrated window management",
+        "status": "pending",
+        "dependencies": [
+          31
+        ],
+        "priority": "high",
+        "details": "1. Configure frameless window with traffic light buttons\n2. Implement custom title bar with draggable region\n3. Add vibrancy effect to sidebar using BrowserWindow options\n4. Setup window state management (size, position persistence)\n5. Implement full-screen mode support\n6. Add window snapping and multiple workspace support\n7. Configure rounded corners and shadows\n8. Implement SF Pro font stack",
+        "testStrategy": "Test on macOS for native feel, verify window controls work, check vibrancy effects, ensure state persistence across restarts"
+      },
+      {
+        "id": 33,
+        "title": "Update UI with new color palette and design system",
+        "description": "Apply new dark theme color palette with improved visual hierarchy and macOS design language",
+        "status": "pending",
+        "dependencies": [
+          31
+        ],
+        "priority": "high",
+        "details": "1. Create CSS variables for new color palette (#1A1B1E backgrounds, #339AF0 primary, etc.)\n2. Update all component styles to use new colors\n3. Implement elevation system with subtle shadows\n4. Add 8px/12px border radius system\n5. Update typography with proper text color hierarchy\n6. Create themed scrollbar styles\n7. Implement hover/active states with new colors\n8. Add transition animations for smooth interactions",
+        "testStrategy": "Visual regression testing, verify all components use new palette, check contrast ratios, test dark/light mode switching"
+      },
+      {
+        "id": 34,
+        "title": "Create native menu bar and application menu",
+        "description": "Implement full native menu bar with standard macOS menu structure and keyboard shortcuts",
+        "status": "pending",
+        "dependencies": [
+          31
+        ],
+        "priority": "high",
+        "details": "1. Create Menu template with standard structure (App, File, Edit, View, Window, Help)\n2. Add application menu items (About, Preferences, Quit)\n3. Implement File menu (New Agent, Open Project, Recent Projects)\n4. Add Edit menu with standard shortcuts\n5. Create View menu with zoom controls and view modes\n6. Implement Window menu with multi-window support\n7. Add keyboard accelerators (Cmd+N, Cmd+O, etc.)\n8. Handle menu state updates based on app context",
+        "testStrategy": "Test all menu items trigger correct actions, verify keyboard shortcuts work, check menu state management"
+      },
+      {
+        "id": 35,
+        "title": "Implement bottom status bar with quick actions",
+        "description": "Add fixed bottom status bar with quick action buttons, metrics display, and system resource monitoring",
+        "status": "pending",
+        "dependencies": [
+          31,
+          33
+        ],
+        "priority": "medium",
+        "details": "1. Create 32px fixed bottom bar component\n2. Add quick action buttons (New Agent, Start/Stop All, View Toggle)\n3. Implement connection status indicator with real-time updates\n4. Add system resource monitor (CPU, Memory usage)\n5. Create notification center button with badge\n6. Display keyboard shortcut hints on hover\n7. Add collapsible sections for extended info\n8. Implement smooth animations for state changes",
+        "testStrategy": "Verify all buttons functional, test real-time updates, check resource monitoring accuracy, test responsive behavior"
+      },
+      {
+        "id": 36,
+        "title": "Enhance terminal integration with native performance",
+        "description": "Upgrade terminal component for native performance with split panes, tabs, and enhanced features",
+        "status": "pending",
+        "dependencies": [
+          31
+        ],
+        "priority": "high",
+        "details": "1. Replace web terminal with node-pty for native performance\n2. Implement terminal tab management\n3. Add split pane support (horizontal/vertical)\n4. Create terminal themes with new color palette\n5. Add font preference settings\n6. Implement better copy/paste with system clipboard\n7. Add search functionality within terminal\n8. Create picture-in-picture mode for terminals",
+        "testStrategy": "Performance benchmarks, test split panes, verify copy/paste works across platforms, test PiP mode"
+      },
+      {
+        "id": 37,
+        "title": "Add system integration and notifications",
+        "description": "Implement native notifications, system tray, dock integration, and file system features",
+        "status": "pending",
+        "dependencies": [
+          31
+        ],
+        "priority": "medium",
+        "details": "1. Setup native notifications API with custom templates\n2. Create system tray icon with context menu\n3. Implement dock badge for agent counts\n4. Add drag & drop file support\n5. Create native file dialogs for project selection\n6. Implement Recent Documents menu\n7. Add Touch Bar support for macOS\n8. Setup file associations for .magents files",
+        "testStrategy": "Test notifications appear correctly, verify system tray works, check file operations, test Touch Bar on supported Macs"
+      },
+      {
+        "id": 38,
+        "title": "Implement auto-updater and distribution pipeline",
+        "description": "Setup auto-update system with delta updates and create distribution packages for all platforms",
+        "status": "pending",
+        "dependencies": [
+          31
+        ],
+        "priority": "medium",
+        "details": "1. Configure electron-updater with update server\n2. Implement update UI with progress indication\n3. Setup code signing for macOS (Developer ID)\n4. Configure notarization workflow\n5. Create DMG installer with custom background\n6. Setup MSI installer for Windows\n7. Create AppImage for Linux\n8. Configure GitHub Actions for multi-platform builds",
+        "testStrategy": "Test update flow end-to-end, verify signatures, test installers on each platform, check auto-update works"
+      },
+      {
+        "id": 39,
+        "title": "Add performance optimizations and monitoring",
+        "description": "Optimize app performance with lazy loading, virtual scrolling, and implement performance monitoring",
+        "status": "pending",
+        "dependencies": [
+          31,
+          33,
+          36
+        ],
+        "priority": "medium",
+        "details": "1. Implement React.lazy for code splitting\n2. Add virtual scrolling for agent lists\n3. Setup memory usage monitoring\n4. Implement background process optimization\n5. Add GPU acceleration flags\n6. Create performance profiling tools\n7. Optimize IPC message passing\n8. Add startup time tracking",
+        "testStrategy": "Measure startup time < 2s, verify memory < 200MB idle, test 60fps animations, profile performance bottlenecks"
+      },
+      {
+        "id": 40,
+        "title": "Complete accessibility and testing infrastructure",
+        "description": "Ensure full accessibility compliance and setup comprehensive testing suite for Electron app",
+        "status": "pending",
+        "dependencies": [
+          31,
+          32,
+          33,
+          34,
+          35
+        ],
+        "priority": "medium",
+        "details": "1. Add ARIA labels to all interactive elements\n2. Implement keyboard navigation for all features\n3. Add screen reader announcements\n4. Create high contrast mode\n5. Setup Spectron/Playwright for E2E testing\n6. Add unit tests for main process\n7. Create integration tests for IPC\n8. Setup automated accessibility testing",
+        "testStrategy": "Run accessibility audit, test with screen readers, verify keyboard navigation complete, ensure all tests pass"
       }
     ],
     "metadata": {
       "created": "2025-06-30T14:18:19.843Z",
-      "updated": "2025-07-02T20:06:41.089Z",
+      "updated": "2025-07-03T12:50:55.140Z",
       "description": "Tasks for master context"
     }
   }

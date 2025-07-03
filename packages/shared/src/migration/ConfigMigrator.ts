@@ -636,7 +636,7 @@ export class ConfigMigrator {
       case 'container':
         return 'docker';
       case 'tmux':
-        return 'tmux';
+        return 'docker'; // Tmux mode removed, default to docker
       case 'local':
       case 'native':
       case 'hybrid':

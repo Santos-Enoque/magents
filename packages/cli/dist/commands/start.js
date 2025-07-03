@@ -22,7 +22,7 @@ class StartCommand {
             if (options.docker || this.configManager.loadConfig().DOCKER_ENABLED) {
                 const dockerAvailable = await this.checkDocker();
                 if (!dockerAvailable) {
-                    UIService_1.ui.error('Docker is not available. Please install Docker or use tmux mode.');
+                    UIService_1.ui.error('Docker is not available. Please install Docker.');
                     process.exit(1);
                 }
             }
@@ -180,49 +180,36 @@ class StartCommand {
             UIService_1.ui.header('Dry Run - Agent Start Preview');
             UIService_1.ui.keyValue('Agent ID', agent.id);
             UIService_1.ui.keyValue('Agent Branch', agent.branch);
-            UIService_1.ui.keyValue('Mode', agent.useDocker || options.docker ? 'Docker' : 'tmux');
-            if (agent.useDocker || options.docker) {
-                UIService_1.ui.keyValue('Container Name', `magents-${agent.id}`);
-                UIService_1.ui.keyValue('Docker Image', this.configManager.loadConfig().DOCKER_IMAGE || 'magents/agent:latest');
-                if (options.resources?.cpu)
-                    UIService_1.ui.keyValue('CPU Limit', options.resources.cpu);
-                if (options.resources?.memory)
-                    UIService_1.ui.keyValue('Memory Limit', options.resources.memory);
-                if (options.network)
-                    UIService_1.ui.keyValue('Network', options.network);
-                if (options.volumes && options.volumes.length > 0) {
-                    UIService_1.ui.keyValue('Additional Volumes', options.volumes.join(', '));
-                }
-                if (options.env && options.env.length > 0) {
-                    UIService_1.ui.keyValue('Environment Variables', options.env.join(', '));
-                }
-                if (options.restart)
-                    UIService_1.ui.keyValue('Restart Policy', options.restart);
+            UIService_1.ui.keyValue('Mode', 'Docker');
+            UIService_1.ui.keyValue('Container Name', `magents-${agent.id}`);
+            UIService_1.ui.keyValue('Docker Image', this.configManager.loadConfig().DOCKER_IMAGE || 'magents/agent:latest');
+            if (options.resources?.cpu)
+                UIService_1.ui.keyValue('CPU Limit', options.resources.cpu);
+            if (options.resources?.memory)
+                UIService_1.ui.keyValue('Memory Limit', options.resources.memory);
+            if (options.network)
+                UIService_1.ui.keyValue('Network', options.network);
+            if (options.volumes && options.volumes.length > 0) {
+                UIService_1.ui.keyValue('Additional Volumes', options.volumes.join(', '));
             }
-            else {
-                UIService_1.ui.keyValue('Tmux Session', agent.tmuxSession);
-                UIService_1.ui.keyValue('Working Directory', agent.worktreePath);
+            if (options.env && options.env.length > 0) {
+                UIService_1.ui.keyValue('Environment Variables', options.env.join(', '));
             }
+            if (options.restart)
+                UIService_1.ui.keyValue('Restart Policy', options.restart);
             UIService_1.ui.info('Use without --dry-run to start the agent');
             return;
         }
         const spinner = UIService_1.ui.spinner(`Starting agent '${agent.id}'...`);
         spinner.start();
         try {
-            if (agent.useDocker || options.docker) {
-                await this.startDockerAgent(agent, options);
-            }
-            else {
-                await this.startTmuxAgent(agent, options);
-            }
+            await this.startDockerAgent(agent, options);
             spinner.succeed(`Agent '${agent.id}' started successfully`);
             // Show connection info
             UIService_1.ui.divider('Connection Info');
             UIService_1.ui.command(`magents attach ${agent.id}`, 'Connect to agent');
-            if (agent.useDocker || options.docker) {
-                UIService_1.ui.command(`docker logs magents-${agent.id}`, 'View container logs');
-                UIService_1.ui.command(`docker exec -it magents-${agent.id} bash`, 'Open shell in container');
-            }
+            UIService_1.ui.command(`docker logs magents-${agent.id}`, 'View container logs');
+            UIService_1.ui.command(`docker exec -it magents-${agent.id} bash`, 'Open shell in container');
         }
         catch (error) {
             spinner.fail(`Failed to start agent '${agent.id}'`);
@@ -318,33 +305,6 @@ class StartCommand {
         }
         return cmd;
     }
-    async startTmuxAgent(agent, options) {
-        const sessionName = agent.tmuxSession;
-        // Check if session exists
-        try {
-            (0, child_process_1.execSync)(`tmux has-session -t ${sessionName} 2>/dev/null`, { stdio: 'ignore' });
-            UIService_1.ui.info('Tmux session already exists');
-            return;
-        }
-        catch {
-            // Session doesn't exist, create it
-            const worktreePath = agent.worktreePath;
-            // Create new tmux session
-            (0, child_process_1.execSync)(`tmux new-session -d -s ${sessionName} -c ${worktreePath}`, { stdio: 'pipe' });
-            // Set up windows
-            (0, child_process_1.execSync)(`tmux rename-window -t ${sessionName}:0 main`, { stdio: 'pipe' });
-            (0, child_process_1.execSync)(`tmux new-window -t ${sessionName}:1 -n claude -c ${worktreePath}`, { stdio: 'pipe' });
-            (0, child_process_1.execSync)(`tmux new-window -t ${sessionName}:2 -n git -c ${worktreePath}`, { stdio: 'pipe' });
-            // Start Claude in the claude window if not detached
-            if (!options.detach) {
-                const config = this.configManager.loadConfig();
-                const claudeCmd = config.CLAUDE_AUTO_ACCEPT
-                    ? 'claude --auto-accept'
-                    : 'claude';
-                (0, child_process_1.execSync)(`tmux send-keys -t ${sessionName}:claude "${claudeCmd}" Enter`, { stdio: 'pipe' });
-            }
-        }
-    }
     async waitForContainer(containerName, timeout = 30000) {
         const start = Date.now();
         while (Date.now() - start < timeout) {
@@ -395,42 +355,21 @@ class StartCommand {
         UIService_1.ui.muted('Health check should be configured in Docker image');
     }
     async showLogs(agent, options) {
-        if (agent.useDocker || options.docker) {
-            const containerName = `magents-${agent.id}`;
-            const follow = options.detach ? '' : '-f';
-            (0, child_process_1.spawn)('docker', ['logs', follow, containerName], { stdio: 'inherit' });
-        }
-        else {
-            UIService_1.ui.info('Logs are available in the tmux session');
-            UIService_1.ui.command(`magents attach ${agent.id}`, 'View tmux session');
-        }
+        const containerName = `magents-${agent.id}`;
+        const follow = options.detach ? '' : '-f';
+        (0, child_process_1.spawn)('docker', ['logs', follow, containerName], { stdio: 'inherit' });
     }
     async attachShell(agent, options) {
-        if (agent.useDocker || options.docker) {
-            const containerName = `magents-${agent.id}`;
-            (0, child_process_1.spawn)('docker', ['exec', '-it', containerName, 'bash'], { stdio: 'inherit' });
-        }
-        else {
-            UIService_1.ui.info('Opening new tmux window...');
-            const sessionName = agent.tmuxSession;
-            (0, child_process_1.execSync)(`tmux new-window -t ${sessionName} -n shell`, { stdio: 'inherit' });
-        }
+        const containerName = `magents-${agent.id}`;
+        (0, child_process_1.spawn)('docker', ['exec', '-it', containerName, 'bash'], { stdio: 'inherit' });
     }
     async restartAgent(agent, options) {
         const spinner = UIService_1.ui.spinner(`Restarting agent '${agent.id}'...`);
         spinner.start();
         try {
-            if (agent.useDocker || options.docker) {
-                const containerName = `magents-${agent.id}`;
-                (0, child_process_1.execSync)(`docker restart ${containerName}`, { stdio: 'pipe' });
-                await this.waitForContainer(containerName);
-            }
-            else {
-                // For tmux, kill and recreate session
-                const sessionName = agent.tmuxSession;
-                (0, child_process_1.execSync)(`tmux kill-session -t ${sessionName} 2>/dev/null || true`, { stdio: 'ignore' });
-                await this.startTmuxAgent(agent, options);
-            }
+            const containerName = `magents-${agent.id}`;
+            (0, child_process_1.execSync)(`docker restart ${containerName}`, { stdio: 'pipe' });
+            await this.waitForContainer(containerName);
             spinner.succeed(`Agent '${agent.id}' restarted successfully`);
         }
         catch (error) {

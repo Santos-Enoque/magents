@@ -1,0 +1,553 @@
+{
+  "config": {
+    "configFile": "/Users/santossafrao/Development/personal/magents/playwright.config.ts",
+    "rootDir": "/Users/santossafrao/Development/personal/magents/tests/e2e",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": "/Users/santossafrao/Development/personal/magents/tests/e2e/global-setup.ts",
+    "globalTeardown": "/Users/santossafrao/Development/personal/magents/tests/e2e/global-teardown.ts",
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 6
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFolder": "playwright-report"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results.json"
+        }
+      ],
+      [
+        "list",
+        null
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/Users/santossafrao/Development/personal/magents/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 6
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/santossafrao/Development/personal/magents/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/santossafrao/Development/personal/magents/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 6
+        },
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "/Users/santossafrao/Development/personal/magents/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/santossafrao/Development/personal/magents/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 6
+        },
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "/Users/santossafrao/Development/personal/magents/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/santossafrao/Development/personal/magents/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 6
+        },
+        "id": "Mobile Chrome",
+        "name": "Mobile Chrome",
+        "testDir": "/Users/santossafrao/Development/personal/magents/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/santossafrao/Development/personal/magents/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 6
+        },
+        "id": "Mobile Safari",
+        "name": "Mobile Safari",
+        "testDir": "/Users/santossafrao/Development/personal/magents/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.53.2",
+    "workers": 6,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "test-agent-creation-from-dashboard.spec.ts",
+      "file": "test-agent-creation-from-dashboard.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Agent Creation Bug Fixes",
+          "file": "test-agent-creation-from-dashboard.spec.ts",
+          "line": 3,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should successfully create an agent using the dashboard wizard",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 30641,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/santossafrao/Development/personal/magents/tests/e2e/test-agent-creation-from-dashboard.spec.ts",
+                            "column": 16,
+                            "line": 19
+                          },
+                          "message": "Error: page.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Create Agent\")')\u001b[22m\n\n\n  17 |\n  18 |     // 1. Click Create Agent button from dashboard\n> 19 |     await page.click('button:has-text(\"Create Agent\")');\n     |                ^\n  20 |     await page.waitForURL('**/agents/new');\n  21 |     \n  22 |     // 2. Select Simple mode first (should be default)\n    at /Users/santossafrao/Development/personal/magents/tests/e2e/test-agent-creation-from-dashboard.spec.ts:19:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-07-03T11:52:25.937Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/santossafrao/Development/personal/magents/test-results/test-agent-creation-from-d-13286--using-the-dashboard-wizard-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/santossafrao/Development/personal/magents/test-results/test-agent-creation-from-d-13286--using-the-dashboard-wizard-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/santossafrao/Development/personal/magents/test-results/test-agent-creation-from-d-13286--using-the-dashboard-wizard-chromium/error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "547c56c3d232eb5835aa-582e29138c7ed871e0de",
+              "file": "test-agent-creation-from-dashboard.spec.ts",
+              "line": 10,
+              "column": 7
+            },
+            {
+              "title": "should show full system paths in directory selection",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "timedOut",
+                      "duration": 30679,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/santossafrao/Development/personal/magents/tests/e2e/test-agent-creation-from-dashboard.spec.ts",
+                            "column": 16,
+                            "line": 103
+                          },
+                          "message": "Error: page.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Create Agent\")')\u001b[22m\n\n\n  101 |   test('should show full system paths in directory selection', async ({ page }) => {\n  102 |     // Navigate to agent creation\n> 103 |     await page.click('button:has-text(\"Create Agent\")');\n      |                ^\n  104 |     await page.waitForURL('**/agents/new');\n  105 |     \n  106 |     // Go to project selection step\n    at /Users/santossafrao/Development/personal/magents/tests/e2e/test-agent-creation-from-dashboard.spec.ts:103:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-07-03T11:52:25.928Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/santossafrao/Development/personal/magents/test-results/test-agent-creation-from-d-3b132-aths-in-directory-selection-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/santossafrao/Development/personal/magents/test-results/test-agent-creation-from-d-3b132-aths-in-directory-selection-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/santossafrao/Development/personal/magents/test-results/test-agent-creation-from-d-3b132-aths-in-directory-selection-chromium/error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "547c56c3d232eb5835aa-c137df5f509020bd8b63",
+              "file": "test-agent-creation-from-dashboard.spec.ts",
+              "line": 101,
+              "column": 7
+            },
+            {
+              "title": "should validate Git and TaskMaster repositories correctly",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "timedOut",
+                      "duration": 30708,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/santossafrao/Development/personal/magents/tests/e2e/test-agent-creation-from-dashboard.spec.ts",
+                            "column": 16,
+                            "line": 126
+                          },
+                          "message": "Error: page.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Create Agent\")')\u001b[22m\n\n\n  124 |   test('should validate Git and TaskMaster repositories correctly', async ({ page }) => {\n  125 |     // Navigate to agent creation\n> 126 |     await page.click('button:has-text(\"Create Agent\")');\n      |                ^\n  127 |     await page.waitForURL('**/agents/new');\n  128 |     \n  129 |     // Go to project selection step\n    at /Users/santossafrao/Development/personal/magents/tests/e2e/test-agent-creation-from-dashboard.spec.ts:126:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-07-03T11:52:25.928Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/santossafrao/Development/personal/magents/test-results/test-agent-creation-from-d-43251-ster-repositories-correctly-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/santossafrao/Development/personal/magents/test-results/test-agent-creation-from-d-43251-ster-repositories-correctly-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/santossafrao/Development/personal/magents/test-results/test-agent-creation-from-d-43251-ster-repositories-correctly-chromium/error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "547c56c3d232eb5835aa-b6b8c286d605f78682ee",
+              "file": "test-agent-creation-from-dashboard.spec.ts",
+              "line": 124,
+              "column": 7
+            },
+            {
+              "title": "should not show file upload alerts when selecting paths",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "timedOut",
+                      "duration": 30683,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/santossafrao/Development/personal/magents/tests/e2e/test-agent-creation-from-dashboard.spec.ts",
+                            "column": 16,
+                            "line": 155
+                          },
+                          "message": "Error: page.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Create Agent\")')\u001b[22m\n\n\n  153 |   test('should not show file upload alerts when selecting paths', async ({ page }) => {\n  154 |     // Navigate to agent creation\n> 155 |     await page.click('button:has-text(\"Create Agent\")');\n      |                ^\n  156 |     await page.waitForURL('**/agents/new');\n  157 |     \n  158 |     // Go to project selection step  \n    at /Users/santossafrao/Development/personal/magents/tests/e2e/test-agent-creation-from-dashboard.spec.ts:155:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-07-03T11:52:25.936Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/santossafrao/Development/personal/magents/test-results/test-agent-creation-from-d-56dfe-alerts-when-selecting-paths-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/santossafrao/Development/personal/magents/test-results/test-agent-creation-from-d-56dfe-alerts-when-selecting-paths-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/santossafrao/Development/personal/magents/test-results/test-agent-creation-from-d-56dfe-alerts-when-selecting-paths-chromium/error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "547c56c3d232eb5835aa-eb5877ebe54dc589860a",
+              "file": "test-agent-creation-from-dashboard.spec.ts",
+              "line": 153,
+              "column": 7
+            },
+            {
+              "title": "should allow all complexity modes without restrictions",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 4,
+                      "status": "timedOut",
+                      "duration": 30702,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/santossafrao/Development/personal/magents/tests/e2e/test-agent-creation-from-dashboard.spec.ts",
+                            "column": 16,
+                            "line": 184
+                          },
+                          "message": "Error: page.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Create Agent\")')\u001b[22m\n\n\n  182 |   test('should allow all complexity modes without restrictions', async ({ page }) => {\n  183 |     // Navigate to agent creation\n> 184 |     await page.click('button:has-text(\"Create Agent\")');\n      |                ^\n  185 |     await page.waitForURL('**/agents/new');\n  186 |     \n  187 |     // Verify all three modes are available (testing the free mode requirement)\n    at /Users/santossafrao/Development/personal/magents/tests/e2e/test-agent-creation-from-dashboard.spec.ts:184:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-07-03T11:52:25.927Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/santossafrao/Development/personal/magents/test-results/test-agent-creation-from-d-1480e--modes-without-restrictions-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/santossafrao/Development/personal/magents/test-results/test-agent-creation-from-d-1480e--modes-without-restrictions-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/santossafrao/Development/personal/magents/test-results/test-agent-creation-from-d-1480e--modes-without-restrictions-chromium/error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "547c56c3d232eb5835aa-53c008707d6b20103adb",
+              "file": "test-agent-creation-from-dashboard.spec.ts",
+              "line": 182,
+              "column": 7
+            },
+            {
+              "title": "should handle network errors gracefully",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 5,
+                      "status": "timedOut",
+                      "duration": 30692,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/santossafrao/Development/personal/magents/tests/e2e/test-agent-creation-from-dashboard.spec.ts",
+                            "column": 16,
+                            "line": 213
+                          },
+                          "message": "Error: page.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Create Agent\")')\u001b[22m\n\n\n  211 |   test('should handle network errors gracefully', async ({ page }) => {\n  212 |     // Navigate to agent creation\n> 213 |     await page.click('button:has-text(\"Create Agent\")');\n      |                ^\n  214 |     await page.waitForURL('**/agents/new');\n  215 |     \n  216 |     // Intercept validation API call and simulate network error\n    at /Users/santossafrao/Development/personal/magents/tests/e2e/test-agent-creation-from-dashboard.spec.ts:213:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-07-03T11:52:25.928Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/santossafrao/Development/personal/magents/test-results/test-agent-creation-from-d-ad702-e-network-errors-gracefully-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/santossafrao/Development/personal/magents/test-results/test-agent-creation-from-d-ad702-e-network-errors-gracefully-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/santossafrao/Development/personal/magents/test-results/test-agent-creation-from-d-ad702-e-network-errors-gracefully-chromium/error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "547c56c3d232eb5835aa-0338701968211f1f4553",
+              "file": "test-agent-creation-from-dashboard.spec.ts",
+              "line": 211,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-07-03T11:52:23.269Z",
+    "duration": 33623.853,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 6,
+    "flaky": 0
+  }
+}

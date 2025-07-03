@@ -1,0 +1,18 @@
+# Task ID: 32
+# Title: Implement macOS native window controls and styling
+# Status: pending
+# Dependencies: 31
+# Priority: high
+# Description: Add native macOS traffic light controls, vibrancy effects, and system-integrated window management
+# Details:
+1. Configure frameless window with traffic light buttons
+2. Implement custom title bar with draggable region
+3. Add vibrancy effect to sidebar using BrowserWindow options
+4. Setup window state management (size, position persistence)
+5. Implement full-screen mode support
+6. Add window snapping and multiple workspace support
+7. Configure rounded corners and shadows
+8. Implement SF Pro font stack
+
+# Test Strategy:
+Test on macOS for native feel, verify window controls work, check vibrancy effects, ensure state persistence across restarts

@@ -1,0 +1,18 @@
+# Task ID: 36
+# Title: Enhance terminal integration with native performance
+# Status: pending
+# Dependencies: 31
+# Priority: high
+# Description: Upgrade terminal component for native performance with split panes, tabs, and enhanced features
+# Details:
+1. Replace web terminal with node-pty for native performance
+2. Implement terminal tab management
+3. Add split pane support (horizontal/vertical)
+4. Create terminal themes with new color palette
+5. Add font preference settings
+6. Implement better copy/paste with system clipboard
+7. Add search functionality within terminal
+8. Create picture-in-picture mode for terminals
+
+# Test Strategy:
+Performance benchmarks, test split panes, verify copy/paste works across platforms, test PiP mode

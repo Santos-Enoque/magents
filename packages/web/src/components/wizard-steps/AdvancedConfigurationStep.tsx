@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
-import { Settings } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { Settings, HelpCircle } from 'lucide-react';
 import { WizardFormData } from '../AgentCreationWizard';
 import { AdvancedConfigPanel, AdvancedAgentConfig } from '../AdvancedConfigPanel';
+import AdvancedModeHelp from '../AdvancedModeHelp';
 
 interface AdvancedConfigurationStepProps {
   formData: WizardFormData;
@@ -12,6 +13,7 @@ export const AdvancedConfigurationStep: React.FC<AdvancedConfigurationStepProps>
   formData,
   updateFormData
 }) => {
+  const [showHelp, setShowHelp] = useState(false);
   // Convert WizardFormData to AdvancedAgentConfig
   const advancedConfig: AdvancedAgentConfig = useMemo(() => ({
     // Security & Automation
@@ -80,13 +82,33 @@ export const AdvancedConfigurationStep: React.FC<AdvancedConfigurationStepProps>
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h3 className="text-lg font-medium text-gray-900 flex items-center">
-          <Settings className="w-5 h-5 mr-2" />
-          Advanced Agent Configuration
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-medium text-gray-900 flex items-center">
+            <Settings className="w-5 h-5 mr-2" />
+            Advanced Agent Configuration
+          </h3>
+          <button
+            onClick={() => setShowHelp(true)}
+            className="inline-flex items-center px-3 py-1.5 text-sm text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-md transition-colors"
+          >
+            <HelpCircle className="w-4 h-4 mr-1" />
+            Help
+          </button>
+        </div>
         <p className="text-sm text-gray-500 mt-1">
-          Configure Docker settings, environment variables, and advanced agent options.
+          Configure Docker settings, environment variables, Claude parameters, MCP servers, and advanced agent options.
         </p>
+        
+        {/* Advanced Mode Tips */}
+        <div className="mt-3 p-3 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-md">
+          <h4 className="text-sm font-medium text-purple-900 mb-2">💡 Advanced Mode Features</h4>
+          <ul className="text-xs text-purple-800 space-y-1">
+            <li>• Use configuration templates for common setups (Development, Production, Research)</li>
+            <li>• Export your configuration to share with team members or reuse across projects</li>
+            <li>• Configure MCP servers to extend agent capabilities with external tools</li>
+            <li>• Fine-tune Claude parameters for optimal performance in your specific use case</li>
+          </ul>
+        </div>
       </div>
 
       {/* Advanced Configuration Panel */}
@@ -174,6 +196,12 @@ export const AdvancedConfigurationStep: React.FC<AdvancedConfigurationStepProps>
           <li>• Use environment variables for configuration, not secrets</li>
         </ul>
       </div>
+
+      {/* Advanced Mode Help Modal */}
+      <AdvancedModeHelp 
+        isOpen={showHelp} 
+        onClose={() => setShowHelp(false)} 
+      />
     </div>
   );
 };

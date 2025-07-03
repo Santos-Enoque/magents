@@ -1,0 +1,18 @@
+# Task ID: 31
+# Title: Setup Electron project foundation
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Initialize Electron app structure with main/renderer process architecture and integrate existing React codebase
+# Details:
+1. Install Electron and essential dependencies (electron, electron-builder, electron-updater)
+2. Create main process entry point (main.js) with BrowserWindow configuration
+3. Setup preload script for secure context bridging
+4. Configure webpack/vite for Electron renderer process
+5. Integrate existing React app as renderer
+6. Setup IPC communication patterns
+7. Configure development environment with hot reload
+8. Add electron-devtools-installer for React DevTools
+
+# Test Strategy:
+Verify app launches, React components render, DevTools available, hot reload works, IPC communication functional

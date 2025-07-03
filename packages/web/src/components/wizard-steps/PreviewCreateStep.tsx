@@ -1,7 +1,7 @@
 import React from 'react';
-import { Eye, GitBranch, Folder, Settings, Wand2, Tag, Check, AlertTriangle } from 'lucide-react';
+import { Eye, GitBranch, Folder, Settings, Wand2, Tag, Check, AlertTriangle, Zap, Settings2, Wrench } from 'lucide-react';
 import { Project, TaskMasterTask } from '@magents/shared';
-import { WizardFormData } from '../AgentCreationWizard';
+import { WizardFormData, ComplexityMode } from '../AgentCreationWizard';
 
 interface PreviewCreateStepProps {
   formData: WizardFormData;
@@ -32,6 +32,16 @@ export const PreviewCreateStep: React.FC<PreviewCreateStepProps> = ({
   const estimatedPorts = formData.portRange ? 
     formData.portRange.split('-').map(Number).reduce((acc, val, idx) => idx === 0 ? val : val - acc + 1, 0) : 0;
 
+  // Get complexity mode icon
+  const getModeIcon = (mode: ComplexityMode) => {
+    switch (mode) {
+      case 'simple': return Zap;
+      case 'standard': return Settings2;
+      case 'advanced': return Wrench;
+    }
+  };
+  const ModeIcon = getModeIcon(formData.complexityMode);
+
   return (
     <div className="space-y-6">
       <div className="text-center mb-6">
@@ -40,6 +50,16 @@ export const PreviewCreateStep: React.FC<PreviewCreateStepProps> = ({
         <p className="text-gray-600 mt-2">
           Please review all settings before creating your agent. You can go back to make changes if needed.
         </p>
+      </div>
+
+      {/* Complexity Mode Display */}
+      <div className="bg-brand/10 border border-brand/20 rounded-lg p-4 mb-6">
+        <div className="flex items-center justify-center">
+          <ModeIcon className="w-5 h-5 text-brand mr-2" />
+          <span className="text-sm font-medium text-brand capitalize">
+            {formData.complexityMode} Mode Configuration
+          </span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -104,19 +124,20 @@ export const PreviewCreateStep: React.FC<PreviewCreateStepProps> = ({
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Tmux Session:</span>
-              <span className="text-sm font-medium text-gray-900">magent-{effectiveAgentId}</span>
+              <span className="text-sm font-medium text-gray-900">magents-{effectiveAgentId}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Worktree Path:</span>
               <span className="text-sm font-medium text-gray-900">
-                ./magent-{formData.branch.replace(/[^a-zA-Z0-9]/g, '-')}
+                ./magents-{formData.branch.replace(/[^a-zA-Z0-9]/g, '-')}
               </span>
             </div>
           </div>
         </div>
 
-        {/* TaskMaster Integration */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
+        {/* TaskMaster Integration - Only show for standard and advanced modes */}
+        {formData.complexityMode !== 'simple' && (
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
           <div className="flex items-center mb-4">
             <Wand2 className="w-5 h-5 text-purple-600 mr-2" />
             <h3 className="text-lg font-semibold text-gray-900">TaskMaster Integration</h3>
@@ -164,9 +185,19 @@ export const PreviewCreateStep: React.FC<PreviewCreateStepProps> = ({
             </div>
           )}
         </div>
+        )}
 
-        {/* Advanced Configuration */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
+        {/* Advanced Configuration - Only show for advanced mode or if settings differ from defaults */}
+        {(formData.complexityMode === 'advanced' || formData.useDocker || formData.mcpEnabled || 
+          (formData.environment && Object.keys(formData.environment).length > 0)) && (
+          <div className="bg-white border border-gray-200 rounded-lg p-6">{formData.complexityMode === 'advanced' && (
+            <div className="mb-4 p-3 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-md">
+              <div className="flex items-center">
+                <Wrench className="w-5 h-5 text-purple-600 mr-2" />
+                <span className="text-sm font-medium text-purple-900">Advanced Mode Configuration</span>
+              </div>
+            </div>
+          )}
           <div className="flex items-center mb-4">
             <Settings className="w-5 h-5 text-gray-600 mr-2" />
             <h3 className="text-lg font-semibold text-gray-900">Advanced Settings</h3>
@@ -213,8 +244,63 @@ export const PreviewCreateStep: React.FC<PreviewCreateStepProps> = ({
                 </span>
               </div>
             )}
+
+            {/* Advanced Mode Additional Details */}
+            {formData.complexityMode === 'advanced' && (
+              <div className="mt-4 space-y-3">
+                {formData.claudeModel && (
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Claude Model:</span>
+                    <span className="text-sm font-medium text-gray-900">{formData.claudeModel}</span>
+                  </div>
+                )}
+                
+                {formData.claudeSettings.temperature !== undefined && (
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Temperature:</span>
+                    <span className="text-sm font-medium text-gray-900">{formData.claudeSettings.temperature}</span>
+                  </div>
+                )}
+                
+                {formData.claudeSettings.maxTokens && (
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Max Tokens:</span>
+                    <span className="text-sm font-medium text-gray-900">{formData.claudeSettings.maxTokens}</span>
+                  </div>
+                )}
+                
+                {formData.resourceLimits?.memory && (
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Memory Limit:</span>
+                    <span className="text-sm font-medium text-gray-900">{formData.resourceLimits.memory}</span>
+                  </div>
+                )}
+                
+                {formData.resourceLimits?.cpu && (
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">CPU Limit:</span>
+                    <span className="text-sm font-medium text-gray-900">{formData.resourceLimits.cpu} cores</span>
+                  </div>
+                )}
+                
+                {formData.dockerNetwork && (
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Docker Network:</span>
+                    <span className="text-sm font-medium text-gray-900">{formData.dockerNetwork}</span>
+                  </div>
+                )}
+                
+                {formData.dockerVolumes && formData.dockerVolumes.length > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Volume Mounts:</span>
+                    <span className="text-sm font-medium text-gray-900">{formData.dockerVolumes.length} configured</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
+        )}
       </div>
 
       {/* Resource Estimation */}

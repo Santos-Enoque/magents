@@ -14,7 +14,7 @@ import { ProjectDetail } from './pages/ProjectDetail';
 import { Tasks } from './pages/Tasks';
 import { TaskAssignment } from './pages/TaskAssignment';
 import { Analytics } from './pages/Analytics';
-import { Terminal } from './pages/Terminal';
+import { TerminalPage } from './pages/TerminalPage';
 import { WebSocketProvider } from './hooks/useWebSocket';
 import './App.css';
 import 'react-toastify/dist/ReactToastify.css';
@@ -47,7 +47,7 @@ function App() {
                 <Route path="/tasks/assign" element={<TaskAssignment />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/settings" element={<Settings />} />
-                <Route path="/terminal" element={<Terminal />} />
+                <Route path="/terminal" element={<TerminalPage />} />
               </Routes>
             </Layout>
             <ToastContainer

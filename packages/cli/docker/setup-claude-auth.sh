@@ -15,9 +15,10 @@ if ! docker images | grep -q "magents/claude.*dev"; then
     docker build -f Dockerfile.claude-working --target development -t magents/claude:dev .
 fi
 
-# Step 2: Create volume
-echo "Creating persistent volume..."
+# Step 2: Create volumes
+echo "Creating persistent volumes..."
 docker volume create claude-data 2>/dev/null || true
+docker volume create claude-container-auth 2>/dev/null || true
 
 # Step 3: Run interactive container for authentication
 echo ""
@@ -88,6 +89,15 @@ docker exec claude-copy-settings chown -R magents:magents /home/magents/.claude
 
 # Stop temp container
 docker stop claude-copy-settings && docker rm claude-copy-settings
+
+# Step 5: Copy auth to claude-container-auth volume (used by magents)
+echo ""
+echo "Setting up claude-container-auth volume..."
+docker run --rm \
+    -v claude-data:/source \
+    -v claude-container-auth:/target \
+    alpine:latest \
+    sh -c "cp -r /source /target/Library && mkdir -p /target/Library/Application\ Support && mv /target/Library /target/Library/Application\ Support/Claude || true"
 
 echo ""
 echo "=== Testing Authentication ==="

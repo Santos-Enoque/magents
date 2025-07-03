@@ -1,8 +1,8 @@
 // Default configuration values
 export const DEFAULT_CONFIG = {
   DEFAULT_BASE_BRANCH: 'main',
-  TMUX_SESSION_PREFIX: 'magent',
-  WORKTREE_PREFIX: 'magent',
+  TMUX_SESSION_PREFIX: 'magents',
+  WORKTREE_PREFIX: 'magents',
   MAX_AGENTS: 10,
   CLAUDE_CODE_PATH: 'claude',
   CLAUDE_AUTO_ACCEPT: true,

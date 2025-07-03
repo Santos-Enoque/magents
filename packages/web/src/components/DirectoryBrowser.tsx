@@ -44,7 +44,7 @@ interface SearchResult {
   type: 'file' | 'directory';
 }
 
-const DEFAULT_START_PATH = process.env.HOME || '/Users';
+const DEFAULT_START_PATH = process.env.HOME || (typeof window !== 'undefined' && navigator.platform.toLowerCase().includes('win') ? 'C:\\' : '/Users');
 
 const DirectoryTreeItem: React.FC<DirectoryTreeItemProps> = ({
   item,

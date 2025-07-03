@@ -1,6 +1,6 @@
 # Task ID: 21
 # Title: Docker Runtime Implementation
-# Status: pending
+# Status: done
 # Dependencies: None
 # Priority: high
 # Description: Create Docker-based runtime for agents with pre-built images including all necessary tools
@@ -11,31 +11,31 @@ Create Dockerfile for magents/agent:latest with Node.js 20, tmux, git, task-mast
 Build Docker image and verify all tools are installed correctly. Test volume persistence across container restarts. Verify health checks respond correctly. Test container lifecycle (start, stop, restart). Validate signal handling for graceful shutdown.
 
 # Subtasks:
-## 1. Create Base Dockerfile with Core Dependencies [pending]
+## 1. Create Base Dockerfile with Core Dependencies [done]
 ### Dependencies: None
 ### Description: Build the foundational Docker image with Node.js 20, system packages, and base tools
 ### Details:
 Create Dockerfile in packages/cli/docker/ directory. Use node:20-slim as base image for smaller size. Install essential system packages: git, tmux, curl, python3, make, g++ for native modules. Set up non-root user for security. Configure working directory as /workspace. Install global npm packages: npm@latest, yarn, pnpm for flexibility.
 
-## 2. Install Task Master and Claude Code Bridge [pending]
+## 2. Install Task Master and Claude Code Bridge [done]
 ### Dependencies: 21.1
 ### Description: Add Task Master AI and create socket-based Claude Code bridge for host communication
 ### Details:
 Install task-master-ai globally via npm. Create a Unix domain socket-based bridge system that allows containers to use the host's Claude Code installation. Implementation includes: 1) Create /var/run/claude-code-bridge.sock Unix domain socket on host accessible via volume mount at /host/claude-bridge.sock in containers, 2) Implement lightweight Node.js proxy service (claude-bridge-server) that listens on the socket and forwards commands to host's Claude Code CLI, 3) Create claude-code wrapper script in container that communicates through the socket instead of requiring local Claude Code installation, 4) Handle authentication tokens and session management transparently by proxying ~/.config/claude-code from host, 5) Support multiple concurrent container connections with request queuing and connection pooling, 6) Provide fallback mechanism that detects if bridge is unavailable and shows helpful error message with setup instructions. Configure Task Master to use mounted config directory. Set up environment variables for Task Master configuration including CLAUDE_BRIDGE_SOCKET=/host/claude-bridge.sock.
 
-## 3. Implement Volume Mapping and Persistence [pending]
+## 3. Implement Volume Mapping and Persistence [done]
 ### Dependencies: 21.1
 ### Description: Configure Docker volumes for project files, shared config, and agent state persistence
 ### Details:
 Define volume mount points: /workspace for project files, /shared for shared configuration, /agent for agent-specific state. Create docker-compose.yml template with proper volume definitions. Implement permission handling for mounted volumes. Add .dockerignore to exclude unnecessary files. Create volume initialization scripts.
 
-## 4. Add Health Checks and Auto-restart Policies [pending]
+## 4. Add Health Checks and Auto-restart Policies [done]
 ### Dependencies: 21.1, 21.2
 ### Description: Implement container health monitoring and automatic recovery mechanisms
 ### Details:
 Create health check endpoint using simple HTTP server on port 3999. Implement HEALTHCHECK instruction in Dockerfile with proper intervals. Configure restart policy as 'unless-stopped' in docker-compose. Add graceful shutdown handling for SIGTERM/SIGINT. Create health status script that checks tmux sessions and agent status.
 
-## 5. Create Production and Development Image Variants [pending]
+## 5. Create Production and Development Image Variants [done]
 ### Dependencies: 21.1, 21.2, 21.3, 21.4
 ### Description: Build optimized production image and feature-rich development image with debugging tools
 ### Details:

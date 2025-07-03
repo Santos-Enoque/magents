@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Server, GitBranch, Terminal, Shield, Monitor } from 'lucide-react';
 import { AgentCreationWizard } from '../components/AgentCreationWizard';
 import { AgentCreationProgress } from '../components/AgentCreationProgress';
 import { apiService } from '../services/api';
@@ -111,19 +111,19 @@ export const CreateAgent: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-5xl mx-auto p-6">
       {/* Page Header */}
-      <div className="mb-6">
+      <div className="mb-8">
         <button
           onClick={() => navigate('/agents')}
-          className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 mb-4"
+          className="inline-flex items-center text-sm text-foreground-secondary hover:text-foreground mb-4 transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-1" />
           Back to Agents
         </button>
         
-        <h1 className="text-2xl font-bold text-gray-900">Create New Agent</h1>
-        <p className="mt-2 text-sm text-gray-600">
+        <h1 className="text-3xl font-bold text-foreground mb-2">Create New Agent</h1>
+        <p className="text-base text-foreground-secondary">
           Create a new Claude Code agent with a dedicated Git worktree and tmux session.
           The agent will be able to work independently on the specified branch.
         </p>
@@ -149,27 +149,90 @@ export const CreateAgent: React.FC = () => {
       />
 
       {/* Additional Information */}
-      <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h3 className="text-sm font-medium text-blue-900 mb-2">What happens when you create an agent?</h3>
-        <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-          <li>A new Git worktree is created for the specified branch</li>
-          <li>A tmux session is started with the agent ID as the session name</li>
-          <li>Claude Code is launched within the tmux session</li>
-          <li>The agent begins working on the branch independently</li>
-          <li>You can monitor and manage the agent from the dashboard</li>
-        </ul>
+      <div className="mt-8 bg-background-card border border-border rounded-lg p-6">
+        <h3 className="text-base font-semibold text-foreground mb-4 flex items-center">
+          <Server className="w-5 h-5 mr-2 text-brand" />
+          What happens when you create an agent?
+        </h3>
+        <div className="space-y-3">
+          <div className="flex items-start">
+            <GitBranch className="w-4 h-4 text-status-info mt-0.5 mr-3 flex-shrink-0" />
+            <p className="text-sm text-foreground-secondary">
+              A new Git worktree is created for the specified branch, providing an isolated workspace
+            </p>
+          </div>
+          <div className="flex items-start">
+            <Terminal className="w-4 h-4 text-status-success mt-0.5 mr-3 flex-shrink-0" />
+            <p className="text-sm text-foreground-secondary">
+              A tmux session is started with the agent ID as the session name for easy management
+            </p>
+          </div>
+          <div className="flex items-start">
+            <Shield className="w-4 h-4 text-status-warning mt-0.5 mr-3 flex-shrink-0" />
+            <p className="text-sm text-foreground-secondary">
+              If Docker mode is enabled, the agent runs in an isolated container with resource limits
+            </p>
+          </div>
+          <div className="flex items-start">
+            <Monitor className="w-4 h-4 text-brand mt-0.5 mr-3 flex-shrink-0" />
+            <p className="text-sm text-foreground-secondary">
+              Claude Code is launched within the environment and begins working independently
+            </p>
+          </div>
+          <div className="flex items-start">
+            <div className="w-4 h-4 rounded-full bg-status-success mt-0.5 mr-3 flex-shrink-0" />
+            <p className="text-sm text-foreground-secondary">
+              You can monitor, manage, and interact with the agent from the unified dashboard
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Tips */}
-      <div className="mt-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
-        <h3 className="text-sm font-medium text-gray-900 mb-2">Tips for creating agents</h3>
-        <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
-          <li>Use descriptive agent IDs that reflect the task or feature</li>
-          <li>Create feature branches before creating agents for new features</li>
-          <li>Enable auto-accept for routine tasks, disable for complex changes</li>
-          <li>Use project IDs to group related agents together</li>
-          <li>Monitor agent status regularly to ensure they're working correctly</li>
-        </ul>
+      <div className="mt-6 bg-background-tertiary border border-border-light rounded-lg p-6">
+        <h3 className="text-base font-semibold text-foreground mb-4">💡 Pro Tips</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-3">
+            <div className="flex items-start">
+              <span className="text-brand mr-2">•</span>
+              <p className="text-sm text-foreground-secondary">
+                Use descriptive agent IDs that reflect the task or feature
+              </p>
+            </div>
+            <div className="flex items-start">
+              <span className="text-brand mr-2">•</span>
+              <p className="text-sm text-foreground-secondary">
+                Create feature branches before creating agents for new features
+              </p>
+            </div>
+            <div className="flex items-start">
+              <span className="text-brand mr-2">•</span>
+              <p className="text-sm text-foreground-secondary">
+                Enable Docker mode for better isolation and security
+              </p>
+            </div>
+          </div>
+          <div className="space-y-3">
+            <div className="flex items-start">
+              <span className="text-brand mr-2">•</span>
+              <p className="text-sm text-foreground-secondary">
+                Enable auto-accept for routine tasks, disable for complex changes
+              </p>
+            </div>
+            <div className="flex items-start">
+              <span className="text-brand mr-2">•</span>
+              <p className="text-sm text-foreground-secondary">
+                Use project IDs to group related agents together
+              </p>
+            </div>
+            <div className="flex items-start">
+              <span className="text-brand mr-2">•</span>
+              <p className="text-sm text-foreground-secondary">
+                Monitor agent status regularly to ensure they're working correctly
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

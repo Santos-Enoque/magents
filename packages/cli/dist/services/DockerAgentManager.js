@@ -289,8 +289,9 @@ class DockerAgentManager {
         const dockerImage = hasClaudeAuth ? 'magents/claude:dev' : this.dockerImage;
         // For Claude image, we need to override the entrypoint
         const entrypointOverride = hasClaudeAuth ? '--entrypoint /bin/bash' : '';
-        // Command to keep container running
-        const runCommand = hasClaudeAuth ? '-c "while true; do sleep 3600; done"' : 'tail -f /dev/null';
+        // Command to initialize tmux and keep container running
+        const initCommand = this.buildTmuxInitCommand(options.agentId, hasClaudeAuth);
+        const runCommand = hasClaudeAuth ? `-c "${initCommand}"` : `bash -c "${initCommand}"`;
         return `docker run -d \
       --name ${options.containerName} \
       --label magents.agent.id=${options.agentId} \
@@ -307,6 +308,21 @@ class DockerAgentManager {
       ${entrypointOverride} \
       ${dockerImage} \
       ${runCommand}`;
+    }
+    buildTmuxInitCommand(agentId, hasClaudeAuth) {
+        // Create a tmux session with windows similar to old TmuxService
+        return `
+      tmux new-session -d -s "${agentId}" -n "main" -c "/workspace" && \\
+      tmux new-window -t "${agentId}" -n "claude" -c "/workspace" && \\
+      tmux new-window -t "${agentId}" -n "git" -c "/workspace" && \\
+      tmux send-keys -t "${agentId}:git" "echo 'Git commands for this workspace:'" Enter && \\
+      tmux send-keys -t "${agentId}:git" "echo '  git status'" Enter && \\
+      tmux send-keys -t "${agentId}:git" "echo '  git add . && git commit -m \"message\"'" Enter && \\
+      tmux send-keys -t "${agentId}:git" "echo '  git push'" Enter && \\
+      tmux send-keys -t "${agentId}:git" "echo ''" Enter && \\
+      tmux select-window -t "${agentId}:claude" && \\
+      while true; do sleep 3600; done
+    `.trim().replace(/\n\s+/g, ' ');
     }
     getApiKeys() {
         const keys = {};

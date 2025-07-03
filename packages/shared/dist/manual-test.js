@@ -240,7 +240,7 @@ class ManualTester {
                 name: 'Batch Agent 2',
                 projectId: 'test-project-1',
                 status: 'STOPPED',
-                mode: 'tmux',
+                mode: 'docker',
                 branch: 'feature/batch-2',
                 worktreePath: '/batch/2',
                 createdAt: new Date(),

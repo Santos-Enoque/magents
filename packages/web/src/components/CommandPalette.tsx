@@ -216,12 +216,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         }
       }
 
-      const result = await coreManager.executeCommand(command.name, {
-        params,
-        source: 'GUI',
-        sessionId,
-        userId: isDemoMode ? 'demo-user' : undefined
-      });
+      const result = await command.execute(params);
 
       setExecutionResult(result);
       onCommandExecuted?.(result);

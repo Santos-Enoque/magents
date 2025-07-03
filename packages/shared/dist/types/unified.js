@@ -24,7 +24,7 @@ exports.EntityIdSchema = zod_1.z.string().min(1).refine((val) => val.trim().leng
 // Unified Agent Data Schema
 // ============================================================================
 exports.AgentStatusSchema = zod_1.z.enum(['CREATED', 'STARTING', 'RUNNING', 'STOPPING', 'STOPPED', 'ERROR', 'SUSPENDED']);
-exports.AgentModeSchema = zod_1.z.enum(['tmux', 'docker', 'hybrid']);
+exports.AgentModeSchema = zod_1.z.enum(['docker', 'hybrid']);
 exports.UnifiedAgentDataSchema = zod_1.z.object({
     // Core identification
     id: exports.EntityIdSchema,

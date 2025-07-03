@@ -88,9 +88,10 @@ const CONFIG_TEMPLATES = {
     description: 'Basic agent with minimal overhead',
     config: {
       autoAccept: false,
-      useDocker: false,
+      useDocker: true,
+      dockerImage: 'node:20-alpine',
       mcpEnabled: false,
-      isolationMode: 'none' as const,
+      isolationMode: 'container' as const,
       claudeSettings: {}
     }
   },
@@ -483,30 +484,14 @@ export const AdvancedConfigPanel: React.FC<AdvancedConfigPanelProps> = ({
         {/* Docker Tab */}
         {activeTab === 'docker' && (
           <div className="space-y-6">
-            <div className="flex items-start space-x-3">
-              <div className="flex h-6 items-center">
-                <input
-                  id="use-docker"
-                  type="checkbox"
-                  checked={config.useDocker}
-                  onChange={(e) => updateConfig({ useDocker: e.target.checked })}
-                  disabled={readonly}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-              </div>
-              <div className="min-w-0 flex-1">
-                <label htmlFor="use-docker" className="text-sm font-medium text-gray-900">
-                  Enable Docker Container
-                </label>
-                <p className="text-sm text-gray-500">
-                  Run agents in isolated Docker containers for enhanced security and consistency.
-                </p>
-              </div>
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+              <p className="text-sm text-blue-800">
+                <strong>Docker Mode:</strong> All agents run in Docker containers for enhanced security and consistency.
+              </p>
             </div>
 
-            {config.useDocker && (
-              <div className="ml-7 space-y-4">
-                <div>
+            <div className="space-y-4">
+              <div>
                   <label htmlFor="docker-image" className="block text-sm font-medium text-gray-700 mb-2">
                     Docker Image
                   </label>
@@ -612,7 +597,6 @@ export const AdvancedConfigPanel: React.FC<AdvancedConfigPanelProps> = ({
                   </p>
                 </div>
               </div>
-            )}
           </div>
         )}
 

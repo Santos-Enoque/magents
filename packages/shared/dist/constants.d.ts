@@ -1,7 +1,7 @@
 export declare const DEFAULT_CONFIG: {
     readonly DEFAULT_BASE_BRANCH: "main";
-    readonly TMUX_SESSION_PREFIX: "magent";
-    readonly WORKTREE_PREFIX: "magent";
+    readonly TMUX_SESSION_PREFIX: "magents";
+    readonly WORKTREE_PREFIX: "magents";
     readonly MAX_AGENTS: 10;
     readonly CLAUDE_CODE_PATH: "claude";
     readonly CLAUDE_AUTO_ACCEPT: true;

@@ -40,7 +40,6 @@ export declare class StartCommand {
     private startAgent;
     private startDockerAgent;
     private buildDockerRunCommand;
-    private startTmuxAgent;
     private waitForContainer;
     private checkClaudeAuthVolume;
     private applyResourceLimits;

@@ -1,0 +1,18 @@
+# Task ID: 40
+# Title: Complete accessibility and testing infrastructure
+# Status: pending
+# Dependencies: 31, 32, 33, 34, 35
+# Priority: medium
+# Description: Ensure full accessibility compliance and setup comprehensive testing suite for Electron app
+# Details:
+1. Add ARIA labels to all interactive elements
+2. Implement keyboard navigation for all features
+3. Add screen reader announcements
+4. Create high contrast mode
+5. Setup Spectron/Playwright for E2E testing
+6. Add unit tests for main process
+7. Create integration tests for IPC
+8. Setup automated accessibility testing
+
+# Test Strategy:
+Run accessibility audit, test with screen readers, verify keyboard navigation complete, ensure all tests pass

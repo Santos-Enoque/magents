@@ -1,0 +1,18 @@
+# Task ID: 37
+# Title: Add system integration and notifications
+# Status: pending
+# Dependencies: 31
+# Priority: medium
+# Description: Implement native notifications, system tray, dock integration, and file system features
+# Details:
+1. Setup native notifications API with custom templates
+2. Create system tray icon with context menu
+3. Implement dock badge for agent counts
+4. Add drag & drop file support
+5. Create native file dialogs for project selection
+6. Implement Recent Documents menu
+7. Add Touch Bar support for macOS
+8. Setup file associations for .magents files
+
+# Test Strategy:
+Test notifications appear correctly, verify system tray works, check file operations, test Touch Bar on supported Macs

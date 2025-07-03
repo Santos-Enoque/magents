@@ -57,7 +57,7 @@ describe('Unified Data Schemas', () => {
         name: 'Minimal Agent',
         projectId: 'project-minimal',
         status: 'CREATED' as const,
-        mode: 'tmux' as const,
+        mode: 'docker' as const,
         branch: 'main',
         worktreePath: '/minimal/path',
         createdAt: new Date(),

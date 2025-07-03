@@ -1,0 +1,18 @@
+# Task ID: 34
+# Title: Create native menu bar and application menu
+# Status: pending
+# Dependencies: 31
+# Priority: high
+# Description: Implement full native menu bar with standard macOS menu structure and keyboard shortcuts
+# Details:
+1. Create Menu template with standard structure (App, File, Edit, View, Window, Help)
+2. Add application menu items (About, Preferences, Quit)
+3. Implement File menu (New Agent, Open Project, Recent Projects)
+4. Add Edit menu with standard shortcuts
+5. Create View menu with zoom controls and view modes
+6. Implement Window menu with multi-window support
+7. Add keyboard accelerators (Cmd+N, Cmd+O, etc.)
+8. Handle menu state updates based on app context
+
+# Test Strategy:
+Test all menu items trigger correct actions, verify keyboard shortcuts work, check menu state management

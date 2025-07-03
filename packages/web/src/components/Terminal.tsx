@@ -13,6 +13,7 @@ import {
 
 interface TerminalProps {
   agentId?: string;
+  isSystemTerminal?: boolean;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
   onClose?: () => void;
@@ -21,6 +22,7 @@ interface TerminalProps {
 
 export const Terminal: React.FC<TerminalProps> = ({
   agentId,
+  isSystemTerminal = false,
   isFullscreen = false,
   onToggleFullscreen,
   onClose,
@@ -33,16 +35,22 @@ export const Terminal: React.FC<TerminalProps> = ({
   // Use WebSocket hook for terminal connection
   const { isConnected, isConnecting, error, sendData, connect, disconnect } = useTerminal({
     agentId,
+    isSystemTerminal,
     onData: (data: string) => {
       if (xtermRef.current) {
         xtermRef.current.write(data);
       }
     },
     onConnect: () => {
-      if (xtermRef.current && agentId) {
+      if (xtermRef.current) {
         xtermRef.current.clear();
-        xtermRef.current.writeln('\x1b[32m✅ Connected to agent ' + agentId + '\x1b[0m');
-        xtermRef.current.writeln('\x1b[36mTerminal session active. You can now interact with the agent.\x1b[0m');
+        if (isSystemTerminal) {
+          xtermRef.current.writeln('\x1b[32m✅ Connected to system terminal\x1b[0m');
+          xtermRef.current.writeln('\x1b[36mSystem terminal session active.\x1b[0m');
+        } else if (agentId) {
+          xtermRef.current.writeln('\x1b[32m✅ Connected to agent ' + agentId + '\x1b[0m');
+          xtermRef.current.writeln('\x1b[36mAgent terminal session active.\x1b[0m');
+        }
         xtermRef.current.writeln('');
       }
     },
@@ -118,7 +126,14 @@ export const Terminal: React.FC<TerminalProps> = ({
     });
 
     // Show appropriate message
-    if (agentId) {
+    if (isSystemTerminal) {
+      if (isConnecting) {
+        terminal.writeln('\x1b[32m🔌 Connecting to system terminal...\x1b[0m');
+      } else if (!isConnected) {
+        terminal.writeln('\x1b[33m⚠️  Not connected to system terminal\x1b[0m');
+        terminal.writeln('\x1b[90mWaiting for connection...\x1b[0m');
+      }
+    } else if (agentId) {
       if (isConnecting) {
         terminal.writeln('\x1b[32m🔌 Connecting to agent ' + agentId + '...\x1b[0m');
       } else if (!isConnected) {
@@ -133,7 +148,7 @@ export const Terminal: React.FC<TerminalProps> = ({
     return () => {
       terminal.dispose();
     };
-  }, [agentId, isConnected, isConnecting, sendData]);
+  }, [agentId, isSystemTerminal, isConnected, isConnecting, sendData]);
 
   // Handle resize
   useEffect(() => {

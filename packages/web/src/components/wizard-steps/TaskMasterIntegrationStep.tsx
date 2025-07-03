@@ -10,17 +10,17 @@ interface TaskMasterIntegrationStepProps {
 }
 
 const PRIORITY_COLORS = {
-  high: 'bg-red-100 text-red-800',
-  medium: 'bg-yellow-100 text-yellow-800',
-  low: 'bg-green-100 text-green-800'
+  high: 'bg-red-900 text-red-200',
+  medium: 'bg-yellow-900 text-yellow-200',
+  low: 'bg-green-900 text-green-200'
 };
 
 const STATUS_COLORS = {
-  pending: 'bg-gray-100 text-gray-800',
-  'in-progress': 'bg-blue-100 text-blue-800',
-  done: 'bg-green-100 text-green-800',
-  blocked: 'bg-red-100 text-red-800',
-  cancelled: 'bg-gray-100 text-gray-800'
+  pending: 'bg-gray-700 text-gray-200',
+  'in-progress': 'bg-blue-900 text-blue-200',
+  done: 'bg-green-900 text-green-200',
+  blocked: 'bg-red-900 text-red-200',
+  cancelled: 'bg-gray-700 text-gray-300'
 };
 
 export const TaskMasterIntegrationStep: React.FC<TaskMasterIntegrationStepProps> = ({
@@ -84,8 +84,8 @@ export const TaskMasterIntegrationStep: React.FC<TaskMasterIntegrationStepProps>
       <div className="flex items-center space-x-3">
         <button
           onClick={() => toggleTaskMaster(!formData.taskMasterEnabled)}
-          className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-            formData.taskMasterEnabled ? 'bg-blue-600' : 'bg-gray-200'
+          className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 ${
+            formData.taskMasterEnabled ? 'bg-blue-600' : 'bg-gray-600'
           }`}
         >
           <span
@@ -95,8 +95,8 @@ export const TaskMasterIntegrationStep: React.FC<TaskMasterIntegrationStepProps>
           />
         </button>
         <div>
-          <h3 className="text-sm font-medium text-gray-900">Enable TaskMaster Integration</h3>
-          <p className="text-sm text-gray-500">
+          <h3 className="text-sm font-medium text-foreground">Enable TaskMaster Integration</h3>
+          <p className="text-sm text-foreground-secondary">
             Assign specific tasks to this agent for automated tracking and execution
           </p>
         </div>
@@ -104,16 +104,16 @@ export const TaskMasterIntegrationStep: React.FC<TaskMasterIntegrationStepProps>
 
       {!formData.taskMasterEnabled ? (
         /* Disabled State */
-        <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-          <Wand2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">TaskMaster Integration Disabled</h3>
-          <p className="text-gray-500 mb-4">
+        <div className="text-center py-8 bg-background-secondary rounded-lg border-2 border-dashed border-border">
+          <Wand2 className="w-12 h-12 text-foreground-tertiary mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-foreground mb-2">TaskMaster Integration Disabled</h3>
+          <p className="text-foreground-secondary mb-4">
             Enable TaskMaster integration to assign specific tasks to your agent.
             This allows for automated task tracking and progress monitoring.
           </p>
           <button
             onClick={() => toggleTaskMaster(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand hover:bg-brand-hover"
           >
             <Wand2 className="w-4 h-4 mr-2" />
             Enable TaskMaster
@@ -124,16 +124,16 @@ export const TaskMasterIntegrationStep: React.FC<TaskMasterIntegrationStepProps>
         <div className="space-y-4">
           {tasks.length === 0 ? (
             /* No Tasks Available */
-            <div className="text-center py-8 bg-yellow-50 rounded-lg border border-yellow-200">
-              <AlertTriangle className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Tasks Available</h3>
-              <p className="text-gray-600 mb-4">
+            <div className="text-center py-8 bg-status-warning/10 rounded-lg border border-status-warning/30">
+              <AlertTriangle className="w-12 h-12 text-status-warning mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-foreground mb-2">No Tasks Available</h3>
+              <p className="text-foreground-secondary mb-4">
                 No TaskMaster tasks were found for this project. You can still create the agent
                 and assign tasks later from the dashboard.
               </p>
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-foreground-tertiary">
                 <p>To add tasks, use TaskMaster CLI:</p>
-                <code className="bg-gray-100 px-2 py-1 rounded mt-1 inline-block">
+                <code className="bg-background-tertiary px-2 py-1 rounded mt-1 inline-block text-foreground">
                   task-master add-task --prompt="Task description"
                 </code>
               </div>
@@ -143,13 +143,13 @@ export const TaskMasterIntegrationStep: React.FC<TaskMasterIntegrationStepProps>
               {/* Search and Filters */}
               <div className="flex flex-col sm:flex-row gap-4 mb-4">
                 <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground-tertiary w-4 h-4" />
                   <input
                     type="text"
                     placeholder="Search tasks..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full pl-10 pr-4 py-2 border border-border rounded-md focus:ring-2 focus:ring-brand focus:border-brand bg-background-secondary text-foreground placeholder-foreground-tertiary"
                   />
                 </div>
                 
@@ -157,7 +157,7 @@ export const TaskMasterIntegrationStep: React.FC<TaskMasterIntegrationStepProps>
                   <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-brand focus:border-brand bg-background-secondary text-foreground"
                   >
                     <option value="all">All Status</option>
                     <option value="pending">Pending</option>
@@ -168,7 +168,7 @@ export const TaskMasterIntegrationStep: React.FC<TaskMasterIntegrationStepProps>
                   <select
                     value={priorityFilter}
                     onChange={(e) => setPriorityFilter(e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-brand focus:border-brand bg-background-secondary text-foreground"
                   >
                     <option value="all">All Priority</option>
                     <option value="high">High</option>
@@ -181,19 +181,19 @@ export const TaskMasterIntegrationStep: React.FC<TaskMasterIntegrationStepProps>
               {/* Bulk Actions */}
               {availableTasks.length > 0 && (
                 <div className="flex justify-between items-center mb-4">
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-foreground-secondary">
                     {formData.selectedTasks.length} of {availableTasks.length} tasks selected
                   </span>
                   <div className="space-x-2">
                     <button
                       onClick={selectAllTasks}
-                      className="text-sm text-blue-600 hover:text-blue-700"
+                      className="text-sm text-brand hover:text-brand-hover"
                     >
                       Select All
                     </button>
                     <button
                       onClick={clearAllTasks}
-                      className="text-sm text-gray-600 hover:text-gray-700"
+                      className="text-sm text-foreground-secondary hover:text-foreground"
                     >
                       Clear All
                     </button>
@@ -204,7 +204,7 @@ export const TaskMasterIntegrationStep: React.FC<TaskMasterIntegrationStepProps>
               {/* Task List */}
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {filteredTasks.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-foreground-tertiary">
                     <Filter className="w-8 h-8 mx-auto mb-2" />
                     <p>No tasks match your current filters</p>
                   </div>
@@ -221,32 +221,32 @@ export const TaskMasterIntegrationStep: React.FC<TaskMasterIntegrationStepProps>
                         className={`w-full p-4 border rounded-lg text-left transition-colors ${
                           isAvailable
                             ? isSelected
-                              ? 'border-blue-500 bg-blue-50'
-                              : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
-                            : 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
+                              ? 'border-brand bg-brand/10'
+                              : 'border-border hover:border-brand hover:bg-background-secondary'
+                            : 'border-border bg-background-secondary opacity-60 cursor-not-allowed'
                         }`}
                       >
                         <div className="flex items-start space-x-3">
                           <div className="pt-1">
                             {isAvailable ? (
                               isSelected ? (
-                                <CheckSquare className="w-5 h-5 text-blue-600" />
+                                <CheckSquare className="w-5 h-5 text-brand" />
                               ) : (
-                                <Square className="w-5 h-5 text-gray-400" />
+                                <Square className="w-5 h-5 text-foreground-tertiary" />
                               )
                             ) : (
-                              <Square className="w-5 h-5 text-gray-300" />
+                              <Square className="w-5 h-5 text-foreground-tertiary opacity-50" />
                             )}
                           </div>
                           
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
-                                <h4 className="text-sm font-medium text-gray-900 mb-1">
+                                <h4 className="text-sm font-medium text-foreground mb-1">
                                   {task.id}: {task.title}
                                 </h4>
                                 {task.description && (
-                                  <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                                  <p className="text-sm text-foreground-secondary mb-2 line-clamp-2">
                                     {task.description}
                                   </p>
                                 )}
@@ -264,7 +264,7 @@ export const TaskMasterIntegrationStep: React.FC<TaskMasterIntegrationStepProps>
                             
                             {task.dependencies && task.dependencies.length > 0 && (
                               <div className="mt-2">
-                                <span className="text-xs text-gray-500">
+                                <span className="text-xs text-foreground-tertiary">
                                   Depends on: {task.dependencies.join(', ')}
                                 </span>
                               </div>
@@ -281,22 +281,22 @@ export const TaskMasterIntegrationStep: React.FC<TaskMasterIntegrationStepProps>
 
           {/* Selection Summary */}
           {formData.selectedTasks.length > 0 && (
-            <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-              <h4 className="text-sm font-medium text-blue-900 mb-2">Selected Tasks Summary</h4>
-              <p className="text-sm text-blue-800 mb-3">
+            <div className="bg-brand/10 border border-brand/30 rounded-md p-4">
+              <h4 className="text-sm font-medium text-foreground mb-2">Selected Tasks Summary</h4>
+              <p className="text-sm text-foreground-secondary mb-3">
                 {formData.selectedTasks.length} task{formData.selectedTasks.length !== 1 ? 's' : ''} will be assigned to this agent
               </p>
               <div className="space-y-1">
                 {formData.selectedTasks.slice(0, 3).map(taskId => {
                   const task = tasks.find(t => t.id === taskId);
                   return task ? (
-                    <div key={taskId} className="text-sm text-blue-700">
+                    <div key={taskId} className="text-sm text-foreground-secondary">
                       • {task.id}: {task.title}
                     </div>
                   ) : null;
                 })}
                 {formData.selectedTasks.length > 3 && (
-                  <div className="text-sm text-blue-600">
+                  <div className="text-sm text-foreground-tertiary">
                     ... and {formData.selectedTasks.length - 3} more task{formData.selectedTasks.length - 3 !== 1 ? 's' : ''}
                   </div>
                 )}

@@ -14,16 +14,15 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GitService = exports.TmuxService = exports.ui = exports.ConfigManager = exports.AgentManager = void 0;
+exports.GitService = exports.ui = exports.ConfigManager = exports.AgentManager = void 0;
 // Main CLI exports
+// @deprecated AgentManager is deprecated - use DockerAgentManager instead
 var AgentManager_1 = require("./services/AgentManager");
 Object.defineProperty(exports, "AgentManager", { enumerable: true, get: function () { return AgentManager_1.AgentManager; } });
 var ConfigManager_1 = require("./config/ConfigManager");
 Object.defineProperty(exports, "ConfigManager", { enumerable: true, get: function () { return ConfigManager_1.ConfigManager; } });
 var UIService_1 = require("./ui/UIService");
 Object.defineProperty(exports, "ui", { enumerable: true, get: function () { return UIService_1.ui; } });
-var TmuxService_1 = require("./services/TmuxService");
-Object.defineProperty(exports, "TmuxService", { enumerable: true, get: function () { return TmuxService_1.TmuxService; } });
 var GitService_1 = require("./services/GitService");
 Object.defineProperty(exports, "GitService", { enumerable: true, get: function () { return GitService_1.GitService; } });
 // Re-export types

@@ -1,0 +1,18 @@
+# Task ID: 35
+# Title: Implement bottom status bar with quick actions
+# Status: pending
+# Dependencies: 31, 33
+# Priority: medium
+# Description: Add fixed bottom status bar with quick action buttons, metrics display, and system resource monitoring
+# Details:
+1. Create 32px fixed bottom bar component
+2. Add quick action buttons (New Agent, Start/Stop All, View Toggle)
+3. Implement connection status indicator with real-time updates
+4. Add system resource monitor (CPU, Memory usage)
+5. Create notification center button with badge
+6. Display keyboard shortcut hints on hover
+7. Add collapsible sections for extended info
+8. Implement smooth animations for state changes
+
+# Test Strategy:
+Verify all buttons functional, test real-time updates, check resource monitoring accuracy, test responsive behavior

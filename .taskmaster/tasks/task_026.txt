@@ -1,6 +1,6 @@
 # Task ID: 26
 # Title: GUI-CLI Integration Bridge
-# Status: pending
+# Status: in-progress
 # Dependencies: 24, 25
 # Priority: high
 # Description: Ensure complete feature parity and real-time synchronization between GUI and CLI
