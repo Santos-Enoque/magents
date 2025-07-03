@@ -2022,7 +2022,7 @@
         "id": 42,
         "title": "Update Backend Services for Database",
         "description": "Modify backend services to use database repositories instead of file operations",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           41
         ],
@@ -2036,7 +2036,7 @@
             "description": "Refactor ProjectService to use ProjectRepository instead of file operations",
             "dependencies": [],
             "details": "Modify all methods in ProjectService to use database repositories. Replace fs.readJson/writeJson with repository.create/update/find methods. Maintain same public API to ensure backward compatibility.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests for each service method, regression tests"
           },
           {
@@ -2045,7 +2045,7 @@
             "description": "Refactor agent-related services to use AgentRepository",
             "dependencies": [],
             "details": "Update DockerAgentManager and related services to use AgentRepository for persistence. Replace file-based agent storage with database operations. Ensure status updates are persisted to database.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Integration tests for agent lifecycle operations"
           },
           {
@@ -2057,7 +2057,7 @@
               2
             ],
             "details": "Wrap complex operations like creating agent with project in database transactions. Implement rollback on failure. Use UnifiedDatabaseService.transaction() method for atomic operations.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test transaction rollback scenarios, concurrent operations"
           },
           {
@@ -2069,7 +2069,7 @@
               2
             ],
             "details": "Update all API endpoints in backend controllers to use the refactored services. Ensure proper error handling and response formats remain unchanged.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "API integration tests, endpoint response validation"
           },
           {
@@ -2081,7 +2081,7 @@
               4
             ],
             "details": "Add database connection initialization in backend startup, implement connection pooling if needed, add graceful shutdown to close database connections properly.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Connection lifecycle tests, load testing"
           }
         ]
@@ -2090,7 +2090,7 @@
         "id": 43,
         "title": "Add Database Initialization to Startup",
         "description": "Initialize SQLite database on application startup with automatic migration",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           41,
           42
@@ -2105,7 +2105,7 @@
             "description": "Initialize database when backend server starts",
             "dependencies": [],
             "details": "Add database initialization code to backend/src/index.ts startup sequence. Create database file at ~/.magents/magents.db if not exists. Handle initialization errors gracefully.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Startup tests with missing database, corrupted database"
           },
           {
@@ -2116,7 +2116,7 @@
               1
             ],
             "details": "Check current database version against latest migration version. Run any pending migrations in order. Log migration progress and handle failures appropriately.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test with various migration states, version mismatches"
           },
           {
@@ -2127,7 +2127,7 @@
               1
             ],
             "details": "Add GET /api/health/database endpoint that checks database connectivity, returns current version and migration status, includes basic statistics like table counts.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Health check endpoint tests, failure scenarios"
           },
           {
@@ -2138,7 +2138,7 @@
               1
             ],
             "details": "Add lazy database initialization for CLI commands that need it. Only initialize when database operations are required. Share initialization logic with backend.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "CLI command tests with fresh installation"
           },
           {
@@ -2150,7 +2150,7 @@
               4
             ],
             "details": "Add database configuration to magents config (custom path, read-only mode, etc.). Support environment variables for database configuration. Document configuration options.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Configuration tests with various options"
           }
         ]
@@ -2628,7 +2628,7 @@
     ],
     "metadata": {
       "created": "2025-06-30T14:18:19.843Z",
-      "updated": "2025-07-03T14:16:46.691Z",
+      "updated": "2025-07-03T16:09:27.438Z",
       "description": "Tasks for master context"
     }
   }

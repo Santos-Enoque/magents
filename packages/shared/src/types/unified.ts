@@ -426,7 +426,6 @@ export const TABLE_SCHEMAS = {
       ports_config TEXT, -- JSON object
       task_master_config TEXT, -- JSON object
       paths_config TEXT, -- JSON object
-      backup_metadata TEXT, -- JSON array of backup metadata
       version TEXT NOT NULL,
       created_at DATETIME NOT NULL,
       updated_at DATETIME NOT NULL
