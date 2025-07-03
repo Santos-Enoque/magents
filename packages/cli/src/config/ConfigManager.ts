@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import { MagentsConfig } from '../types';
+import { DatabaseConfig, DEFAULT_DATABASE_CONFIG } from '@magents/shared';
 
 export class ConfigManager {
   private static instance: ConfigManager;
@@ -117,6 +118,16 @@ MCP_ENABLED=false
       MODE: (config.MODE as any) || 'simple',
       TASK_MASTER_ENABLED: config.TASK_MASTER_ENABLED || false,
       TASKMASTER_AUTO_INSTALL: (config as any).TASKMASTER_AUTO_INSTALL || false,
+      DATABASE_CONFIG: {
+        enabled: (config as any).DATABASE_ENABLED !== undefined ? (config as any).DATABASE_ENABLED : DEFAULT_DATABASE_CONFIG.enabled,
+        path: (config as any).DATABASE_PATH,
+        autoMigrate: (config as any).DATABASE_AUTO_MIGRATE !== undefined ? (config as any).DATABASE_AUTO_MIGRATE : DEFAULT_DATABASE_CONFIG.autoMigrate,
+        backupOnMigration: (config as any).DATABASE_BACKUP_ON_MIGRATION !== undefined ? (config as any).DATABASE_BACKUP_ON_MIGRATION : DEFAULT_DATABASE_CONFIG.backupOnMigration,
+        healthCheckInterval: (config as any).DATABASE_HEALTH_CHECK_INTERVAL || DEFAULT_DATABASE_CONFIG.healthCheckInterval,
+        connectionTimeout: (config as any).DATABASE_CONNECTION_TIMEOUT || DEFAULT_DATABASE_CONFIG.connectionTimeout,
+        retryAttempts: (config as any).DATABASE_RETRY_ATTEMPTS || DEFAULT_DATABASE_CONFIG.retryAttempts,
+        retryDelay: (config as any).DATABASE_RETRY_DELAY || DEFAULT_DATABASE_CONFIG.retryDelay,
+      } as DatabaseConfig,
     };
 
     return this.config;
@@ -159,6 +170,22 @@ MCP_ENABLED=false
     }
     if (newConfig.ADVANCED_DOCKER_CONFIG !== undefined) {
       configLines.push(`ADVANCED_DOCKER_CONFIG=${newConfig.ADVANCED_DOCKER_CONFIG}`);
+    }
+
+    // Add database configuration section
+    if (newConfig.DATABASE_CONFIG) {
+      configLines.push('');
+      configLines.push('# Database Configuration');
+      configLines.push(`DATABASE_ENABLED=${newConfig.DATABASE_CONFIG.enabled}`);
+      if (newConfig.DATABASE_CONFIG.path) {
+        configLines.push(`DATABASE_PATH=${newConfig.DATABASE_CONFIG.path}`);
+      }
+      configLines.push(`DATABASE_AUTO_MIGRATE=${newConfig.DATABASE_CONFIG.autoMigrate}`);
+      configLines.push(`DATABASE_BACKUP_ON_MIGRATION=${newConfig.DATABASE_CONFIG.backupOnMigration}`);
+      configLines.push(`DATABASE_HEALTH_CHECK_INTERVAL=${newConfig.DATABASE_CONFIG.healthCheckInterval}`);
+      configLines.push(`DATABASE_CONNECTION_TIMEOUT=${newConfig.DATABASE_CONFIG.connectionTimeout}`);
+      configLines.push(`DATABASE_RETRY_ATTEMPTS=${newConfig.DATABASE_CONFIG.retryAttempts}`);
+      configLines.push(`DATABASE_RETRY_DELAY=${newConfig.DATABASE_CONFIG.retryDelay}`);
     }
 
     fs.writeFileSync(this.configFile, configLines.join('\n') + '\n');

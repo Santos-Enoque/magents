@@ -512,10 +512,13 @@ ${task.description}
         ui.info(`Creating agent for task: ${task.title}`);
         
         try {
+          const currentPath = process.cwd();
+          const projectId = require('path').basename(currentPath);
           const result = await this.agentManager.createAgent({
             branch: `task/${agentName}`,
             agentId: `${agentName}-agent`,
-            autoAccept: true
+            autoAccept: true,
+            projectId
           });
           
           if (result.success) {

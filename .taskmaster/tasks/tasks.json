@@ -1258,7 +1258,7 @@
         "id": 31,
         "title": "Setup Electron project foundation",
         "description": "Initialize Electron app structure with main/renderer process architecture and integrate existing React codebase",
-        "status": "pending",
+        "status": "in-progress",
         "dependencies": [],
         "priority": "high",
         "details": "1. Install Electron and essential dependencies (electron, electron-builder, electron-updater)\n2. Create main process entry point (main.js) with BrowserWindow configuration\n3. Setup preload script for secure context bridging\n4. Configure webpack/vite for Electron renderer process\n5. Integrate existing React app as renderer\n6. Setup IPC communication patterns\n7. Configure development environment with hot reload\n8. Add electron-devtools-installer for React DevTools",
@@ -2159,7 +2159,7 @@
         "id": 44,
         "title": "Make ProjectId Mandatory for Agents",
         "description": "Update agent data model and creation flow to require project association",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           42
         ],
@@ -2173,7 +2173,7 @@
             "description": "Make projectId a required field in agent data model",
             "dependencies": [],
             "details": "Modify UnifiedAgentData interface and Zod schema to make projectId required. Remove optional modifier from projectId field. Update all TypeScript types that depend on this.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Type checking tests, schema validation tests"
           },
           {
@@ -2184,7 +2184,7 @@
               1
             ],
             "details": "Add migration to create foreign key constraint on agents.projectId referencing projects.id. Set up cascade rules for updates and restrict deletes. Add appropriate indexes.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Constraint violation tests, cascade behavior tests"
           },
           {
@@ -2195,7 +2195,7 @@
               1
             ],
             "details": "Update agent creation endpoints to validate projectId presence. Return clear error messages when projectId is missing. Check that referenced project exists.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "API validation tests, error message tests"
           },
           {
@@ -2206,7 +2206,7 @@
               3
             ],
             "details": "Update magents create command to check for projectId. Implement logic to auto-create project if not provided (task 45). Show clear messages about project association.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "CLI integration tests with various scenarios"
           },
           {
@@ -2218,7 +2218,7 @@
               3
             ],
             "details": "In migration script, handle agents that don't have projectId. Either assign to existing project based on path matching or create new project. Log decisions made during migration.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Migration tests with legacy agent data"
           }
         ]
@@ -2628,7 +2628,7 @@
     ],
     "metadata": {
       "created": "2025-06-30T14:18:19.843Z",
-      "updated": "2025-07-03T16:09:27.438Z",
+      "updated": "2025-07-03T16:17:15.560Z",
       "description": "Tasks for master context"
     }
   }

@@ -1,3 +1,15 @@
+// Database configuration interfaces
+export interface DatabaseConfig {
+  enabled: boolean;
+  path?: string;
+  autoMigrate: boolean;
+  backupOnMigration: boolean;
+  healthCheckInterval: number; // seconds
+  connectionTimeout: number; // milliseconds
+  retryAttempts: number;
+  retryDelay: number; // milliseconds
+}
+
 // Core configuration interfaces
 export interface MagentsConfig {
   DEFAULT_BASE_BRANCH: string;
@@ -16,6 +28,7 @@ export interface MagentsConfig {
   CUSTOM_COMMANDS_ENABLED?: boolean;
   MCP_DEVELOPMENT_MODE?: boolean;
   ADVANCED_DOCKER_CONFIG?: boolean;
+  DATABASE_CONFIG?: DatabaseConfig;
 }
 
 // Agent interfaces
@@ -27,7 +40,7 @@ export interface Agent {
   status: AgentStatus;
   createdAt: Date;
   updatedAt?: Date;
-  projectId?: string;
+  projectId: string; // Required - agents must be associated with a project
   autoAccept?: boolean;
   useDocker?: boolean;
   config?: Record<string, any>;
@@ -59,7 +72,7 @@ export interface CreateAgentOptions {
   context?: AgentContext;
   useDocker?: boolean;
   dockerOptions?: DockerContainerOptions;
-  projectId?: string;
+  projectId: string; // Required - agents must be associated with a project
 }
 
 export interface AgentRecord {
@@ -71,7 +84,7 @@ export interface AgentRecord {
   context?: AgentContext;
   useDocker?: boolean;
   dockerContainer?: string;
-  projectId?: string;
+  projectId: string; // Required - agents must be associated with a project
   portRange?: string;
 }
 

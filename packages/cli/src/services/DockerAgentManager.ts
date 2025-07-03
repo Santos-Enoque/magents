@@ -5,6 +5,7 @@ import { Agent, AgentRecord, CreateAgentOptions, CommandResult, AgentStatus, Cre
 import { ConfigManager } from '../config/ConfigManager';
 import { GitService } from './GitService';
 import { ui } from '../ui/UIService';
+import { createHash } from 'crypto';
 
 // Extended agent type for Docker agents
 interface DockerAgent extends Agent {
@@ -29,6 +30,17 @@ export class DockerAgentManager {
     const config = this.configManager.loadConfig();
     // Always check for Claude auth volume to determine image
     this.dockerImage = config.DOCKER_IMAGE || 'magents/agent:latest';
+  }
+
+  /**
+   * Generate a consistent project ID based on the project path
+   */
+  private generateProjectId(projectPath: string): string {
+    const normalizedPath = path.resolve(projectPath);
+    const projectName = path.basename(normalizedPath);
+    // Create a short hash from the full path for uniqueness
+    const hash = createHash('md5').update(normalizedPath).digest('hex').substring(0, 8);
+    return `${projectName}-${hash}`;
   }
 
   // Compatibility method for CLI that might check for TmuxService
@@ -65,6 +77,7 @@ export class DockerAgentManager {
       }
 
       const repoRoot = options.projectPath || this.gitService.getRepoRoot();
+      const projectId = options.projectId || this.generateProjectId(repoRoot);
       const containerName = `magents-${agentId}`;
 
       // Prepare shared volumes
@@ -102,6 +115,7 @@ export class DockerAgentManager {
         branch: options.branch,
         worktreePath: repoRoot,
         tmuxSession: containerName,
+        projectId,
         containerName,
         repoRoot,
         status: 'RUNNING',

@@ -3,11 +3,13 @@
 import { Command } from 'commander';
 import inquirer from 'inquirer';
 import fs from 'fs';
+import path from 'path';
 import { DockerAgentManager } from '../services/DockerAgentManager';
 import { ConfigManager } from '../config/ConfigManager';
 import { ui } from '../ui/UIService';
 import { createAutoConfigCommand } from '../commands/autoconfig';
 import { createMigrateCommand } from '../commands/migrate';
+import { createDatabaseCommand } from '../commands/database';
 
 const program = new Command();
 const configManager = ConfigManager.getInstance();
@@ -713,11 +715,14 @@ program
       spinner.start();
       
       // 8. Create the agent
+      const currentPath = process.cwd();
+      const projectId = path.basename(currentPath);
       const result = await agentManager.createAgent({
         branch: branchName,
         agentId,
         autoAccept: creationConfig.autoAccept,
-        useDocker: creationConfig.useDocker
+        useDocker: creationConfig.useDocker,
+        projectId
       });
 
       if (result.success && result.data) {
@@ -1286,10 +1291,13 @@ program
       spinner.start();
 
       try {
+        const currentPath = process.cwd();
+        const projectId = path.basename(currentPath);
         const result = await agentManager.createAgent({
           branch: branchName,
           agentId,
-          autoAccept: true
+          autoAccept: true,
+          projectId
         });
 
         if (result.success && result.data) {
@@ -1578,10 +1586,13 @@ program
         spinner.start();
 
         try {
+          const currentPath = process.cwd();
+          const projectId = path.basename(currentPath);
           const result = await agentManager.createAgent({
             branch: branchName,
             agentId,
-            autoAccept: true
+            autoAccept: true,
+            projectId
           });
 
           if (result.success && result.data) {
@@ -2316,6 +2327,9 @@ program.addCommand(createAutoConfigCommand());
 
 // Add migrate command
 program.addCommand(createMigrateCommand());
+
+// Add database command
+program.addCommand(createDatabaseCommand());
 
 // Override help to show our custom styling
 if (process.argv.includes('--help') || process.argv.includes('-h')) {

@@ -173,12 +173,15 @@ export class CoreIntegrationService {
     try {
       switch (commandName) {
         case 'create-agent':
+          const currentPath = process.cwd();
+          const projectId = require('path').basename(currentPath);
           const agent = await this.dockerManager.createAgent({
             agentId: params.agentId,
             branch: params.branch,
             projectPath: params.projectPath,
             autoAccept: params.autoAccept,
-            useDocker: params.useDocker
+            useDocker: params.useDocker,
+            projectId
           });
           return {
             success: true,
