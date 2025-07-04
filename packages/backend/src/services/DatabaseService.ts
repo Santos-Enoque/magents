@@ -16,7 +16,7 @@ export class DatabaseService {
   private healthCheckInterval?: NodeJS.Timeout;
 
   private constructor() {
-    this.db = UnifiedDatabaseService.getInstance();
+    this.db = new UnifiedDatabaseService();
   }
 
   public static getInstance(): DatabaseService {
@@ -93,8 +93,8 @@ export class DatabaseService {
       }
 
       // Try a simple database operation
-      const projects = await this.db.projectRepo.findAll();
-      const agents = await this.db.agentRepo.findAll();
+      const projects = await this.db.projects.findAll();
+      const agents = await this.db.agents.findAll();
       
       return {
         status: 'healthy',
@@ -128,8 +128,8 @@ export class DatabaseService {
       throw new Error('Database not available');
     }
 
-    const projects = await this.db.projectRepo.findAll();
-    const agents = await this.db.agentRepo.findAll();
+    const projects = await this.db.projects.findAll();
+    const agents = await this.db.agents.findAll();
     const configs = await this.db.configRepo.findAll();
     
     const dbPath = this.db.getDatabasePath();

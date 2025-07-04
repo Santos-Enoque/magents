@@ -79,6 +79,8 @@ var constants_2 = require("./constants");
 Object.defineProperty(exports, "DEFAULT_CONFIG", { enumerable: true, get: function () { return constants_2.DEFAULT_CONFIG; } });
 // Export core GUI-CLI integration functionality
 __exportStar(require("./core"), exports);
+// Export task integration system
+__exportStar(require("./integrations"), exports);
 // Re-export specific commonly used items for convenience
 var utils_1 = require("./utils");
 Object.defineProperty(exports, "generateId", { enumerable: true, get: function () { return utils_1.generateId; } });

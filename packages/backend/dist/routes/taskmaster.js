@@ -141,4 +141,25 @@ router.get('/statistics', async (req, res, next) => {
         next(error);
     }
 });
+// GET /api/taskmaster/agents - Get available agents for project
+router.get('/agents', async (req, res, next) => {
+    try {
+        const { path } = req.query;
+        if (!path || typeof path !== 'string') {
+            return res.status(400).json({
+                success: false,
+                error: 'Path parameter is required'
+            });
+        }
+        const agents = await taskMasterController_1.taskMasterController.getAvailableAgentsForProject(path);
+        const response = {
+            success: true,
+            data: agents
+        };
+        res.json(response);
+    }
+    catch (error) {
+        next(error);
+    }
+});
 //# sourceMappingURL=taskmaster.js.map

@@ -1,5 +1,5 @@
 import { TaskMasterTask } from '@magents/shared';
-import { TaskMasterDetection, TaskAssignment } from '../services/taskMasterIntegration';
+import { TaskMasterDetection, TaskAssignment } from '../services/taskMasterIntegrationWrapper';
 export declare const taskMasterController: {
     /**
      * Detect if TaskMaster is configured in a project
@@ -25,6 +25,10 @@ export declare const taskMasterController: {
      * Update task status
      */
     updateTaskStatus(projectPath: string, taskId: string, status: "pending" | "in-progress" | "done" | "blocked" | "cancelled"): Promise<void>;
+    /**
+     * Get agents available for task assignment in a specific project
+     */
+    getAvailableAgentsForProject(projectPath: string): Promise<any[]>;
     /**
      * Get task statistics for a project
      */

@@ -3,7 +3,7 @@ import { promisify } from 'util';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { TaskMasterConfig } from '@magents/shared';
-import { taskIntegrationManager, TaskData } from '@magents/shared/src/integrations';
+import { taskIntegrationManager, TaskData } from '@magents/shared';
 
 export interface TaskMasterTask {
   id: string;
@@ -133,11 +133,10 @@ export class TaskMasterIntegrationWrapper {
 
     if (taskMasterIntegration) {
       try {
-        const tasks = await taskMasterIntegration.listTasks({
-          projectId: projectPath,
+        const tasks = await taskMasterIntegration.getTasks(projectPath, {
           includeSubtasks: true
         });
-        return tasks.map(task => this.convertTaskDataToTaskMasterTask(task));
+        return tasks.map((task: any) => this.convertTaskDataToTaskMasterTask(task));
       } catch (error) {
         console.warn('Failed to get tasks via integration, falling back to direct method:', error);
       }
@@ -159,7 +158,7 @@ export class TaskMasterIntegrationWrapper {
 
     if (taskMasterIntegration) {
       try {
-        const task = await taskMasterIntegration.getTask(taskId);
+        const task = await taskMasterIntegration.getTask(projectPath, taskId);
         return task ? this.convertTaskDataToTaskMasterTask(task) : null;
       } catch (error) {
         console.warn('Failed to get task via integration, falling back to direct method:', error);
@@ -187,10 +186,9 @@ export class TaskMasterIntegrationWrapper {
 
     if (taskMasterIntegration && taskMasterIntegration.capabilities.canCreate) {
       try {
-        const task = await taskMasterIntegration.createTask({
+        const task = await taskMasterIntegration.createTask(projectPath, {
           title,
           description,
-          status: 'pending',
           priority: priority || 'medium',
           projectId: projectPath
         });
@@ -220,7 +218,7 @@ export class TaskMasterIntegrationWrapper {
 
     if (taskMasterIntegration && taskMasterIntegration.capabilities.canUpdate) {
       try {
-        await taskMasterIntegration.updateTask(taskId, { status });
+        await taskMasterIntegration.updateTask(projectPath, taskId, { status });
         return;
       } catch (error) {
         console.warn('Failed to update task via integration, falling back to direct method:', error);
@@ -246,7 +244,7 @@ export class TaskMasterIntegrationWrapper {
     // So we always use the original implementation
     const originalService = await import('./taskMasterIntegration');
     const service = new originalService.TaskMasterIntegrationService();
-    return service.assignTaskToAgent(agentId, taskId, projectPath, worktreePath);
+    return service.assignTaskToAgent(agentId, taskId, projectPath, worktreePath || projectPath);
   }
 }
 

@@ -10,6 +10,10 @@ const fs_1 = require("fs");
 const path_1 = __importDefault(require("path"));
 const execAsync = (0, util_1.promisify)(child_process_1.exec);
 class TaskMasterIntegrationService {
+    constructor() {
+        this.taskCache = new Map();
+        this.cacheExpiry = 5 * 60 * 1000; // 5 minutes in milliseconds
+    }
     /**
      * Detect if TaskMaster is configured in a project
      */
@@ -56,10 +60,23 @@ class TaskMasterIntegrationService {
      * Get available TaskMaster tasks from a project
      */
     async getTasks(projectPath) {
+        // Check cache first
+        const cacheKey = projectPath;
+        const cached = this.taskCache.get(cacheKey);
+        const now = Date.now();
+        if (cached && (now - cached.timestamp) < this.cacheExpiry) {
+            return cached.tasks;
+        }
         try {
             // First check if TaskMaster is configured
             const detection = await this.detectTaskMaster(projectPath);
             if (!detection.isConfigured || !detection.tasksPath) {
+                // Cache empty result
+                this.taskCache.set(cacheKey, {
+                    tasks: [],
+                    timestamp: now,
+                    projectPath
+                });
                 return [];
             }
             // Execute task-master list command with JSON output
@@ -70,10 +87,17 @@ class TaskMasterIntegrationService {
             // Parse the JSON output
             const tasksData = JSON.parse(stdout);
             // Extract tasks from the structure
+            let tasks = [];
             if (tasksData && tasksData.master && tasksData.master.tasks) {
-                return this.flattenTasks(tasksData.master.tasks);
+                tasks = this.flattenTasks(tasksData.master.tasks);
             }
-            return [];
+            // Cache the result
+            this.taskCache.set(cacheKey, {
+                tasks,
+                timestamp: now,
+                projectPath
+            });
+            return tasks;
         }
         catch (error) {
             console.error('Error getting TaskMaster tasks:', error);
@@ -82,13 +106,27 @@ class TaskMasterIntegrationService {
                 const tasksPath = path_1.default.join(projectPath, '.taskmaster', 'tasks', 'tasks.json');
                 const tasksContent = await fs_1.promises.readFile(tasksPath, 'utf-8');
                 const tasksData = JSON.parse(tasksContent);
+                let tasks = [];
                 if (tasksData && tasksData.master && tasksData.master.tasks) {
-                    return this.flattenTasks(tasksData.master.tasks);
+                    tasks = this.flattenTasks(tasksData.master.tasks);
                 }
+                // Cache the fallback result
+                this.taskCache.set(cacheKey, {
+                    tasks,
+                    timestamp: now,
+                    projectPath
+                });
+                return tasks;
             }
             catch (fallbackError) {
                 console.error('Fallback task reading failed:', fallbackError);
             }
+            // Cache empty result on complete failure
+            this.taskCache.set(cacheKey, {
+                tasks: [],
+                timestamp: now,
+                projectPath
+            });
             return [];
         }
     }
@@ -178,12 +216,16 @@ class TaskMasterIntegrationService {
             // Parse the output to extract the created task ID
             const taskIdMatch = stdout.match(/Task (\d+(?:\.\d+)*) added successfully/);
             if (taskIdMatch && taskIdMatch[1]) {
+                // Invalidate cache since we added a new task
+                this.invalidateCache(projectPath);
                 const newTaskId = taskIdMatch[1];
                 const task = await this.getTaskDetails(projectPath, newTaskId);
                 if (task) {
                     return task;
                 }
             }
+            // Invalidate cache even if we couldn't parse the task ID
+            this.invalidateCache(projectPath);
             // If we couldn't parse the task ID, return a minimal task object
             return {
                 id: 'temp-' + Date.now(),
@@ -205,10 +247,24 @@ class TaskMasterIntegrationService {
             await execAsync(`task-master set-status --id=${taskId} --status=${status}`, {
                 cwd: projectPath
             });
+            // Invalidate cache for this project
+            this.invalidateCache(projectPath);
         }
         catch (error) {
             throw new Error(`Failed to update task status: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
+    }
+    /**
+     * Invalidate cache for a specific project
+     */
+    invalidateCache(projectPath) {
+        this.taskCache.delete(projectPath);
+    }
+    /**
+     * Clear all cached tasks
+     */
+    clearCache() {
+        this.taskCache.clear();
     }
     /**
      * Generate a task briefing for an agent

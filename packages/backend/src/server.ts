@@ -14,8 +14,8 @@ import { errorHandler } from './middleware/errorHandler';
 import { logger } from './middleware/logger';
 import { setupWebSocket } from './services/websocket';
 import { DatabaseService } from './services/DatabaseService';
-import { registerTaskMasterIntegration } from '@magents/shared/src/integrations/taskmaster/registry';
-import { registerInternalTaskIntegration } from '@magents/shared/src/integrations/internal';
+// import { registerTaskMasterIntegration } from '@magents/shared/src/integrations/taskmaster/registry';
+// import { registerInternalTaskIntegration } from '@magents/shared/src/integrations/internal';
 
 const app = express();
 const server = createServer(app);
@@ -27,7 +27,12 @@ const io = new SocketIOServer(server, {
 });
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:4000",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "Cache-Control", "Connection"]
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(logger);
@@ -59,8 +64,8 @@ async function initializeServices() {
     
     // Register task integrations
     console.log('📋 Registering task integrations...');
-    registerTaskMasterIntegration();
-    registerInternalTaskIntegration();
+    // registerTaskMasterIntegration();
+    // registerInternalTaskIntegration();
     
     console.log('✅ Services initialized successfully');
   } catch (error) {

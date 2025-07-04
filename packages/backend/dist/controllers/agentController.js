@@ -46,7 +46,7 @@ exports.agentController = {
         let allAgents = await getAgentManager().getActiveAgents();
         // Filter by status if provided
         if (status) {
-            allAgents = allAgents.filter(agent => agent.status === status);
+            allAgents = allAgents.filter((agent) => agent.status === status);
         }
         const total = allAgents.length;
         const totalPages = Math.ceil(total / limit);
@@ -268,7 +268,7 @@ exports.agentController = {
                 console.warn(`Failed to remove agent ${agentId} from project ${agent.projectId}:`, error);
             }
             // Update agent to remove project assignment
-            agent.projectId = undefined;
+            agent.projectId = '';
             agent.updatedAt = new Date();
         }
         return agent;
@@ -278,7 +278,7 @@ exports.agentController = {
         await getProjectManager().getProject(projectId);
         // Get all agents and filter by project
         const allAgents = await getAgentManager().getActiveAgents();
-        return allAgents.filter(agent => agent.projectId === projectId);
+        return allAgents.filter((agent) => agent.projectId === projectId);
     },
     async assignTaskToAgent(agentId, taskId) {
         const agent = await this.getAgent(agentId);

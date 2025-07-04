@@ -17,6 +17,7 @@ export { MigrationResult as ConfigMigrationResult } from './migration/ConfigMigr
 export { DEFAULT_DATABASE_CONFIG, PORT_RANGES, AGENT_STATUS, PROJECT_STATUS, TASK_STATUS, TASK_PRIORITY, ERROR_CODES, WS_EVENTS, API_ENDPOINTS } from './constants';
 export { DEFAULT_CONFIG } from './constants';
 export * from './core';
+export * from './integrations';
 export { generateId, generateAgentId, sanitizeBranchName, createSuccessResult, createErrorResult, delay, retry, deepMerge, formatDate, getRelativeTime, } from './utils';
 export declare const VERSION = "1.0.0";
 export declare const PACKAGE_INFO: {

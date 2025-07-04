@@ -9,8 +9,8 @@ import {
   TaskNotFoundError,
   TaskStatus,
   TaskPriority
-} from './TaskIntegration';
-import { BaseTaskIntegrationFactory } from './TaskIntegrationFactory';
+} from '../TaskIntegration';
+import { BaseTaskIntegrationFactory } from '../TaskIntegrationFactory';
 
 /**
  * TaskMaster Integration

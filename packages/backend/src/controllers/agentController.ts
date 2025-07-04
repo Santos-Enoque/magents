@@ -16,7 +16,7 @@ export const agentController = {
     
     // Filter by status if provided
     if (status) {
-      allAgents = allAgents.filter(agent => agent.status === status);
+      allAgents = allAgents.filter((agent: Agent) => agent.status === status);
     }
     
     const total = allAgents.length;
@@ -267,7 +267,7 @@ export const agentController = {
       }
 
       // Update agent to remove project assignment
-      agent.projectId = undefined;
+      agent.projectId = '' as any;
       agent.updatedAt = new Date();
     }
 
@@ -280,7 +280,7 @@ export const agentController = {
 
     // Get all agents and filter by project
     const allAgents = await getAgentManager().getActiveAgents();
-    return allAgents.filter(agent => agent.projectId === projectId);
+    return allAgents.filter((agent: Agent) => agent.projectId === projectId);
   },
 
   async assignTaskToAgent(agentId: string, taskId: string): Promise<Agent> {

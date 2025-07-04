@@ -32,6 +32,8 @@ export interface TaskAssignment {
     environment: Record<string, string>;
 }
 export declare class TaskMasterIntegrationService {
+    private taskCache;
+    private cacheExpiry;
     /**
      * Detect if TaskMaster is configured in a project
      */
@@ -56,6 +58,14 @@ export declare class TaskMasterIntegrationService {
      * Update task status
      */
     updateTaskStatus(projectPath: string, taskId: string, status: 'pending' | 'in-progress' | 'done' | 'blocked' | 'cancelled'): Promise<void>;
+    /**
+     * Invalidate cache for a specific project
+     */
+    private invalidateCache;
+    /**
+     * Clear all cached tasks
+     */
+    clearCache(): void;
     /**
      * Generate a task briefing for an agent
      */

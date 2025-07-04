@@ -21,7 +21,7 @@ export class ProjectManagerDB {
   private initialized = false;
 
   private constructor() {
-    this.db = UnifiedDatabaseService.getInstance();
+    this.db = new UnifiedDatabaseService();
   }
 
   public static getInstance(): ProjectManagerDB {
@@ -41,7 +41,7 @@ export class ProjectManagerDB {
   public async listProjects(): Promise<Project[]> {
     await this.ensureInitialized();
     
-    const projects = await this.db.projectRepo.findAll();
+    const projects = await this.db.projects.findAll();
     
     // Convert UnifiedProjectData to Project format
     return projects.map(this.convertToProject).sort((a, b) => 
@@ -52,7 +52,7 @@ export class ProjectManagerDB {
   public async getProject(id: string): Promise<Project> {
     await this.ensureInitialized();
     
-    const project = await this.db.projectRepo.findById(id);
+    const project = await this.db.projects.findById(id);
     if (!project) {
       throw new Error(`Project with id ${id} not found`);
     }
@@ -66,7 +66,7 @@ export class ProjectManagerDB {
     const projectId = generateId('proj');
     
     // Check if project with same name exists
-    const existingProjects = await this.db.projectRepo.findAll();
+    const existingProjects = await this.db.projects.findAll();
     const existingProject = existingProjects.find(p => p.name === options.name);
     if (existingProject) {
       throw new Error(`Project with name ${options.name} already exists`);
@@ -84,6 +84,8 @@ export class ProjectManagerDB {
       status: 'ACTIVE' as const,
       maxAgents: 5,
       taskMasterEnabled: false,
+      tags: [],
+      agentIds: [],
       createdAt: new Date(),
       updatedAt: new Date(),
       metadata: {}
@@ -95,7 +97,7 @@ export class ProjectManagerDB {
       if (isNaN(start) || isNaN(end) || start >= end) {
         throw new Error('Invalid port range format. Use "start-end" format (e.g., "3000-3010")');
       }
-      projectData.portRange = `${start}-${end}`;
+      projectData.portRange = { start, end };
     }
     
     if (options.docker) {
@@ -110,7 +112,7 @@ export class ProjectManagerDB {
       };
     }
     
-    await this.db.projectRepo.create(projectData);
+    await this.db.projects.create(projectData);
     
     return this.convertToProject(projectData);
   }
@@ -118,14 +120,14 @@ export class ProjectManagerDB {
   public async updateProject(id: string, updates: Partial<Project>): Promise<Project> {
     await this.ensureInitialized();
     
-    const existingProject = await this.db.projectRepo.findById(id);
+    const existingProject = await this.db.projects.findById(id);
     if (!existingProject) {
       throw new Error(`Project with id ${id} not found`);
     }
     
     // Check if name is being changed and if it conflicts
     if (updates.name && updates.name !== existingProject.name) {
-      const allProjects = await this.db.projectRepo.findAll();
+      const allProjects = await this.db.projects.findAll();
       const conflictingProject = allProjects.find(p => p.name === updates.name && p.id !== id);
       if (conflictingProject) {
         throw new Error(`Project with name ${updates.name} already exists`);
@@ -146,7 +148,7 @@ export class ProjectManagerDB {
     };
 
     if (updates.portRange) {
-      dataUpdates.portRange = `${updates.portRange[0]}-${updates.portRange[1]}`;
+      dataUpdates.portRange = { start: updates.portRange[0], end: updates.portRange[1] };
     }
 
     if (updates.dockerNetwork) {
@@ -161,7 +163,7 @@ export class ProjectManagerDB {
       };
     }
     
-    const updatedProject = await this.db.projectRepo.update(id, dataUpdates);
+    const updatedProject = await this.db.projects.update(id, dataUpdates);
     if (!updatedProject) {
       throw new Error(`Failed to update project ${id}`);
     }
@@ -172,21 +174,21 @@ export class ProjectManagerDB {
   public async deleteProject(id: string): Promise<void> {
     await this.ensureInitialized();
     
-    const project = await this.db.projectRepo.findById(id);
+    const project = await this.db.projects.findById(id);
     if (!project) {
       throw new Error(`Project with id ${id} not found`);
     }
     
     // Get all agents in the project
-    const agents = await this.db.agentRepo.findByProject(id);
+    const agents = await this.db.agents.findByProject(id);
     
     // Delete all agents first (this will handle cleanup)
     for (const agent of agents) {
-      await this.db.agentRepo.delete(agent.id);
+      await this.db.agents.delete(agent.id);
     }
     
     // Delete the project
-    const deleted = await this.db.projectRepo.delete(id);
+    const deleted = await this.db.projects.delete(id);
     if (!deleted) {
       throw new Error(`Failed to delete project ${id}`);
     }
@@ -196,28 +198,28 @@ export class ProjectManagerDB {
     await this.ensureInitialized();
     
     // Verify project exists
-    const project = await this.db.projectRepo.findById(projectId);
+    const project = await this.db.projects.findById(projectId);
     if (!project) {
       throw new Error(`Project with id ${projectId} not found`);
     }
     
     // Update agent's projectId
-    const agent = await this.db.agentRepo.findById(agentId);
+    const agent = await this.db.agents.findById(agentId);
     if (!agent) {
       throw new Error(`Agent with id ${agentId} not found`);
     }
     
-    await this.db.agentRepo.update(agentId, { 
+    await this.db.agents.update(agentId, { 
       projectId,
       updatedAt: new Date()
     });
     
     // Update project's updatedAt
-    await this.db.projectRepo.update(projectId, { 
+    await this.db.projects.update(projectId, { 
       updatedAt: new Date() 
     });
     
-    const updatedProject = await this.db.projectRepo.findById(projectId);
+    const updatedProject = await this.db.projects.findById(projectId);
     return this.convertToProject(updatedProject!);
   }
 
@@ -225,26 +227,26 @@ export class ProjectManagerDB {
     await this.ensureInitialized();
     
     // Verify project exists
-    const project = await this.db.projectRepo.findById(projectId);
+    const project = await this.db.projects.findById(projectId);
     if (!project) {
       throw new Error(`Project with id ${projectId} not found`);
     }
     
     // Update agent to remove projectId
-    const agent = await this.db.agentRepo.findById(agentId);
+    const agent = await this.db.agents.findById(agentId);
     if (agent && agent.projectId === projectId) {
-      await this.db.agentRepo.update(agentId, { 
+      await this.db.agents.update(agentId, { 
         projectId: undefined,
         updatedAt: new Date()
       });
     }
     
     // Update project's updatedAt
-    await this.db.projectRepo.update(projectId, { 
+    await this.db.projects.update(projectId, { 
       updatedAt: new Date() 
     });
     
-    const updatedProject = await this.db.projectRepo.findById(projectId);
+    const updatedProject = await this.db.projects.findById(projectId);
     return this.convertToProject(updatedProject!);
   }
 
@@ -256,13 +258,13 @@ export class ProjectManagerDB {
   }> {
     await this.ensureInitialized();
     
-    const project = await this.db.projectRepo.findById(id);
+    const project = await this.db.projects.findById(id);
     if (!project) {
       throw new Error(`Project with id ${id} not found`);
     }
     
     // Get agent count
-    const agents = await this.db.agentRepo.findByProject(id);
+    const agents = await this.db.agents.findByProject(id);
     
     return {
       agentCount: agents.length,
@@ -291,7 +293,7 @@ export class ProjectManagerDB {
   public async searchProjects(query: string): Promise<Project[]> {
     await this.ensureInitialized();
     
-    const projects = await this.db.projectRepo.findAll();
+    const projects = await this.db.projects.findAll();
     const lowerQuery = query.toLowerCase();
     
     const filtered = projects.filter(project => {
@@ -310,7 +312,7 @@ export class ProjectManagerDB {
   public async getProjectsByStatus(status: ProjectStatus): Promise<Project[]> {
     await this.ensureInitialized();
     
-    const projects = await this.db.projectRepo.findAll();
+    const projects = await this.db.projects.findAll();
     const filtered = projects.filter(project => project.status === status);
     
     return filtered.map(this.convertToProject);
@@ -319,10 +321,10 @@ export class ProjectManagerDB {
   public async getProjectSettings(id: string): Promise<Record<string, any>> {
     await this.ensureInitialized();
     
-    const config = await this.db.configRepo.findByKey(`project_${id}_settings`);
-    
-    if (config && config.value) {
-      return config.value as Record<string, any>;
+    // TODO: Implement project-specific settings storage
+    const project = await this.db.projects.findById(id);
+    if (project && project.metadata && project.metadata.settings) {
+      return project.metadata.settings as Record<string, any>;
     }
     
     // Return default settings
@@ -333,7 +335,7 @@ export class ProjectManagerDB {
     await this.ensureInitialized();
     
     // Verify project exists
-    const project = await this.db.projectRepo.findById(id);
+    const project = await this.db.projects.findById(id);
     if (!project) {
       throw new Error(`Project with id ${id} not found`);
     }
@@ -349,10 +351,10 @@ export class ProjectManagerDB {
     };
     
     // Save to database
-    await this.db.configRepo.upsert({
-      key: `project_${id}_settings`,
-      value: updatedSettings,
-      createdAt: new Date(),
+    // TODO: Implement project-specific settings storage
+    // For now, store in project metadata
+    await this.db.projects.update(id, {
+      metadata: { ...project.metadata, settings: updatedSettings },
       updatedAt: new Date()
     });
     
@@ -363,7 +365,7 @@ export class ProjectManagerDB {
     await this.ensureInitialized();
     
     // Verify project exists
-    const project = await this.db.projectRepo.findById(id);
+    const project = await this.db.projects.findById(id);
     if (!project) {
       throw new Error(`Project with id ${id} not found`);
     }
@@ -379,10 +381,7 @@ export class ProjectManagerDB {
    * Convert UnifiedProjectData to Project format for backward compatibility
    */
   private convertToProject(data: UnifiedProjectData): Project {
-    const agents = this.db.agentRepo.findByProject(data.id)
-      .then(agents => agents.map(a => a.id))
-      .catch(() => []);
-    
+    // Note: agents will be populated separately when needed
     const project: Project = {
       id: data.id,
       name: data.name,
@@ -395,8 +394,7 @@ export class ProjectManagerDB {
     
     // Add optional fields
     if (data.portRange) {
-      const [start, end] = data.portRange.split('-').map(Number);
-      project.portRange = [start, end];
+      project.portRange = [data.portRange.start, data.portRange.end];
     }
     
     if (data.dockerNetwork) {
@@ -497,11 +495,8 @@ export class ProjectManagerDB {
   }> {
     await this.ensureInitialized();
     
-    const config = await this.db.configRepo.findByKey(`template_${templateName}`);
-    
-    if (config && config.value) {
-      return config.value as any;
-    }
+    // TODO: Implement template storage
+    // For now, just return default template
     
     // Return default template
     return this.getDefaultTemplate(templateName);
@@ -515,24 +510,15 @@ export class ProjectManagerDB {
   }): Promise<void> {
     await this.ensureInitialized();
     
-    await this.db.configRepo.upsert({
-      key: `template_${templateName}`,
-      value: {
-        ...template,
-        updatedAt: new Date().toISOString()
-      },
-      createdAt: new Date(),
-      updatedAt: new Date()
-    });
+    // TODO: Implement template storage
+    throw new Error('Template storage not yet implemented');
   }
 
   public async listProjectTemplates(): Promise<string[]> {
     await this.ensureInitialized();
     
-    const configs = await this.db.configRepo.findAll();
-    const templateKeys = configs
-      .filter(c => c.key.startsWith('template_'))
-      .map(c => c.key.replace('template_', ''));
+    // TODO: Implement template storage
+    const templateKeys: string[] = [];
     
     // Include default templates
     const defaultTemplates = ['basic', 'node', 'react', 'python'];

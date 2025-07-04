@@ -1,4 +1,4 @@
-import { DockerAgentManager } from '@magents/cli';
+import { AgentManager } from '@magents/cli';
 import { AgentManagerDB } from './AgentManagerDB';
 /**
  * AgentService factory that provides the appropriate implementation
@@ -11,7 +11,7 @@ export declare class AgentService {
      * Get the appropriate AgentManager implementation
      * This allows for graceful transition from CLI-only to database-backed storage
      */
-    static getInstance(): AgentManagerDB | DockerAgentManager;
+    static getInstance(): AgentManagerDB | AgentManager;
     /**
      * Force the service to use database implementation
      * Useful after running migration

@@ -1,4 +1,4 @@
-import { AgentManager, DockerAgentManager } from '@magents/cli';
+import { AgentManager } from '@magents/cli';
 import { AgentManagerDB } from './AgentManagerDB';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -9,14 +9,14 @@ import * as os from 'os';
  * based on whether the database has been initialized
  */
 export class AgentService {
-  private static instance: AgentManagerDB | DockerAgentManager;
+  private static instance: AgentManagerDB | AgentManager;
   private static useDatabase: boolean = false;
 
   /**
    * Get the appropriate AgentManager implementation
    * This allows for graceful transition from CLI-only to database-backed storage
    */
-  public static getInstance(): AgentManagerDB | DockerAgentManager {
+  public static getInstance(): AgentManagerDB | AgentManager {
     if (!AgentService.instance) {
       // Check if database file exists to determine which implementation to use
       const dbPath = path.join(os.homedir(), '.magents', 'magents.db');
@@ -27,7 +27,7 @@ export class AgentService {
         AgentService.instance = AgentManagerDB.getInstance();
       } else {
         console.log('[AgentService] Using CLI-only implementation');
-        AgentService.instance = new DockerAgentManager();
+        AgentService.instance = new AgentManager();
       }
     }
     

@@ -5,11 +5,11 @@ export declare const agentController: {
         limit: number;
         status?: string;
     }): Promise<{
-        agents: any;
+        agents: Agent[];
         pagination: {
             page: number;
             limit: number;
-            total: any;
+            total: number;
             totalPages: number;
         };
     }>;

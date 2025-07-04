@@ -59,7 +59,7 @@ class AgentService {
             }
             else {
                 console.log('[AgentService] Using CLI-only implementation');
-                AgentService.instance = new cli_1.DockerAgentManager();
+                AgentService.instance = new cli_1.AgentManager();
             }
         }
         return AgentService.instance;

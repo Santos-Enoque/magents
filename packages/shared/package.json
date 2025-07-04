@@ -24,6 +24,10 @@
     "./constants": {
       "types": "./dist/constants.d.ts",
       "default": "./dist/constants.js"
+    },
+    "./src/config/features": {
+      "types": "./dist/config/features.d.ts",
+      "default": "./dist/config/features.js"
     }
   },
   "scripts": {

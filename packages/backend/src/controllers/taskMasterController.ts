@@ -164,7 +164,7 @@ export const taskMasterController = {
     
     // Filter to only show agents that are available for task assignment
     return agents.filter(agent => 
-      agent.status === 'RUNNING' || agent.status === 'CREATED'
+      agent.status === 'RUNNING'
     );
   },
 

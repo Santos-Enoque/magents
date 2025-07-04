@@ -26,6 +26,11 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:3001';
     const newSocket = io(WS_URL, {
       transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 5,
+      timeout: 20000,
     });
 
     newSocket.on('connect', () => {
@@ -37,7 +42,20 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     newSocket.on('disconnect', (reason) => {
       console.log('WebSocket disconnected:', reason);
       setIsConnected(false);
-      toast.warning('Disconnected from Magents server');
+      if (reason === 'io server disconnect') {
+        toast.error('Server disconnected the connection');
+      } else if (reason === 'transport close' || reason === 'transport error') {
+        toast.warning('Connection lost. Retrying...');
+      } else {
+        toast.warning('Disconnected from Magents server');
+      }
+    });
+
+    newSocket.on('connect_error', (error) => {
+      console.error('WebSocket connection error:', error);
+      if (error.type === 'TransportError') {
+        toast.error('Cannot connect to Magents server. Is it running on port 3001?');
+      }
     });
 
     newSocket.on('message', (message: WebSocketMessage) => {

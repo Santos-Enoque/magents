@@ -15,10 +15,13 @@ const config_1 = require("./routes/config");
 const health_1 = require("./routes/health");
 const taskmaster_1 = require("./routes/taskmaster");
 const metrics_1 = require("./routes/metrics");
+const features_1 = require("./routes/features");
 const errorHandler_1 = require("./middleware/errorHandler");
 const logger_1 = require("./middleware/logger");
 const websocket_1 = require("./services/websocket");
 const DatabaseService_1 = require("./services/DatabaseService");
+const registry_1 = require("@magents/shared/src/integrations/taskmaster/registry");
+const internal_1 = require("@magents/shared/src/integrations/internal");
 const app = (0, express_1.default)();
 exports.app = app;
 const server = (0, http_1.createServer)(app);
@@ -42,6 +45,7 @@ app.use(shared_1.API_ENDPOINTS.PROJECTS, projects_1.projectRoutes);
 app.use(shared_1.API_ENDPOINTS.CONFIG, config_1.configRoutes);
 app.use('/api/taskmaster', taskmaster_1.taskMasterRoutes);
 app.use('/api/metrics', metrics_1.metricsRoutes);
+app.use('/api/features', features_1.featureRoutes);
 // WebSocket setup
 const websocketService = (0, websocket_1.setupWebSocket)(io);
 exports.websocketService = websocketService;
@@ -53,6 +57,10 @@ async function initializeServices() {
         console.log('🔧 Initializing services...');
         const dbService = DatabaseService_1.DatabaseService.getInstance();
         await dbService.initialize();
+        // Register task integrations
+        console.log('📋 Registering task integrations...');
+        (0, registry_1.registerTaskMasterIntegration)();
+        (0, internal_1.registerInternalTaskIntegration)();
         console.log('✅ Services initialized successfully');
     }
     catch (error) {

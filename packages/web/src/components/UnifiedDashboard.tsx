@@ -13,6 +13,7 @@ import { KeyboardShortcutsModal } from './KeyboardShortcutsModal';
 import { CommandPalette } from './CommandPalette';
 import { useRealTime } from './RealTimeProvider';
 import { useKeyboardShortcuts, createCommonShortcuts } from '../hooks/useKeyboardShortcuts';
+import { ConnectionDiagnostics } from './ConnectionDiagnostics';
 import {
   ChevronDownIcon,
   ChevronUpIcon,
@@ -235,6 +236,17 @@ export const UnifiedDashboard: React.FC = () => {
           isLoading={agentsLoading || projectsLoading}
         />
       </CollapsibleSection>
+
+      {/* Connection Diagnostics - Temporary for debugging */}
+      {process.env.NODE_ENV === 'development' && (
+        <CollapsibleSection
+          title="Connection Diagnostics"
+          isExpanded={true}
+          onToggle={() => {}}
+        >
+          <ConnectionDiagnostics />
+        </CollapsibleSection>
+      )}
 
       {/* Quick Actions */}
       <QuickActions 

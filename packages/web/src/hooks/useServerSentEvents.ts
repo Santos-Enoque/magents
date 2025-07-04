@@ -59,7 +59,12 @@ export const useServerSentEvents = (
     setError(null);
 
     try {
-      const eventSource = new EventSource(url);
+      // Handle both relative and absolute URLs
+      const fullUrl = url.startsWith('http') 
+        ? url 
+        : `${window.location.protocol}//${window.location.host}${url}`;
+      
+      const eventSource = new EventSource(fullUrl);
       eventSourceRef.current = eventSource;
 
       eventSource.onopen = () => {
