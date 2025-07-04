@@ -87,7 +87,11 @@ class ApiService {
   // Agents
   async getAgents(params?: { page?: number; limit?: number; status?: string }) {
     const queryString = params ? '?' + new URLSearchParams(params as any).toString() : '';
-    const response = await this.request<Agent[]>(`/api/agents${queryString}`);
+    const response = await this.request<PaginatedResponse<Agent>>(`/api/agents${queryString}`);
+    // Handle both paginated and array responses
+    if (response && 'data' in response) {
+      return response.data;
+    }
     return Array.isArray(response) ? response : [];
   }
 

@@ -44,31 +44,15 @@ export class AgentManagerDB {
   public async getActiveAgents(): Promise<Agent[]> {
     await this.ensureInitialized();
     
-    // Get agents from database
-    const dbAgents = await this.db.agents.findAll();
-    
-    // Get running agents from CLI to sync status
+    // Get all agents from CLI
     const cliAgents = this.cliAgentManager.getActiveAgents();
-    const cliAgentIds = new Set(cliAgents.map(a => a.id));
     
-    // Update status based on CLI state
-    for (const dbAgent of dbAgents) {
-      const isRunning = cliAgentIds.has(dbAgent.id);
-      const currentStatus = isRunning ? 'RUNNING' : 'STOPPED';
-      
-      if (dbAgent.status !== currentStatus) {
-        // Update status directly in database
-        const stmt = this.db.prepare(`
-          UPDATE agents SET status = ? WHERE id = ?
-        `);
-        stmt.run(currentStatus, dbAgent.id);
-      }
-    }
-    
-    // Refresh from database after status sync
-    const updatedAgents = await this.db.agents.findAll();
-    
-    return updatedAgents.map(this.convertToAgent);
+    // For now, just return all CLI agents directly
+    // This bypasses the database sync issues while still showing all agents
+    return cliAgents.map(agent => ({
+      ...agent,
+      projectId: agent.projectId || 'cli-agents-default'
+    }));
   }
 
   public async getAgent(id: string): Promise<Agent | null> {
@@ -457,6 +441,58 @@ export class AgentManagerDB {
         success: false,
         message: error instanceof Error ? error.message : 'Failed to delete agent'
       };
+    }
+  }
+
+  /**
+   * Get or create a default project for CLI agents
+   */
+  private async getOrCreateDefaultProject(): Promise<string> {
+    const defaultProjectId = 'cli-agents-default';
+    
+    // Check if default project exists
+    const existingProject = await this.db.projects.findById(defaultProjectId);
+    if (existingProject) {
+      return defaultProjectId;
+    }
+    
+    // Create default project for CLI agents
+    try {
+      await this.db.projects.create({
+        id: defaultProjectId,
+        name: 'CLI Agents',
+        description: 'Default project for agents created via CLI',
+        path: process.cwd(),
+        status: 'ACTIVE',
+        agentIds: [],
+        gitRepository: {
+          branch: 'main',
+          isClean: true
+        },
+        portRange: { start: 8000, end: 8999 },
+        taskMasterConfig: {
+          initialized: false
+        },
+        projectType: {
+          type: 'unknown' as any,
+          frameworks: [],
+          detectedAt: new Date()
+        },
+        taskMasterEnabled: false,
+        maxAgents: 10,
+        dockerNetwork: 'magents-default',
+        tags: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        metadata: {
+          isDefault: true,
+          createdBy: 'system'
+        }
+      });
+      return defaultProjectId;
+    } catch (error) {
+      console.warn('Failed to create default project, using hardcoded ID:', error);
+      return defaultProjectId;
     }
   }
 }

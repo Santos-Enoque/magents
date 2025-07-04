@@ -41,7 +41,7 @@ const child_process_1 = require("child_process");
 const util_1 = require("util");
 const fs_1 = require("fs");
 const path_1 = __importDefault(require("path"));
-const integrations_1 = require("@magents/shared/src/integrations");
+const shared_1 = require("@magents/shared");
 const execAsync = (0, util_1.promisify)(child_process_1.exec);
 /**
  * Wrapper service that maintains backward compatibility
@@ -117,15 +117,14 @@ class TaskMasterIntegrationWrapper {
      */
     async getTasks(projectPath) {
         // Try to get tasks via the integration system
-        const integrations = await integrations_1.taskIntegrationManager.getActiveIntegrations();
+        const integrations = await shared_1.taskIntegrationManager.getActiveIntegrations();
         const taskMasterIntegration = integrations.find(i => i.name === 'TaskMaster CLI');
         if (taskMasterIntegration) {
             try {
-                const tasks = await taskMasterIntegration.listTasks({
-                    projectId: projectPath,
+                const tasks = await taskMasterIntegration.getTasks(projectPath, {
                     includeSubtasks: true
                 });
-                return tasks.map(task => this.convertTaskDataToTaskMasterTask(task));
+                return tasks.map((task) => this.convertTaskDataToTaskMasterTask(task));
             }
             catch (error) {
                 console.warn('Failed to get tasks via integration, falling back to direct method:', error);
@@ -141,11 +140,11 @@ class TaskMasterIntegrationWrapper {
      */
     async getTaskDetails(projectPath, taskId) {
         // Try to get task via the integration system
-        const integrations = await integrations_1.taskIntegrationManager.getActiveIntegrations();
+        const integrations = await shared_1.taskIntegrationManager.getActiveIntegrations();
         const taskMasterIntegration = integrations.find(i => i.name === 'TaskMaster CLI');
         if (taskMasterIntegration) {
             try {
-                const task = await taskMasterIntegration.getTask(taskId);
+                const task = await taskMasterIntegration.getTask(projectPath, taskId);
                 return task ? this.convertTaskDataToTaskMasterTask(task) : null;
             }
             catch (error) {
@@ -162,14 +161,13 @@ class TaskMasterIntegrationWrapper {
      */
     async createTask(projectPath, title, description, priority) {
         // Try to create task via the integration system
-        const integrations = await integrations_1.taskIntegrationManager.getActiveIntegrations();
+        const integrations = await shared_1.taskIntegrationManager.getActiveIntegrations();
         const taskMasterIntegration = integrations.find(i => i.name === 'TaskMaster CLI');
         if (taskMasterIntegration && taskMasterIntegration.capabilities.canCreate) {
             try {
-                const task = await taskMasterIntegration.createTask({
+                const task = await taskMasterIntegration.createTask(projectPath, {
                     title,
                     description,
-                    status: 'pending',
                     priority: priority || 'medium',
                     projectId: projectPath
                 });
@@ -189,11 +187,11 @@ class TaskMasterIntegrationWrapper {
      */
     async updateTaskStatus(projectPath, taskId, status) {
         // Try to update via the integration system
-        const integrations = await integrations_1.taskIntegrationManager.getActiveIntegrations();
+        const integrations = await shared_1.taskIntegrationManager.getActiveIntegrations();
         const taskMasterIntegration = integrations.find(i => i.name === 'TaskMaster CLI');
         if (taskMasterIntegration && taskMasterIntegration.capabilities.canUpdate) {
             try {
-                await taskMasterIntegration.updateTask(taskId, { status });
+                await taskMasterIntegration.updateTask(projectPath, taskId, { status });
                 return;
             }
             catch (error) {
@@ -213,7 +211,7 @@ class TaskMasterIntegrationWrapper {
         // So we always use the original implementation
         const originalService = await Promise.resolve().then(() => __importStar(require('./taskMasterIntegration')));
         const service = new originalService.TaskMasterIntegrationService();
-        return service.assignTaskToAgent(agentId, taskId, projectPath, worktreePath);
+        return service.assignTaskToAgent(agentId, taskId, projectPath, worktreePath || projectPath);
     }
 }
 exports.TaskMasterIntegrationWrapper = TaskMasterIntegrationWrapper;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Zap, Settings2, Wrench, ArrowUp, ArrowDown, AlertTriangle, Info } from 'lucide-react';
+import { Zap, Settings2, Wrench, ArrowUp, ArrowDown, AlertTriangle, Info, HelpCircle, ChevronDown } from 'lucide-react';
 import { ComplexityMode, WizardFormData } from '../AgentCreationWizard';
 import { ModeChangeConfirmModal } from '../ModeChangeConfirmModal';
 
@@ -235,62 +235,145 @@ export const ComplexityModeStep: React.FC<ComplexityModeStepProps> = ({
     setPendingMode(null);
   };
 
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showModeHelp, setShowModeHelp] = useState<ComplexityMode | null>(null);
+  
+  const selectedMode = COMPLEXITY_MODES.find(m => m.mode === formData.complexityMode);
+  const SelectedIcon = selectedMode?.icon || Zap;
+  
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {COMPLEXITY_MODES.map((option) => {
-          const Icon = option.icon;
-          const isSelected = formData.complexityMode === option.mode;
-          
-          return (
-            <button
-              key={option.mode}
-              onClick={() => handleModeSelection(option.mode)}
-              className={`
-                relative p-6 rounded-lg border-2 transition-all text-left
-                ${isSelected 
-                  ? 'border-brand bg-brand/10 shadow-lg' 
-                  : 'border-border hover:border-brand/50 hover:bg-background-secondary'
-                }
-              `}
-            >
-              {option.recommended && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-brand text-white text-xs px-2 py-1 rounded-full">
-                    Recommended
-                  </span>
-                </div>
-              )}
-              
-              <div className="flex items-center mb-3">
-                <Icon className={`w-8 h-8 ${isSelected ? 'text-brand' : 'text-foreground-secondary'}`} />
-                <h3 className={`ml-3 text-lg font-semibold ${isSelected ? 'text-brand' : 'text-foreground'}`}>
-                  {option.title}
+      {/* Dropdown Selection */}
+      <div className="relative max-w-md">
+        <label className="block text-sm font-medium text-foreground mb-2">
+          Select Complexity Mode
+        </label>
+        <button
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          className="w-full flex items-center justify-between px-4 py-3 bg-background-secondary border border-border rounded-lg hover:bg-background-tertiary transition-colors"
+        >
+          <div className="flex items-center">
+            <SelectedIcon className="w-5 h-5 text-brand mr-3" />
+            <div className="text-left">
+              <div className="font-medium text-foreground">{selectedMode?.title}</div>
+              <div className="text-sm text-foreground-secondary">{selectedMode?.description}</div>
+            </div>
+          </div>
+          <ChevronDown className={`w-5 h-5 text-foreground-secondary transform transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+        </button>
+        
+        {isDropdownOpen && (
+          <>
+            <div 
+              className="fixed inset-0 z-10" 
+              onClick={() => setIsDropdownOpen(false)}
+            />
+            <div className="absolute top-full left-0 right-0 mt-2 bg-background-card border border-border rounded-lg shadow-lg z-20">
+              {COMPLEXITY_MODES.map((option) => {
+                const Icon = option.icon;
+                const isSelected = formData.complexityMode === option.mode;
+                
+                return (
+                  <button
+                    key={option.mode}
+                    onClick={() => {
+                      handleModeSelection(option.mode);
+                      setIsDropdownOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-4 py-3 hover:bg-background-secondary transition-colors ${option.mode !== 'simple' ? 'border-t border-border' : ''}`}
+                  >
+                    <div className="flex items-center">
+                      <Icon className={`w-5 h-5 ${isSelected ? 'text-brand' : 'text-foreground-secondary'} mr-3`} />
+                      <div className="text-left">
+                        <div className={`font-medium ${isSelected ? 'text-brand' : 'text-foreground'} flex items-center gap-2`}>
+                          {option.title}
+                          {option.recommended && (
+                            <span className="text-xs px-2 py-0.5 bg-brand/10 text-brand rounded-full">
+                              Recommended
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-sm text-foreground-secondary">{option.description}</div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowModeHelp(option.mode);
+                      }}
+                      className="p-1 hover:bg-background-tertiary rounded-md transition-colors ml-2"
+                    >
+                      <HelpCircle className="w-4 h-4 text-foreground-secondary" />
+                    </button>
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </div>
+      
+      {/* Mode Help Modal */}
+      {showModeHelp && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowModeHelp(null)}>
+          <div className="bg-background-card rounded-lg shadow-xl max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-foreground flex items-center">
+                  {(() => {
+                    const mode = COMPLEXITY_MODES.find(m => m.mode === showModeHelp);
+                    const Icon = mode?.icon || Zap;
+                    return (
+                      <>
+                        <Icon className="w-5 h-5 text-brand mr-2" />
+                        {mode?.title}
+                      </>
+                    );
+                  })()}
                 </h3>
+                <button
+                  onClick={() => setShowModeHelp(null)}
+                  className="text-foreground-secondary hover:text-foreground transition-colors"
+                >
+                  ✕
+                </button>
               </div>
               
-              <p className="text-sm text-foreground-secondary mb-4">
-                {option.description}
+              <p className="text-foreground-secondary mb-4">
+                {COMPLEXITY_MODES.find(m => m.mode === showModeHelp)?.description}
               </p>
               
-              <ul className="space-y-2">
-                {option.features.map((feature, index) => (
-                  <li key={index} className="flex items-start text-sm">
-                    <span className={`mr-2 ${isSelected ? 'text-brand' : 'text-status-success'}`}>✓</span>
-                    <span className="text-foreground-secondary">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </button>
-          );
-        })}
-      </div>
+              <div>
+                <h4 className="font-medium text-foreground mb-2">Features:</h4>
+                <ul className="space-y-1">
+                  {COMPLEXITY_MODES.find(m => m.mode === showModeHelp)?.features.map((feature, index) => (
+                    <li key={index} className="flex items-start text-sm">
+                      <span className="text-status-success mr-2">✓</span>
+                      <span className="text-foreground-secondary">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              <button
+                onClick={() => setShowModeHelp(null)}
+                className="mt-6 w-full px-4 py-2 bg-brand text-white rounded-md hover:bg-brand-hover transition-colors"
+              >
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
-      {/* Mode comparison table */}
-      <div className="mt-8 border border-border rounded-lg overflow-hidden">
+      {/* Feature Comparison */}
+      <div className="border border-border rounded-lg overflow-hidden">
+        <div className="bg-background-secondary px-4 py-3">
+          <h3 className="text-sm font-medium text-foreground">Feature Comparison</h3>
+        </div>
         <table className="w-full">
-          <thead className="bg-background-secondary">
-            <tr>
+          <thead>
+            <tr className="border-b border-border">
               <th className="text-left px-4 py-3 text-sm font-medium text-foreground">Feature</th>
               <th className="text-center px-4 py-3 text-sm font-medium text-foreground">Simple</th>
               <th className="text-center px-4 py-3 text-sm font-medium text-foreground">Standard</th>
@@ -364,55 +447,55 @@ export const ComplexityModeStep: React.FC<ComplexityModeStepProps> = ({
 
       {/* Advanced Mode Feature Preview */}
       {formData.complexityMode === 'advanced' && (
-        <div className="mt-6 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-6">
-          <h4 className="text-lg font-semibold text-purple-900 mb-4 flex items-center">
-            <Wrench className="w-5 h-5 mr-2" />
+        <div className="bg-brand/5 border border-brand/20 rounded-lg p-6">
+          <h4 className="text-lg font-semibold text-foreground mb-4 flex items-center">
+            <Wrench className="w-5 h-5 mr-2 text-brand" />
             Advanced Mode Features Preview
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-3">
               <div className="flex items-start">
-                <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                <div className="w-2 h-2 bg-brand rounded-full mt-2 mr-3 flex-shrink-0"></div>
                 <div>
-                  <h5 className="font-medium text-purple-900">Docker Configuration</h5>
-                  <p className="text-sm text-purple-700">Choose from multiple Docker images, configure networks, volumes, and container settings</p>
+                  <h5 className="font-medium text-foreground">Docker Configuration</h5>
+                  <p className="text-sm text-foreground-secondary">Choose from multiple Docker images, configure networks, volumes, and container settings</p>
                 </div>
               </div>
               <div className="flex items-start">
-                <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                <div className="w-2 h-2 bg-brand rounded-full mt-2 mr-3 flex-shrink-0"></div>
                 <div>
-                  <h5 className="font-medium text-purple-900">Claude Model Tuning</h5>
-                  <p className="text-sm text-purple-700">Select specific Claude models and fine-tune parameters like temperature and token limits</p>
+                  <h5 className="font-medium text-foreground">Claude Model Tuning</h5>
+                  <p className="text-sm text-foreground-secondary">Select specific Claude models and fine-tune parameters like temperature and token limits</p>
                 </div>
               </div>
               <div className="flex items-start">
-                <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                <div className="w-2 h-2 bg-brand rounded-full mt-2 mr-3 flex-shrink-0"></div>
                 <div>
-                  <h5 className="font-medium text-purple-900">MCP Server Management</h5>
-                  <p className="text-sm text-purple-700">Connect to Model Context Protocol servers for extended functionality and integrations</p>
+                  <h5 className="font-medium text-foreground">MCP Server Management</h5>
+                  <p className="text-sm text-foreground-secondary">Connect to Model Context Protocol servers for extended functionality and integrations</p>
                 </div>
               </div>
             </div>
             <div className="space-y-3">
               <div className="flex items-start">
-                <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                <div className="w-2 h-2 bg-brand rounded-full mt-2 mr-3 flex-shrink-0"></div>
                 <div>
-                  <h5 className="font-medium text-purple-900">Resource Management</h5>
-                  <p className="text-sm text-purple-700">Set memory and CPU limits, configure port ranges, and manage system resources</p>
+                  <h5 className="font-medium text-foreground">Resource Management</h5>
+                  <p className="text-sm text-foreground-secondary">Set memory and CPU limits, configure port ranges, and manage system resources</p>
                 </div>
               </div>
               <div className="flex items-start">
-                <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                <div className="w-2 h-2 bg-brand rounded-full mt-2 mr-3 flex-shrink-0"></div>
                 <div>
-                  <h5 className="font-medium text-purple-900">Configuration Templates</h5>
-                  <p className="text-sm text-purple-700">Use pre-built templates for different scenarios or create custom configurations</p>
+                  <h5 className="font-medium text-foreground">Configuration Templates</h5>
+                  <p className="text-sm text-foreground-secondary">Use pre-built templates for different scenarios or create custom configurations</p>
                 </div>
               </div>
               <div className="flex items-start">
-                <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                <div className="w-2 h-2 bg-brand rounded-full mt-2 mr-3 flex-shrink-0"></div>
                 <div>
-                  <h5 className="font-medium text-purple-900">Import/Export Settings</h5>
-                  <p className="text-sm text-purple-700">Save and share agent configurations across projects and teams</p>
+                  <h5 className="font-medium text-foreground">Import/Export Settings</h5>
+                  <p className="text-sm text-foreground-secondary">Save and share agent configurations across projects and teams</p>
                 </div>
               </div>
             </div>
@@ -432,11 +515,11 @@ export const ComplexityModeStep: React.FC<ComplexityModeStepProps> = ({
         
         {/* Mode switching guidance */}
         {(hasAdvancedConfig() || hasStandardConfig()) && (
-          <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+          <div className="mt-3 p-3 bg-status-info/10 border border-status-info/20 rounded-md">
             <div className="flex items-start">
-              <Info className="w-4 h-4 text-blue-600 mt-0.5 mr-2 flex-shrink-0" />
+              <Info className="w-4 h-4 text-status-info mt-0.5 mr-2 flex-shrink-0" />
               <div>
-                <p className="text-xs text-blue-800">
+                <p className="text-xs text-foreground-secondary">
                   You can switch to a different complexity mode at any time. Your compatible settings will be preserved, 
                   and you'll be notified if any configurations would be lost.
                 </p>

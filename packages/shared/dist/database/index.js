@@ -633,7 +633,7 @@ class AgentRepository extends BaseRepository {
         return result;
     }
     findByProject(projectId) {
-        return this.findBy({ projectId });
+        return this.findBy({ project_id: projectId });
     }
     findByStatus(status) {
         return this.findBy({ status });

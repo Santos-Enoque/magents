@@ -390,17 +390,24 @@ class DockerAgentManager {
         try {
             const content = fs.readFileSync(this.activeAgentsFile, 'utf8');
             const records = JSON.parse(content);
-            return records.map(record => ({
-                id: record.id,
-                branch: record.branch,
-                status: this.getContainerStatus(record.containerName),
-                worktreePath: record.repoRoot, // For compatibility
-                tmuxSession: record.containerName, // For compatibility
-                createdAt: new Date(record.createdAt),
-                useDocker: true
-            }));
+            return records.map(record => {
+                // Handle both old format (with tmuxSession) and new format (with containerName)
+                const containerName = record.containerName || record.tmuxSession;
+                const worktreePath = record.worktreePath || record.repoRoot;
+                return {
+                    id: record.id,
+                    branch: record.branch,
+                    status: containerName ? this.getContainerStatus(containerName) : (record.status || 'STOPPED'),
+                    worktreePath: worktreePath,
+                    tmuxSession: containerName || record.tmuxSession,
+                    createdAt: new Date(record.createdAt),
+                    projectId: record.projectId, // Include projectId if it exists
+                    useDocker: record.useDocker !== false // Default to true
+                };
+            });
         }
-        catch {
+        catch (error) {
+            console.error('Error reading active agents:', error);
             return [];
         }
     }
@@ -574,18 +581,20 @@ class DockerAgentManager {
     }
     buildTmuxInitCommand(agentId, hasClaudeAuth) {
         // Create a tmux session with windows similar to old TmuxService
-        return `
-      tmux new-session -d -s "${agentId}" -n "main" -c "/workspace" && \\
-      tmux new-window -t "${agentId}" -n "claude" -c "/workspace" && \\
-      tmux new-window -t "${agentId}" -n "git" -c "/workspace" && \\
-      tmux send-keys -t "${agentId}:git" "echo 'Git commands for this workspace:'" Enter && \\
-      tmux send-keys -t "${agentId}:git" "echo '  git status'" Enter && \\
-      tmux send-keys -t "${agentId}:git" "echo '  git add . && git commit -m \"message\"'" Enter && \\
-      tmux send-keys -t "${agentId}:git" "echo '  git push'" Enter && \\
-      tmux send-keys -t "${agentId}:git" "echo ''" Enter && \\
-      tmux select-window -t "${agentId}:claude" && \\
-      while true; do sleep 3600; done
-    `.trim().replace(/\n\s+/g, ' ');
+        // Use simpler command structure to avoid escaping issues
+        const commands = [
+            `tmux new-session -d -s '${agentId}' -n 'main' -c /workspace`,
+            `tmux new-window -t '${agentId}' -n 'claude' -c /workspace`,
+            `tmux new-window -t '${agentId}' -n 'git' -c /workspace`,
+            `tmux send-keys -t '${agentId}:git' 'echo Git commands for this workspace:' Enter`,
+            `tmux send-keys -t '${agentId}:git' 'echo   git status' Enter`,
+            `tmux send-keys -t '${agentId}:git' 'echo   git add . and git commit -m message' Enter`,
+            `tmux send-keys -t '${agentId}:git' 'echo   git push' Enter`,
+            `tmux send-keys -t '${agentId}:git' '' Enter`,
+            `tmux select-window -t '${agentId}:claude'`,
+            `while true; do sleep 3600; done`
+        ];
+        return commands.join(' && ');
     }
     getApiKeys() {
         const keys = {};

@@ -47,7 +47,7 @@ const os = __importStar(require("os"));
 class DatabaseService {
     constructor() {
         this.initialized = false;
-        this.db = shared_1.UnifiedDatabaseService.getInstance();
+        this.db = new shared_1.UnifiedDatabaseService();
     }
     static getInstance() {
         if (!DatabaseService.instance) {
@@ -109,8 +109,8 @@ class DatabaseService {
                 };
             }
             // Try a simple database operation
-            const projects = await this.db.projectRepo.findAll();
-            const agents = await this.db.agentRepo.findAll();
+            const projects = await this.db.projects.findAll();
+            const agents = await this.db.agents.findAll();
             return {
                 status: 'healthy',
                 message: 'Database is healthy',
@@ -136,8 +136,8 @@ class DatabaseService {
         if (!this.isAvailable()) {
             throw new Error('Database not available');
         }
-        const projects = await this.db.projectRepo.findAll();
-        const agents = await this.db.agentRepo.findAll();
+        const projects = await this.db.projects.findAll();
+        const agents = await this.db.agents.findAll();
         const configs = await this.db.configRepo.findAll();
         const dbPath = this.db.getDatabasePath();
         let dbSize = 0;

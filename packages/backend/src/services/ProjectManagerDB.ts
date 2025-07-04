@@ -43,8 +43,18 @@ export class ProjectManagerDB {
     
     const projects = await this.db.projects.findAll();
     
-    // Convert UnifiedProjectData to Project format
-    return projects.map(this.convertToProject).sort((a, b) => 
+    // Convert UnifiedProjectData to Project format and populate agents
+    const projectsWithAgents = await Promise.all(
+      projects.map(async (project) => {
+        const convertedProject = this.convertToProject(project);
+        // Get agents for this project
+        const agents = await this.db.agents.findByProject(project.id);
+        convertedProject.agents = agents.map(agent => agent.id);
+        return convertedProject;
+      })
+    );
+    
+    return projectsWithAgents.sort((a, b) => 
       b.createdAt.getTime() - a.createdAt.getTime()
     );
   }
@@ -57,7 +67,13 @@ export class ProjectManagerDB {
       throw new Error(`Project with id ${id} not found`);
     }
     
-    return this.convertToProject(project);
+    const convertedProject = this.convertToProject(project);
+    
+    // Get agents for this project
+    const agents = await this.db.agents.findByProject(id);
+    convertedProject.agents = agents.map(agent => agent.id);
+    
+    return convertedProject;
   }
 
   public async createProject(options: CreateProjectOptions): Promise<Project> {

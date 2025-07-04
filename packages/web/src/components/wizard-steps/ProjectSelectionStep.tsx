@@ -129,11 +129,11 @@ export const ProjectSelectionStep: React.FC<ProjectSelectionStepProps> = ({
         // If the path doesn't start with '/', try to make it absolute
         if (!dirPath.startsWith('/')) {
           // For web context, we'll use a common project directory structure
-          const homeDir = process.env.HOME || '/Users';
+          const homeDir = '/Users';
           fullPath = `${homeDir}/${dirPath}`;
         } else if (dirPath.startsWith('/') && !dirPath.includes('/Users') && !dirPath.includes('/home')) {
           // If it's a relative path starting with '/', prepend home directory
-          const homeDir = process.env.HOME || '/Users';
+          const homeDir = '/Users';
           fullPath = `${homeDir}${dirPath}`;
         }
         
@@ -260,7 +260,7 @@ export const ProjectSelectionStep: React.FC<ProjectSelectionStepProps> = ({
                     <FolderOpen className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground-tertiary w-4 h-4" />
                     <input
                       type="text"
-                      placeholder={`${process.env.HOME || '/Users/username'}/path/to/your/project`}
+                      placeholder="/Users/username/path/to/your/project"
                       value={formData.projectPath || ''}
                       onChange={(e) => handleCustomPathChange(e.target.value)}
                       className="w-full pl-10 pr-32 py-2 bg-background-secondary border border-border rounded-md focus:ring-2 focus:ring-brand focus:border-brand text-foreground placeholder-foreground-tertiary"

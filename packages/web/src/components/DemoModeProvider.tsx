@@ -18,13 +18,17 @@ export const DemoModeProvider: React.FC<DemoModeProviderProps> = ({ children }) 
   useEffect(() => {
     const checkApiAvailability = async () => {
       try {
-        const response = await fetch('/api/health', { 
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+        const response = await fetch(`${apiUrl}/api/health`, { 
           method: 'GET',
           timeout: 2000 
         } as any);
-        setIsDemoMode(!response.ok);
+        const isDemo = !response.ok;
+        setIsDemoMode(isDemo);
+        console.log(`API health check: ${response.ok ? '✅ Success' : '❌ Failed'} - Demo mode: ${isDemo ? 'enabled' : 'disabled'}`);
       } catch (error) {
         // API not available, enable demo mode
+        console.error('API health check failed:', error);
         setIsDemoMode(true);
         console.log('🎭 Demo mode enabled - API not available');
       }

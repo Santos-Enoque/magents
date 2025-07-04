@@ -20,9 +20,9 @@ const getModeIcon = (mode: ComplexityMode) => {
 
 const getModeColor = (mode: ComplexityMode) => {
   switch (mode) {
-    case 'simple': return 'text-green-600 bg-green-50 border-green-200';
-    case 'standard': return 'text-blue-600 bg-blue-50 border-blue-200';
-    case 'advanced': return 'text-purple-600 bg-purple-50 border-purple-200';
+    case 'simple': return 'text-status-success bg-status-success/10 border-status-success/20';
+    case 'standard': return 'text-status-info bg-status-info/10 border-status-info/20';
+    case 'advanced': return 'text-brand bg-brand/10 border-brand/20';
   }
 };
 
@@ -86,9 +86,9 @@ export const ComplexityModeIndicator: React.FC<ComplexityModeIndicatorProps> = (
             className="fixed inset-0 z-10" 
             onClick={() => setShowDropdown(false)}
           />
-          <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
+          <div className="absolute top-full left-0 mt-1 w-64 bg-background-card border border-border rounded-lg shadow-lg z-20">
             <div className="p-2">
-              <div className="text-xs font-medium text-gray-500 uppercase tracking-wide px-2 py-1 mb-1">
+              <div className="text-xs font-medium text-foreground-secondary uppercase tracking-wide px-2 py-1 mb-1">
                 Switch Complexity Mode
               </div>
               {MODES.map((mode) => {
@@ -102,17 +102,17 @@ export const ComplexityModeIndicator: React.FC<ComplexityModeIndicatorProps> = (
                     className={`w-full flex items-center px-2 py-2 rounded-md text-sm transition-colors ${
                       isActive 
                         ? 'bg-brand text-white' 
-                        : 'text-gray-700 hover:bg-gray-100'
+                        : 'text-foreground hover:bg-background-secondary'
                     }`}
                   >
                     <ModeIcon className="w-4 h-4 mr-3 flex-shrink-0" />
                     <div className="flex-1 text-left">
                       <div className="font-medium">{mode.label}</div>
-                      <div className={`text-xs ${isActive ? 'text-brand-light' : 'text-gray-500'}`}>
+                      <div className={`text-xs ${isActive ? 'text-brand-light' : 'text-foreground-secondary'}`}>
                         {mode.description}
                       </div>
                     </div>
-                    {!isActive && <ArrowRight className="w-4 h-4 text-gray-400" />}
+                    {!isActive && <ArrowRight className="w-4 h-4 text-foreground-tertiary" />}
                     {isActive && <span className="text-xs font-medium">Current</span>}
                   </button>
                 );

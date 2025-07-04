@@ -152,7 +152,7 @@ exports.taskMasterController = {
         // Get agents for this project
         const agents = await agentController_1.agentController.getAgentsByProject(project.id);
         // Filter to only show agents that are available for task assignment
-        return agents.filter(agent => agent.status === 'RUNNING' || agent.status === 'CREATED');
+        return agents.filter(agent => agent.status === 'RUNNING');
     },
     /**
      * Get task statistics for a project

@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, ArrowUp, ArrowDown, X, Check, Zap, Settings2, Info } from 'lucide-react';
+import { AlertTriangle, ArrowUp, ArrowDown, ArrowRight, X, Check, Zap, Settings2, Info } from 'lucide-react';
 import { ComplexityMode } from './AgentCreationWizard';
 
 interface ModeChangeConfirmModalProps {
@@ -22,9 +22,9 @@ const getModeIcon = (mode: ComplexityMode) => {
 
 const getModeColor = (mode: ComplexityMode) => {
   switch (mode) {
-    case 'simple': return 'text-green-600';
-    case 'standard': return 'text-blue-600';
-    case 'advanced': return 'text-purple-600';
+    case 'simple': return 'text-status-success';
+    case 'standard': return 'text-status-info';
+    case 'advanced': return 'text-brand';
   }
 };
 
@@ -51,25 +51,25 @@ export const ModeChangeConfirmModal: React.FC<ModeChangeConfirmModalProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-2xl max-w-md w-full">
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-background-card rounded-lg shadow-2xl max-w-md w-full border border-border">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-border">
           <div className="flex items-center">
             {isUpgrade ? (
-              <ArrowUp className="w-6 h-6 text-green-600 mr-3" />
+              <ArrowUp className="w-6 h-6 text-status-success mr-3" />
             ) : isDowngrade ? (
-              <ArrowDown className="w-6 h-6 text-orange-600 mr-3" />
+              <ArrowDown className="w-6 h-6 text-status-warning mr-3" />
             ) : (
-              <AlertTriangle className="w-6 h-6 text-blue-600 mr-3" />
+              <AlertTriangle className="w-6 h-6 text-status-info mr-3" />
             )}
-            <h2 className="text-lg font-semibold text-gray-900">
-              {isUpgrade ? 'Upgrade' : isDowngrade ? 'Downgrade' : 'Switch'} Complexity Mode
+            <h2 className="text-lg font-semibold text-foreground">
+              {isUpgrade ? 'Change to' : isDowngrade ? 'Change to' : 'Switch to'} {targetMode.charAt(0).toUpperCase() + targetMode.slice(1)} Mode
             </h2>
           </div>
           <button
             onClick={onCancel}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-foreground-secondary hover:text-foreground transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -84,7 +84,7 @@ export const ModeChangeConfirmModal: React.FC<ModeChangeConfirmModalProps> = ({
                 {getModeIcon(currentMode)}
                 <span className="ml-2 font-medium capitalize">{currentMode}</span>
               </div>
-              <ArrowUp className="w-5 h-5 text-gray-400 mx-4" />
+              <ArrowRight className="w-5 h-5 text-foreground-tertiary mx-4" />
               <div className={`flex items-center ${getModeColor(targetMode)}`}>
                 {getModeIcon(targetMode)}
                 <span className="ml-2 font-medium capitalize">{targetMode}</span>
@@ -94,18 +94,18 @@ export const ModeChangeConfirmModal: React.FC<ModeChangeConfirmModalProps> = ({
 
           {/* Data Loss Warning */}
           {dataLoss.length > 0 && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="mb-4 p-4 bg-status-error/10 border border-status-error/20 rounded-lg">
               <div className="flex items-start">
-                <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" />
+                <AlertTriangle className="w-5 h-5 text-status-error mt-0.5 mr-3 flex-shrink-0" />
                 <div>
-                  <h4 className="font-medium text-red-900 mb-2">Settings Will Be Lost</h4>
-                  <p className="text-sm text-red-800 mb-2">
+                  <h4 className="font-medium text-foreground mb-2">Settings Will Be Lost</h4>
+                  <p className="text-sm text-foreground-secondary mb-2">
                     The following configurations will be removed when switching to {targetMode} mode:
                   </p>
-                  <ul className="text-sm text-red-800 space-y-1">
+                  <ul className="text-sm text-foreground-secondary space-y-1">
                     {dataLoss.map((item, index) => (
                       <li key={index} className="flex items-center">
-                        <span className="w-1.5 h-1.5 bg-red-600 rounded-full mr-2 flex-shrink-0" />
+                        <span className="w-1.5 h-1.5 bg-status-error rounded-full mr-2 flex-shrink-0" />
                         {item}
                       </li>
                     ))}
@@ -117,18 +117,18 @@ export const ModeChangeConfirmModal: React.FC<ModeChangeConfirmModalProps> = ({
 
           {/* New Features */}
           {newFeatures.length > 0 && (
-            <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div className="mb-4 p-4 bg-status-success/10 border border-status-success/20 rounded-lg">
               <div className="flex items-start">
-                <Check className="w-5 h-5 text-green-600 mt-0.5 mr-3 flex-shrink-0" />
+                <Check className="w-5 h-5 text-status-success mt-0.5 mr-3 flex-shrink-0" />
                 <div>
-                  <h4 className="font-medium text-green-900 mb-2">New Features Available</h4>
-                  <p className="text-sm text-green-800 mb-2">
+                  <h4 className="font-medium text-foreground mb-2">New Features Available</h4>
+                  <p className="text-sm text-foreground-secondary mb-2">
                     You'll gain access to these additional features in {targetMode} mode:
                   </p>
-                  <ul className="text-sm text-green-800 space-y-1">
+                  <ul className="text-sm text-foreground-secondary space-y-1">
                     {newFeatures.map((item, index) => (
                       <li key={index} className="flex items-center">
-                        <span className="w-1.5 h-1.5 bg-green-600 rounded-full mr-2 flex-shrink-0" />
+                        <span className="w-1.5 h-1.5 bg-status-success rounded-full mr-2 flex-shrink-0" />
                         {item}
                       </li>
                     ))}
@@ -139,21 +139,16 @@ export const ModeChangeConfirmModal: React.FC<ModeChangeConfirmModalProps> = ({
           )}
 
           {/* Guidance Message */}
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="mb-6 p-4 bg-status-info/10 border border-status-info/20 rounded-lg">
             <div className="flex items-start">
-              <Info className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
+              <Info className="w-5 h-5 text-status-info mt-0.5 mr-3 flex-shrink-0" />
               <div>
-                <h4 className="font-medium text-blue-900 mb-1">
-                  {isUpgrade ? 'Upgrade Guidance' : isDowngrade ? 'Downgrade Notice' : 'Mode Switch'}
+                <h4 className="font-medium text-foreground mb-1">
+                  Mode Change Information
                 </h4>
-                <p className="text-sm text-blue-800">
-                  {isUpgrade ? (
-                    'You can always return to a simpler mode later. Your current basic settings will be preserved.'
-                  ) : isDowngrade ? (
-                    'You can upgrade back to a more advanced mode at any time. Consider exporting your current configuration first.'
-                  ) : (
-                    'Your existing compatible settings will be preserved during this switch.'
-                  )}
+                <p className="text-sm text-foreground-secondary">
+                  You can switch between modes at any time. Your compatible settings will be preserved when possible.
+                  {isDowngrade && ' Consider exporting your current configuration if you want to save advanced settings.'}
                 </p>
               </div>
             </div>
@@ -163,7 +158,7 @@ export const ModeChangeConfirmModal: React.FC<ModeChangeConfirmModalProps> = ({
           <div className="flex space-x-3">
             <button
               onClick={onCancel}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+              className="flex-1 px-4 py-2 border border-border rounded-md text-sm font-medium text-foreground bg-background-secondary hover:bg-background-tertiary transition-colors"
             >
               Cancel
             </button>
@@ -171,13 +166,11 @@ export const ModeChangeConfirmModal: React.FC<ModeChangeConfirmModalProps> = ({
               onClick={onConfirm}
               className={`flex-1 px-4 py-2 rounded-md text-sm font-medium text-white transition-colors ${
                 dataLoss.length > 0 
-                  ? 'bg-red-600 hover:bg-red-700' 
-                  : isUpgrade 
-                  ? 'bg-green-600 hover:bg-green-700'
-                  : 'bg-blue-600 hover:bg-blue-700'
+                  ? 'bg-status-error hover:bg-status-error/90' 
+                  : 'bg-brand hover:bg-brand-hover'
               }`}
             >
-              {isUpgrade ? 'Upgrade' : isDowngrade ? 'Downgrade' : 'Switch'} Mode
+              Confirm Change
             </button>
           </div>
         </div>

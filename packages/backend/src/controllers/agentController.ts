@@ -152,15 +152,8 @@ export const agentController = {
       currentStepIndex = steps.length - 1;
       emitProgress(currentStepIndex, 'in-progress');
 
-      const createdAgent: Agent = {
-        id: agent.agentId,
-        branch: agent.branch,
-        worktreePath: agent.worktreePath,
-        tmuxSession: agent.tmuxSession,
-        status: 'RUNNING' as AgentStatus,
-        createdAt: new Date(),
-        projectId: options.projectId
-      };
+      // Get the created agent from the database
+      const createdAgent = await this.getAgent(agent.agentId);
 
       // If projectId is provided, add agent to the project
       if (options.projectId) {
@@ -182,8 +175,16 @@ export const agentController = {
   },
 
   async updateAgentStatus(id: string, status: AgentStatus): Promise<Agent> {
-    // For status updates, we need to implement this in CLI AgentManager
-    // For now, we'll just return the agent with updated status from memory
+    // Use database-backed implementation if available
+    if (AgentService.isUsingDatabase()) {
+      const updatedAgent = await (getAgentManager() as AgentManagerDB).updateAgentStatus(id, status);
+      if (!updatedAgent) {
+        throw new Error(`Agent with id ${id} not found`);
+      }
+      return updatedAgent;
+    }
+    
+    // Fallback for CLI-only mode
     const agent = await this.getAgent(id);
     
     // Note: This doesn't persist the status change to the CLI storage
@@ -290,9 +291,7 @@ export const agentController = {
     // and persist the task assignment to CLI storage
     console.log(`Assigned task ${taskId} to agent ${agentId}`);
     
-    return {
-      ...agent,
-      updatedAt: new Date()
-    };
+    // Return the agent as-is since we retrieved it properly from the database
+    return agent;
   }
 };

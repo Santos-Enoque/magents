@@ -47,6 +47,7 @@ const UIService_1 = require("../ui/UIService");
 const autoconfig_1 = require("../commands/autoconfig");
 const migrate_1 = require("../commands/migrate");
 const database_1 = require("../commands/database");
+const features_1 = require("../commands/features");
 const program = new commander_1.Command();
 const configManager = ConfigManager_1.ConfigManager.getInstance();
 const config = configManager.loadConfig();
@@ -2111,6 +2112,8 @@ program.addCommand((0, autoconfig_1.createAutoConfigCommand)());
 program.addCommand((0, migrate_1.createMigrateCommand)());
 // Add database command
 program.addCommand((0, database_1.createDatabaseCommand)());
+// Add features command
+program.addCommand((0, features_1.createFeaturesCommand)());
 // Override help to show our custom styling
 if (process.argv.includes('--help') || process.argv.includes('-h')) {
     UIService_1.ui.header('MAGENTS - Multi-Agent Claude Code Workflow Manager', true);

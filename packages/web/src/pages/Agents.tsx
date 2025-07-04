@@ -25,7 +25,14 @@ export const Agents: React.FC = () => {
   
   const { data: agents = [], isLoading, refetch } = useQuery({
     queryKey: ['agents'],
-    queryFn: () => apiService.getAgents(),
+    queryFn: async () => {
+      console.log('🔍 Fetching agents from API...');
+      const result = await apiService.getAgents();
+      console.log('✅ Agents fetched:', result);
+      return result;
+    },
+    staleTime: 0, // Force fresh data
+    cacheTime: 0, // Don't cache
   });
 
   const { data: projects = [] } = useQuery({

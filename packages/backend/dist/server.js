@@ -20,8 +20,8 @@ const errorHandler_1 = require("./middleware/errorHandler");
 const logger_1 = require("./middleware/logger");
 const websocket_1 = require("./services/websocket");
 const DatabaseService_1 = require("./services/DatabaseService");
-const registry_1 = require("@magents/shared/src/integrations/taskmaster/registry");
-const internal_1 = require("@magents/shared/src/integrations/internal");
+// import { registerTaskMasterIntegration } from '@magents/shared/src/integrations/taskmaster/registry';
+// import { registerInternalTaskIntegration } from '@magents/shared/src/integrations/internal';
 const app = (0, express_1.default)();
 exports.app = app;
 const server = (0, http_1.createServer)(app);
@@ -34,7 +34,12 @@ const io = new socket_io_1.Server(server, {
 });
 exports.io = io;
 // Middleware
-app.use((0, cors_1.default)());
+app.use((0, cors_1.default)({
+    origin: process.env.FRONTEND_URL || "http://localhost:4000",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cache-Control", "Connection"]
+}));
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use(logger_1.logger);
@@ -59,8 +64,8 @@ async function initializeServices() {
         await dbService.initialize();
         // Register task integrations
         console.log('📋 Registering task integrations...');
-        (0, registry_1.registerTaskMasterIntegration)();
-        (0, internal_1.registerInternalTaskIntegration)();
+        // registerTaskMasterIntegration();
+        // registerInternalTaskIntegration();
         console.log('✅ Services initialized successfully');
     }
     catch (error) {

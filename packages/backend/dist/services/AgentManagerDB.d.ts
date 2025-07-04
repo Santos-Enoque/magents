@@ -48,5 +48,9 @@ export declare class AgentManagerDB {
      * Delete agent and update project in a transaction
      */
     deleteAgentFromProject(agentId: string): Promise<CommandResult<void>>;
+    /**
+     * Get or create a default project for CLI agents
+     */
+    private getOrCreateDefaultProject;
 }
 //# sourceMappingURL=AgentManagerDB.d.ts.map

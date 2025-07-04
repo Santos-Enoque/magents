@@ -43,7 +43,7 @@ const shared_1 = require("@magents/shared");
 class ProjectManagerDB {
     constructor() {
         this.initialized = false;
-        this.db = shared_1.UnifiedDatabaseService.getInstance();
+        this.db = new shared_1.UnifiedDatabaseService();
     }
     static getInstance() {
         if (!ProjectManagerDB.instance) {
@@ -59,23 +59,34 @@ class ProjectManagerDB {
     }
     async listProjects() {
         await this.ensureInitialized();
-        const projects = await this.db.projectRepo.findAll();
-        // Convert UnifiedProjectData to Project format
-        return projects.map(this.convertToProject).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        const projects = await this.db.projects.findAll();
+        // Convert UnifiedProjectData to Project format and populate agents
+        const projectsWithAgents = await Promise.all(projects.map(async (project) => {
+            const convertedProject = this.convertToProject(project);
+            // Get agents for this project
+            const agents = await this.db.agents.findByProject(project.id);
+            convertedProject.agents = agents.map(agent => agent.id);
+            return convertedProject;
+        }));
+        return projectsWithAgents.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     }
     async getProject(id) {
         await this.ensureInitialized();
-        const project = await this.db.projectRepo.findById(id);
+        const project = await this.db.projects.findById(id);
         if (!project) {
             throw new Error(`Project with id ${id} not found`);
         }
-        return this.convertToProject(project);
+        const convertedProject = this.convertToProject(project);
+        // Get agents for this project
+        const agents = await this.db.agents.findByProject(id);
+        convertedProject.agents = agents.map(agent => agent.id);
+        return convertedProject;
     }
     async createProject(options) {
         await this.ensureInitialized();
         const projectId = (0, shared_1.generateId)('proj');
         // Check if project with same name exists
-        const existingProjects = await this.db.projectRepo.findAll();
+        const existingProjects = await this.db.projects.findAll();
         const existingProject = existingProjects.find(p => p.name === options.name);
         if (existingProject) {
             throw new Error(`Project with name ${options.name} already exists`);
@@ -91,6 +102,8 @@ class ProjectManagerDB {
             status: 'ACTIVE',
             maxAgents: 5,
             taskMasterEnabled: false,
+            tags: [],
+            agentIds: [],
             createdAt: new Date(),
             updatedAt: new Date(),
             metadata: {}
@@ -101,7 +114,7 @@ class ProjectManagerDB {
             if (isNaN(start) || isNaN(end) || start >= end) {
                 throw new Error('Invalid port range format. Use "start-end" format (e.g., "3000-3010")');
             }
-            projectData.portRange = `${start}-${end}`;
+            projectData.portRange = { start, end };
         }
         if (options.docker) {
             projectData.dockerNetwork = `magents-${projectId}`;
@@ -113,18 +126,18 @@ class ProjectManagerDB {
                 tags: options.tags
             };
         }
-        await this.db.projectRepo.create(projectData);
+        await this.db.projects.create(projectData);
         return this.convertToProject(projectData);
     }
     async updateProject(id, updates) {
         await this.ensureInitialized();
-        const existingProject = await this.db.projectRepo.findById(id);
+        const existingProject = await this.db.projects.findById(id);
         if (!existingProject) {
             throw new Error(`Project with id ${id} not found`);
         }
         // Check if name is being changed and if it conflicts
         if (updates.name && updates.name !== existingProject.name) {
-            const allProjects = await this.db.projectRepo.findAll();
+            const allProjects = await this.db.projects.findAll();
             const conflictingProject = allProjects.find(p => p.name === updates.name && p.id !== id);
             if (conflictingProject) {
                 throw new Error(`Project with name ${updates.name} already exists`);
@@ -142,7 +155,7 @@ class ProjectManagerDB {
             updatedAt: new Date()
         };
         if (updates.portRange) {
-            dataUpdates.portRange = `${updates.portRange[0]}-${updates.portRange[1]}`;
+            dataUpdates.portRange = { start: updates.portRange[0], end: updates.portRange[1] };
         }
         if (updates.dockerNetwork) {
             dataUpdates.dockerNetwork = updates.dockerNetwork;
@@ -154,7 +167,7 @@ class ProjectManagerDB {
                 tags: updates.tags
             };
         }
-        const updatedProject = await this.db.projectRepo.update(id, dataUpdates);
+        const updatedProject = await this.db.projects.update(id, dataUpdates);
         if (!updatedProject) {
             throw new Error(`Failed to update project ${id}`);
         }
@@ -162,18 +175,18 @@ class ProjectManagerDB {
     }
     async deleteProject(id) {
         await this.ensureInitialized();
-        const project = await this.db.projectRepo.findById(id);
+        const project = await this.db.projects.findById(id);
         if (!project) {
             throw new Error(`Project with id ${id} not found`);
         }
         // Get all agents in the project
-        const agents = await this.db.agentRepo.findByProject(id);
+        const agents = await this.db.agents.findByProject(id);
         // Delete all agents first (this will handle cleanup)
         for (const agent of agents) {
-            await this.db.agentRepo.delete(agent.id);
+            await this.db.agents.delete(agent.id);
         }
         // Delete the project
-        const deleted = await this.db.projectRepo.delete(id);
+        const deleted = await this.db.projects.delete(id);
         if (!deleted) {
             throw new Error(`Failed to delete project ${id}`);
         }
@@ -181,56 +194,56 @@ class ProjectManagerDB {
     async addAgentToProject(projectId, agentId) {
         await this.ensureInitialized();
         // Verify project exists
-        const project = await this.db.projectRepo.findById(projectId);
+        const project = await this.db.projects.findById(projectId);
         if (!project) {
             throw new Error(`Project with id ${projectId} not found`);
         }
         // Update agent's projectId
-        const agent = await this.db.agentRepo.findById(agentId);
+        const agent = await this.db.agents.findById(agentId);
         if (!agent) {
             throw new Error(`Agent with id ${agentId} not found`);
         }
-        await this.db.agentRepo.update(agentId, {
+        await this.db.agents.update(agentId, {
             projectId,
             updatedAt: new Date()
         });
         // Update project's updatedAt
-        await this.db.projectRepo.update(projectId, {
+        await this.db.projects.update(projectId, {
             updatedAt: new Date()
         });
-        const updatedProject = await this.db.projectRepo.findById(projectId);
+        const updatedProject = await this.db.projects.findById(projectId);
         return this.convertToProject(updatedProject);
     }
     async removeAgentFromProject(projectId, agentId) {
         await this.ensureInitialized();
         // Verify project exists
-        const project = await this.db.projectRepo.findById(projectId);
+        const project = await this.db.projects.findById(projectId);
         if (!project) {
             throw new Error(`Project with id ${projectId} not found`);
         }
         // Update agent to remove projectId
-        const agent = await this.db.agentRepo.findById(agentId);
+        const agent = await this.db.agents.findById(agentId);
         if (agent && agent.projectId === projectId) {
-            await this.db.agentRepo.update(agentId, {
+            await this.db.agents.update(agentId, {
                 projectId: undefined,
                 updatedAt: new Date()
             });
         }
         // Update project's updatedAt
-        await this.db.projectRepo.update(projectId, {
+        await this.db.projects.update(projectId, {
             updatedAt: new Date()
         });
-        const updatedProject = await this.db.projectRepo.findById(projectId);
+        const updatedProject = await this.db.projects.findById(projectId);
         return this.convertToProject(updatedProject);
     }
     async getProjectStats(id) {
         await this.ensureInitialized();
-        const project = await this.db.projectRepo.findById(id);
+        const project = await this.db.projects.findById(id);
         if (!project) {
             throw new Error(`Project with id ${id} not found`);
         }
         // Get agent count
-        const agents = await this.db.agentRepo.findByProject(id);
+        const agents = await this.db.agents.findByProject(id);
         return {
             agentCount: agents.length,
             status: project.status,
@@ -256,7 +269,7 @@ class ProjectManagerDB {
     }
     async searchProjects(query) {
         await this.ensureInitialized();
-        const projects = await this.db.projectRepo.findAll();
+        const projects = await this.db.projects.findAll();
         const lowerQuery = query.toLowerCase();
         const filtered = projects.filter(project => {
             const description = project.metadata?.description;
@@ -270,15 +283,16 @@ class ProjectManagerDB {
     }
     async getProjectsByStatus(status) {
         await this.ensureInitialized();
-        const projects = await this.db.projectRepo.findAll();
+        const projects = await this.db.projects.findAll();
         const filtered = projects.filter(project => project.status === status);
         return filtered.map(this.convertToProject);
     }
     async getProjectSettings(id) {
         await this.ensureInitialized();
-        const config = await this.db.configRepo.findByKey(`project_${id}_settings`);
-        if (config && config.value) {
-            return config.value;
+        // TODO: Implement project-specific settings storage
+        const project = await this.db.projects.findById(id);
+        if (project && project.metadata && project.metadata.settings) {
+            return project.metadata.settings;
         }
         // Return default settings
         return this.getDefaultProjectSettings();
@@ -286,7 +300,7 @@ class ProjectManagerDB {
     async updateProjectSettings(id, settings) {
         await this.ensureInitialized();
         // Verify project exists
-        const project = await this.db.projectRepo.findById(id);
+        const project = await this.db.projects.findById(id);
         if (!project) {
             throw new Error(`Project with id ${id} not found`);
         }
@@ -299,10 +313,10 @@ class ProjectManagerDB {
             updatedAt: new Date().toISOString()
         };
         // Save to database
-        await this.db.configRepo.upsert({
-            key: `project_${id}_settings`,
-            value: updatedSettings,
-            createdAt: new Date(),
+        // TODO: Implement project-specific settings storage
+        // For now, store in project metadata
+        await this.db.projects.update(id, {
+            metadata: { ...project.metadata, settings: updatedSettings },
             updatedAt: new Date()
         });
         return updatedSettings;
@@ -310,7 +324,7 @@ class ProjectManagerDB {
     async resetProjectSettings(id) {
         await this.ensureInitialized();
         // Verify project exists
-        const project = await this.db.projectRepo.findById(id);
+        const project = await this.db.projects.findById(id);
         if (!project) {
             throw new Error(`Project with id ${id} not found`);
         }
@@ -323,9 +337,7 @@ class ProjectManagerDB {
      * Convert UnifiedProjectData to Project format for backward compatibility
      */
     convertToProject(data) {
-        const agents = this.db.agentRepo.findByProject(data.id)
-            .then(agents => agents.map(a => a.id))
-            .catch(() => []);
+        // Note: agents will be populated separately when needed
         const project = {
             id: data.id,
             name: data.name,
@@ -337,8 +349,7 @@ class ProjectManagerDB {
         };
         // Add optional fields
         if (data.portRange) {
-            const [start, end] = data.portRange.split('-').map(Number);
-            project.portRange = [start, end];
+            project.portRange = [data.portRange.start, data.portRange.end];
         }
         if (data.dockerNetwork) {
             project.dockerNetwork = data.dockerNetwork;
@@ -424,31 +435,20 @@ class ProjectManagerDB {
     }
     async getProjectTemplate(templateName) {
         await this.ensureInitialized();
-        const config = await this.db.configRepo.findByKey(`template_${templateName}`);
-        if (config && config.value) {
-            return config.value;
-        }
+        // TODO: Implement template storage
+        // For now, just return default template
         // Return default template
         return this.getDefaultTemplate(templateName);
     }
     async saveProjectTemplate(templateName, template) {
         await this.ensureInitialized();
-        await this.db.configRepo.upsert({
-            key: `template_${templateName}`,
-            value: {
-                ...template,
-                updatedAt: new Date().toISOString()
-            },
-            createdAt: new Date(),
-            updatedAt: new Date()
-        });
+        // TODO: Implement template storage
+        throw new Error('Template storage not yet implemented');
     }
     async listProjectTemplates() {
         await this.ensureInitialized();
-        const configs = await this.db.configRepo.findAll();
-        const templateKeys = configs
-            .filter(c => c.key.startsWith('template_'))
-            .map(c => c.key.replace('template_', ''));
+        // TODO: Implement template storage
+        const templateKeys = [];
         // Include default templates
         const defaultTemplates = ['basic', 'node', 'react', 'python'];
         const allTemplates = [...new Set([...templateKeys, ...defaultTemplates])];

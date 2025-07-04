@@ -45,9 +45,9 @@ export const PreviewCreateStep: React.FC<PreviewCreateStepProps> = ({
   return (
     <div className="space-y-6">
       <div className="text-center mb-6">
-        <Eye className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-        <h2 className="text-2xl font-bold text-gray-900">Review Your Agent Configuration</h2>
-        <p className="text-gray-600 mt-2">
+        <Eye className="w-12 h-12 text-brand mx-auto mb-4" />
+        <h2 className="text-2xl font-bold text-foreground">Review Your Agent Configuration</h2>
+        <p className="text-foreground-secondary mt-2">
           Please review all settings before creating your agent. You can go back to make changes if needed.
         </p>
       </div>
@@ -64,27 +64,27 @@ export const PreviewCreateStep: React.FC<PreviewCreateStepProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Project Configuration */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="bg-background-card border border-border rounded-lg p-6">
           <div className="flex items-center mb-4">
-            <Folder className="w-5 h-5 text-blue-600 mr-2" />
-            <h3 className="text-lg font-semibold text-gray-900">Project Configuration</h3>
+            <Folder className="w-5 h-5 text-brand mr-2" />
+            <h3 className="text-lg font-semibold text-foreground">Project Configuration</h3>
           </div>
           
           <div className="space-y-3">
             {selectedProject ? (
               <div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Project Name:</span>
-                  <span className="text-sm font-medium text-gray-900">{selectedProject.name}</span>
+                  <span className="text-sm text-foreground-secondary">Project Name:</span>
+                  <span className="text-sm font-medium text-foreground">{selectedProject.name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Project ID:</span>
-                  <span className="text-sm font-medium text-gray-900">{selectedProject.id}</span>
+                  <span className="text-sm text-foreground-secondary">Project ID:</span>
+                  <span className="text-sm font-medium text-foreground">{selectedProject.id}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Status:</span>
+                  <span className="text-sm text-foreground-secondary">Status:</span>
                   <span className={`text-sm font-medium ${
-                    selectedProject.status === 'ACTIVE' ? 'text-green-600' : 'text-gray-600'
+                    selectedProject.status === 'ACTIVE' ? 'text-status-success' : 'text-foreground-secondary'
                   }`}>
                     {selectedProject.status}
                   </span>
@@ -92,14 +92,14 @@ export const PreviewCreateStep: React.FC<PreviewCreateStepProps> = ({
               </div>
             ) : (
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Project Type:</span>
-                <span className="text-sm font-medium text-gray-900">Custom Path</span>
+                <span className="text-sm text-foreground-secondary">Project Type:</span>
+                <span className="text-sm font-medium text-foreground">Custom Path</span>
               </div>
             )}
             
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Project Path:</span>
-              <span className="text-sm font-medium text-gray-900 break-all">
+              <span className="text-sm text-foreground-secondary">Project Path:</span>
+              <span className="text-sm font-medium text-foreground break-all">
                 {formData.projectPath}
               </span>
             </div>
@@ -107,28 +107,28 @@ export const PreviewCreateStep: React.FC<PreviewCreateStepProps> = ({
         </div>
 
         {/* Branch & Agent Configuration */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="bg-background-card border border-border rounded-lg p-6">
           <div className="flex items-center mb-4">
-            <GitBranch className="w-5 h-5 text-green-600 mr-2" />
-            <h3 className="text-lg font-semibold text-gray-900">Branch & Agent</h3>
+            <GitBranch className="w-5 h-5 text-status-success mr-2" />
+            <h3 className="text-lg font-semibold text-foreground">Branch & Agent</h3>
           </div>
           
           <div className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Branch:</span>
-              <span className="text-sm font-medium text-gray-900">{formData.branch}</span>
+              <span className="text-sm text-foreground-secondary">Branch:</span>
+              <span className="text-sm font-medium text-foreground">{formData.branch}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Agent ID:</span>
-              <span className="text-sm font-medium text-gray-900">{effectiveAgentId}</span>
+              <span className="text-sm text-foreground-secondary">Agent ID:</span>
+              <span className="text-sm font-medium text-foreground">{effectiveAgentId}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Tmux Session:</span>
-              <span className="text-sm font-medium text-gray-900">magents-{effectiveAgentId}</span>
+              <span className="text-sm text-foreground-secondary">Tmux Session:</span>
+              <span className="text-sm font-medium text-foreground">magents-{effectiveAgentId}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Worktree Path:</span>
-              <span className="text-sm font-medium text-gray-900">
+              <span className="text-sm text-foreground-secondary">Worktree Path:</span>
+              <span className="text-sm font-medium text-foreground">
                 ./magents-{formData.branch.replace(/[^a-zA-Z0-9]/g, '-')}
               </span>
             </div>
@@ -137,39 +137,39 @@ export const PreviewCreateStep: React.FC<PreviewCreateStepProps> = ({
 
         {/* TaskMaster Integration - Only show for standard and advanced modes */}
         {formData.complexityMode !== 'simple' && (
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <div className="bg-background-card border border-border rounded-lg p-6">
           <div className="flex items-center mb-4">
-            <Wand2 className="w-5 h-5 text-purple-600 mr-2" />
-            <h3 className="text-lg font-semibold text-gray-900">TaskMaster Integration</h3>
+            <Wand2 className="w-5 h-5 text-brand mr-2" />
+            <h3 className="text-lg font-semibold text-foreground">TaskMaster Integration</h3>
           </div>
           
           {formData.taskMasterEnabled ? (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Status:</span>
-                <span className="flex items-center text-sm font-medium text-green-600">
+                <span className="text-sm text-foreground-secondary">Status:</span>
+                <span className="flex items-center text-sm font-medium text-status-success">
                   <Check className="w-4 h-4 mr-1" />
                   Enabled
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Selected Tasks:</span>
-                <span className="text-sm font-medium text-gray-900">
+                <span className="text-sm text-foreground-secondary">Selected Tasks:</span>
+                <span className="text-sm font-medium text-foreground">
                   {selectedTasks.length} task{selectedTasks.length !== 1 ? 's' : ''}
                 </span>
               </div>
               
               {selectedTasks.length > 0 && (
                 <div className="mt-4">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Tasks to Assign:</h4>
+                  <h4 className="text-sm font-medium text-foreground-secondary mb-2">Tasks to Assign:</h4>
                   <div className="space-y-2 max-h-32 overflow-y-auto">
                     {selectedTasks.map((task) => (
-                      <div key={task.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                        <span className="text-sm text-gray-900">{task.id}: {task.title}</span>
+                      <div key={task.id} className="flex items-center justify-between p-2 bg-background-tertiary rounded">
+                        <span className="text-sm text-foreground">{task.id}: {task.title}</span>
                         <span className={`text-xs px-2 py-1 rounded-full ${
-                          task.priority === 'high' ? 'bg-red-100 text-red-800' :
-                          task.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-green-100 text-green-800'
+                          task.priority === 'high' ? 'bg-status-error/20 text-status-error' :
+                          task.priority === 'medium' ? 'bg-status-warning/20 text-status-warning' :
+                          'bg-status-success/20 text-status-success'
                         }`}>
                           {task.priority}
                         </span>
@@ -181,7 +181,7 @@ export const PreviewCreateStep: React.FC<PreviewCreateStepProps> = ({
             </div>
           ) : (
             <div className="text-center py-4">
-              <span className="text-sm text-gray-500">Not enabled</span>
+              <span className="text-sm text-foreground-tertiary">Not enabled</span>
             </div>
           )}
         </div>
@@ -190,33 +190,33 @@ export const PreviewCreateStep: React.FC<PreviewCreateStepProps> = ({
         {/* Advanced Configuration - Only show for advanced mode or if settings differ from defaults */}
         {(formData.complexityMode === 'advanced' || formData.useDocker || formData.mcpEnabled || 
           (formData.environment && Object.keys(formData.environment).length > 0)) && (
-          <div className="bg-white border border-gray-200 rounded-lg p-6">{formData.complexityMode === 'advanced' && (
-            <div className="mb-4 p-3 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-md">
+          <div className="bg-background-card border border-border rounded-lg p-6">{formData.complexityMode === 'advanced' && (
+            <div className="mb-4 p-3 bg-brand/10 border border-brand/20 rounded-md">
               <div className="flex items-center">
-                <Wrench className="w-5 h-5 text-purple-600 mr-2" />
-                <span className="text-sm font-medium text-purple-900">Advanced Mode Configuration</span>
+                <Wrench className="w-5 h-5 text-brand mr-2" />
+                <span className="text-sm font-medium text-brand">Advanced Mode Configuration</span>
               </div>
             </div>
           )}
           <div className="flex items-center mb-4">
-            <Settings className="w-5 h-5 text-gray-600 mr-2" />
-            <h3 className="text-lg font-semibold text-gray-900">Advanced Settings</h3>
+            <Settings className="w-5 h-5 text-foreground-secondary mr-2" />
+            <h3 className="text-lg font-semibold text-foreground">Advanced Settings</h3>
           </div>
           
           <div className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Auto-Accept:</span>
+              <span className="text-sm text-foreground-secondary">Auto-Accept:</span>
               <span className={`text-sm font-medium ${
-                formData.autoAccept ? 'text-green-600' : 'text-red-600'
+                formData.autoAccept ? 'text-status-success' : 'text-status-error'
               }`}>
                 {formData.autoAccept ? 'Enabled' : 'Disabled'}
               </span>
             </div>
             
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Docker:</span>
+              <span className="text-sm text-foreground-secondary">Docker:</span>
               <span className={`text-sm font-medium ${
-                formData.useDocker ? 'text-green-600' : 'text-gray-600'
+                formData.useDocker ? 'text-status-success' : 'text-foreground-secondary'
               }`}>
                 {formData.useDocker ? 'Enabled' : 'Disabled'}
               </span>
@@ -224,22 +224,22 @@ export const PreviewCreateStep: React.FC<PreviewCreateStepProps> = ({
             
             {formData.useDocker && formData.dockerImage && (
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Docker Image:</span>
-                <span className="text-sm font-medium text-gray-900">{formData.dockerImage}</span>
+                <span className="text-sm text-foreground-secondary">Docker Image:</span>
+                <span className="text-sm font-medium text-foreground">{formData.dockerImage}</span>
               </div>
             )}
             
             {formData.portRange && (
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Port Range:</span>
-                <span className="text-sm font-medium text-gray-900">{formData.portRange}</span>
+                <span className="text-sm text-foreground-secondary">Port Range:</span>
+                <span className="text-sm font-medium text-foreground">{formData.portRange}</span>
               </div>
             )}
             
             {formData.environment && Object.keys(formData.environment).length > 0 && (
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Environment Variables:</span>
-                <span className="text-sm font-medium text-gray-900">
+                <span className="text-sm text-foreground-secondary">Environment Variables:</span>
+                <span className="text-sm font-medium text-foreground">
                   {Object.keys(formData.environment).length} variable{Object.keys(formData.environment).length !== 1 ? 's' : ''}
                 </span>
               </div>
@@ -250,50 +250,50 @@ export const PreviewCreateStep: React.FC<PreviewCreateStepProps> = ({
               <div className="mt-4 space-y-3">
                 {formData.claudeModel && (
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Claude Model:</span>
-                    <span className="text-sm font-medium text-gray-900">{formData.claudeModel}</span>
+                    <span className="text-sm text-foreground-secondary">Claude Model:</span>
+                    <span className="text-sm font-medium text-foreground">{formData.claudeModel}</span>
                   </div>
                 )}
                 
                 {formData.claudeSettings.temperature !== undefined && (
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Temperature:</span>
-                    <span className="text-sm font-medium text-gray-900">{formData.claudeSettings.temperature}</span>
+                    <span className="text-sm text-foreground-secondary">Temperature:</span>
+                    <span className="text-sm font-medium text-foreground">{formData.claudeSettings.temperature}</span>
                   </div>
                 )}
                 
                 {formData.claudeSettings.maxTokens && (
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Max Tokens:</span>
-                    <span className="text-sm font-medium text-gray-900">{formData.claudeSettings.maxTokens}</span>
+                    <span className="text-sm text-foreground-secondary">Max Tokens:</span>
+                    <span className="text-sm font-medium text-foreground">{formData.claudeSettings.maxTokens}</span>
                   </div>
                 )}
                 
                 {formData.resourceLimits?.memory && (
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Memory Limit:</span>
-                    <span className="text-sm font-medium text-gray-900">{formData.resourceLimits.memory}</span>
+                    <span className="text-sm text-foreground-secondary">Memory Limit:</span>
+                    <span className="text-sm font-medium text-foreground">{formData.resourceLimits.memory}</span>
                   </div>
                 )}
                 
                 {formData.resourceLimits?.cpu && (
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">CPU Limit:</span>
-                    <span className="text-sm font-medium text-gray-900">{formData.resourceLimits.cpu} cores</span>
+                    <span className="text-sm text-foreground-secondary">CPU Limit:</span>
+                    <span className="text-sm font-medium text-foreground">{formData.resourceLimits.cpu} cores</span>
                   </div>
                 )}
                 
                 {formData.dockerNetwork && (
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Docker Network:</span>
-                    <span className="text-sm font-medium text-gray-900">{formData.dockerNetwork}</span>
+                    <span className="text-sm text-foreground-secondary">Docker Network:</span>
+                    <span className="text-sm font-medium text-foreground">{formData.dockerNetwork}</span>
                   </div>
                 )}
                 
                 {formData.dockerVolumes && formData.dockerVolumes.length > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Volume Mounts:</span>
-                    <span className="text-sm font-medium text-gray-900">{formData.dockerVolumes.length} configured</span>
+                    <span className="text-sm text-foreground-secondary">Volume Mounts:</span>
+                    <span className="text-sm font-medium text-foreground">{formData.dockerVolumes.length} configured</span>
                   </div>
                 )}
               </div>
@@ -304,27 +304,27 @@ export const PreviewCreateStep: React.FC<PreviewCreateStepProps> = ({
       </div>
 
       {/* Resource Estimation */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-blue-900 mb-4">Estimated Resource Usage</h3>
+      <div className="bg-brand/10 border border-brand/20 rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-brand mb-4">Estimated Resource Usage</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">1</div>
-            <div className="text-sm text-blue-800">Git Worktree</div>
+            <div className="text-2xl font-bold text-brand">1</div>
+            <div className="text-sm text-brand/80">Git Worktree</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">1</div>
-            <div className="text-sm text-blue-800">Tmux Session</div>
+            <div className="text-2xl font-bold text-brand">1</div>
+            <div className="text-sm text-brand/80">Tmux Session</div>
           </div>
           {estimatedPorts > 0 && (
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{estimatedPorts}</div>
-              <div className="text-sm text-blue-800">Reserved Ports</div>
+              <div className="text-2xl font-bold text-brand">{estimatedPorts}</div>
+              <div className="text-sm text-brand/80">Reserved Ports</div>
             </div>
           )}
           {formData.useDocker && (
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">1</div>
-              <div className="text-sm text-blue-800">Docker Container</div>
+              <div className="text-2xl font-bold text-brand">1</div>
+              <div className="text-sm text-brand/80">Docker Container</div>
             </div>
           )}
         </div>
@@ -332,13 +332,13 @@ export const PreviewCreateStep: React.FC<PreviewCreateStepProps> = ({
 
       {/* Environment Variables Preview */}
       {formData.environment && Object.keys(formData.environment).length > 0 && (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Environment Variables</h3>
+        <div className="bg-background-secondary border border-border rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-foreground mb-4">Environment Variables</h3>
           <div className="space-y-2">
             {Object.entries(formData.environment).map(([key, value]) => (
-              <div key={key} className="flex justify-between items-center p-2 bg-white rounded border">
-                <span className="text-sm font-medium text-gray-700">{key}</span>
-                <span className="text-sm text-gray-600">{value}</span>
+              <div key={key} className="flex justify-between items-center p-2 bg-background-card rounded border border-border">
+                <span className="text-sm font-medium text-foreground">{key}</span>
+                <span className="text-sm text-foreground-secondary">{value}</span>
               </div>
             ))}
           </div>
@@ -348,12 +348,12 @@ export const PreviewCreateStep: React.FC<PreviewCreateStepProps> = ({
       {/* Warnings & Recommendations */}
       <div className="space-y-4">
         {!formData.useDocker && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div className="bg-status-warning/10 border border-status-warning/20 rounded-lg p-4">
             <div className="flex items-start">
-              <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 mr-3" />
+              <AlertTriangle className="w-5 h-5 text-status-warning mt-0.5 mr-3" />
               <div>
-                <h4 className="text-sm font-medium text-yellow-800">Docker Not Enabled</h4>
-                <p className="text-sm text-yellow-700 mt-1">
+                <h4 className="text-sm font-medium text-status-warning">Docker Not Enabled</h4>
+                <p className="text-sm text-status-warning/80 mt-1">
                   Consider enabling Docker for better isolation and reproducibility, especially for production environments.
                 </p>
               </div>
@@ -362,12 +362,12 @@ export const PreviewCreateStep: React.FC<PreviewCreateStepProps> = ({
         )}
 
         {formData.autoAccept && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div className="bg-status-warning/10 border border-status-warning/20 rounded-lg p-4">
             <div className="flex items-start">
-              <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 mr-3" />
+              <AlertTriangle className="w-5 h-5 text-status-warning mt-0.5 mr-3" />
               <div>
-                <h4 className="text-sm font-medium text-yellow-800">Auto-Accept Enabled</h4>
-                <p className="text-sm text-yellow-700 mt-1">
+                <h4 className="text-sm font-medium text-status-warning">Auto-Accept Enabled</h4>
+                <p className="text-sm text-status-warning/80 mt-1">
                   Auto-accept is enabled. The agent will automatically apply changes without confirmation.
                   Make sure this is appropriate for your use case.
                 </p>
@@ -378,13 +378,13 @@ export const PreviewCreateStep: React.FC<PreviewCreateStepProps> = ({
       </div>
 
       {/* Creation Summary */}
-      <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-green-900 mb-4">Ready to Create Agent</h3>
-        <p className="text-sm text-green-800 mb-4">
+      <div className="bg-status-success/10 border border-status-success/20 rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-status-success mb-4">Ready to Create Agent</h3>
+        <p className="text-sm text-status-success/80 mb-4">
           Your agent configuration looks good! Click "Create Agent" to start the creation process.
           You'll see real-time progress updates as your agent is set up.
         </p>
-        <div className="text-sm text-green-700">
+        <div className="text-sm text-status-success/70">
           <strong>What happens next:</strong>
           <ul className="list-disc list-inside mt-2 space-y-1">
             <li>Git worktree will be created for branch "{formData.branch}"</li>

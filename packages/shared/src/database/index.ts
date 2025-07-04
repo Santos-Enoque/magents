@@ -768,7 +768,7 @@ export class AgentRepository extends BaseRepository<UnifiedAgentData> {
   }
 
   findByProject(projectId: string): UnifiedAgentData[] {
-    return this.findBy({ projectId } as any);
+    return this.findBy({ project_id: projectId } as any);
   }
 
   findByStatus(status: string): UnifiedAgentData[] {

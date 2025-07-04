@@ -1,9 +1,8 @@
 import { Command } from 'commander';
 import { ConfigService } from '../services/ConfigService';
-import { UIService } from '../services/UIService';
+import { ui } from '../ui/UIService';
 import axios from 'axios';
 
-const ui = new UIService();
 const configService = new ConfigService();
 
 interface FeatureFlags {

@@ -399,16 +399,16 @@ export const ContextualHelpSystem: React.FC<ContextualHelpSystemProps> = ({
   }
 
   return (
-    <div className="fixed bottom-6 right-6 w-96 bg-white border border-gray-200 rounded-lg shadow-2xl z-50">
+    <div className="fixed bottom-6 right-6 w-96 bg-background-card border border-border rounded-lg shadow-2xl z-50">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+      <div className="flex items-center justify-between p-4 border-b border-border bg-gradient-to-r from-brand/10 to-brand/20">
         <div className="flex items-center">
-          <BookOpen className="w-5 h-5 text-blue-600 mr-2" />
-          <h3 className="font-semibold text-blue-900">{helpContent.title}</h3>
+          <BookOpen className="w-5 h-5 text-brand mr-2" />
+          <h3 className="font-semibold text-foreground">{helpContent.title}</h3>
         </div>
         <button
           onClick={handleClose}
-          className="text-gray-400 hover:text-gray-600 transition-colors"
+          className="text-foreground-tertiary hover:text-foreground-secondary transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
@@ -416,13 +416,13 @@ export const ContextualHelpSystem: React.FC<ContextualHelpSystemProps> = ({
 
       {/* Content */}
       <div className="p-4 space-y-4 max-h-96 overflow-y-auto">
-        <p className="text-sm text-gray-600">{helpContent.description}</p>
+        <p className="text-sm text-foreground-secondary">{helpContent.description}</p>
 
         {/* Main Content */}
         <div>
           <button
             onClick={() => setExpandedSection(expandedSection === 'content' ? null : 'content')}
-            className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 hover:text-gray-900"
+            className="flex items-center justify-between w-full text-left text-sm font-medium text-foreground-secondary hover:text-foreground"
           >
             <span>How this works</span>
             <ArrowRight className={`w-4 h-4 transition-transform ${expandedSection === 'content' ? 'rotate-90' : ''}`} />
@@ -430,7 +430,7 @@ export const ContextualHelpSystem: React.FC<ContextualHelpSystemProps> = ({
           {expandedSection === 'content' && (
             <div className="mt-2 space-y-2">
               {helpContent.content.map((paragraph, index) => (
-                <p key={index} className="text-sm text-gray-600 leading-relaxed">
+                <p key={index} className="text-sm text-foreground-secondary leading-relaxed">
                   {paragraph}
                 </p>
               ))}
@@ -442,7 +442,7 @@ export const ContextualHelpSystem: React.FC<ContextualHelpSystemProps> = ({
         <div>
           <button
             onClick={() => setExpandedSection(expandedSection === 'tips' ? null : 'tips')}
-            className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 hover:text-gray-900"
+            className="flex items-center justify-between w-full text-left text-sm font-medium text-foreground-secondary hover:text-foreground"
           >
             <span className="flex items-center">
               <Lightbulb className="w-4 h-4 mr-1" />
@@ -453,8 +453,8 @@ export const ContextualHelpSystem: React.FC<ContextualHelpSystemProps> = ({
           {expandedSection === 'tips' && (
             <div className="mt-2 space-y-1">
               {helpContent.tips.map((tip, index) => (
-                <div key={index} className="flex items-start text-sm text-gray-600">
-                  <span className="text-blue-500 mr-2 flex-shrink-0">•</span>
+                <div key={index} className="flex items-start text-sm text-foreground-secondary">
+                  <span className="text-brand mr-2 flex-shrink-0">•</span>
                   <span>{tip}</span>
                 </div>
               ))}
@@ -464,17 +464,17 @@ export const ContextualHelpSystem: React.FC<ContextualHelpSystemProps> = ({
 
         {/* Smart Upgrade Suggestions */}
         {smartSuggestions.length > 0 && (
-          <div className="border-t border-gray-200 pt-4">
+          <div className="border-t border-border pt-4">
             <div className="flex items-center mb-3">
-              <ArrowUp className="w-4 h-4 text-green-600 mr-2" />
-              <span className="text-sm font-medium text-green-900">Smart Suggestions</span>
+              <ArrowUp className="w-4 h-4 text-status-success mr-2" />
+              <span className="text-sm font-medium text-status-success">Smart Suggestions</span>
             </div>
             {smartSuggestions.map((suggestion, index) => (
-              <div key={index} className="bg-green-50 border border-green-200 rounded-md p-3 mb-3">
-                <p className="text-sm text-green-800 mb-2">{suggestion.reason}</p>
+              <div key={index} className="bg-status-success/10 border border-status-success/20 rounded-md p-3 mb-3">
+                <p className="text-sm text-status-success mb-2">{suggestion.reason}</p>
                 <div className="space-y-1 mb-3">
                   {suggestion.benefits.map((benefit, benefitIndex) => (
-                    <div key={benefitIndex} className="flex items-center text-xs text-green-700">
+                    <div key={benefitIndex} className="flex items-center text-xs text-status-success">
                       <Zap className="w-3 h-3 mr-1" />
                       <span>{benefit}</span>
                     </div>
@@ -482,7 +482,7 @@ export const ContextualHelpSystem: React.FC<ContextualHelpSystemProps> = ({
                 </div>
                 <button
                   onClick={() => handleUpgrade(suggestion.targetMode)}
-                  className="w-full bg-green-600 text-white text-sm py-2 rounded hover:bg-green-700 transition-colors"
+                  className="w-full bg-status-success text-white text-sm py-2 rounded hover:bg-status-success/80 transition-colors"
                 >
                   Upgrade to {suggestion.targetMode.charAt(0).toUpperCase() + suggestion.targetMode.slice(1)} Mode
                 </button>
@@ -493,23 +493,23 @@ export const ContextualHelpSystem: React.FC<ContextualHelpSystemProps> = ({
 
         {/* Manual Upgrade Prompt */}
         {helpContent.upgradePrompt && !smartSuggestions.length && (
-          <div className="border-t border-gray-200 pt-4">
-            <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+          <div className="border-t border-border pt-4">
+            <div className="bg-brand/10 border border-brand/20 rounded-md p-3">
               <div className="flex items-start">
-                <ArrowUp className="w-4 h-4 text-blue-600 mt-0.5 mr-2 flex-shrink-0" />
+                <ArrowUp className="w-4 h-4 text-brand mt-0.5 mr-2 flex-shrink-0" />
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-blue-900 mb-1">{helpContent.upgradePrompt.reason}</p>
+                  <p className="text-sm font-medium text-foreground mb-1">{helpContent.upgradePrompt.reason}</p>
                   <div className="space-y-1 mb-3">
                     {helpContent.upgradePrompt.benefits.map((benefit, index) => (
-                      <div key={index} className="flex items-center text-xs text-blue-700">
-                        <span className="w-1 h-1 bg-blue-600 rounded-full mr-2" />
+                      <div key={index} className="flex items-center text-xs text-brand">
+                        <span className="w-1 h-1 bg-brand rounded-full mr-2" />
                         <span>{benefit}</span>
                       </div>
                     ))}
                   </div>
                   <button
                     onClick={() => handleUpgrade(helpContent.upgradePrompt!.targetMode)}
-                    className="text-sm text-blue-700 hover:text-blue-900 font-medium"
+                    className="text-sm text-brand hover:text-brand-hover font-medium"
                   >
                     Try {helpContent.upgradePrompt.targetMode.charAt(0).toUpperCase() + helpContent.upgradePrompt.targetMode.slice(1)} Mode →
                   </button>
@@ -521,10 +521,10 @@ export const ContextualHelpSystem: React.FC<ContextualHelpSystemProps> = ({
       </div>
 
       {/* Footer */}
-      <div className="p-3 border-t border-gray-200 bg-gray-50 text-center">
+      <div className="p-3 border-t border-border bg-background-secondary text-center">
         <button
           onClick={handleClose}
-          className="text-xs text-gray-500 hover:text-gray-700"
+          className="text-xs text-foreground-tertiary hover:text-foreground-secondary"
         >
           Don't show this again for this step
         </button>

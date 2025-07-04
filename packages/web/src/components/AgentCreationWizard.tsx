@@ -417,52 +417,66 @@ export const AgentCreationWizard: React.FC<AgentCreationWizardProps> = ({
 
       {/* Step Progress Indicator */}
       <div className="mb-8">
-        <div className="flex items-center justify-between">
-          {steps.map((step, index) => {
-            const StepIcon = step.icon;
-            const isActive = index === currentStep;
-            const isCompleted = index < currentStep;
-            const isValid = step.isValid;
-            
-            return (
-              <div key={step.id} className="flex flex-col items-center flex-1">
-                <button
-                  onClick={() => goToStep(index)}
-                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-                    isActive
-                      ? 'bg-brand text-white shadow-glow'
-                      : isCompleted
-                      ? 'bg-status-success text-white'
-                      : isValid
-                      ? 'bg-background-tertiary text-foreground-secondary hover:bg-background-secondary'
-                      : 'bg-status-error/20 text-status-error'
-                  }`}
-                  disabled={isLoading}
-                >
-                  {isCompleted ? (
-                    <Check className="w-6 h-6" />
-                  ) : (
-                    <StepIcon className="w-6 h-6" />
-                  )}
-                </button>
-                <div className="mt-2 text-center">
-                  <p className={`text-sm font-medium ${
-                    isActive ? 'text-brand' : isCompleted ? 'text-status-success' : 'text-foreground-secondary'
-                  }`}>
-                    {step.title}
-                  </p>
-                  <p className="text-xs text-foreground-tertiary max-w-24">
-                    {step.description}
-                  </p>
-                </div>
-                {index < steps.length - 1 && (
-                  <div className={`h-px w-full mt-4 ${
+        <div className="relative">
+          {/* Progress lines */}
+          <div className="absolute top-6 left-0 right-0 flex items-center px-6">
+            {steps.map((_, index) => {
+              if (index === steps.length - 1) return null;
+              const isCompleted = index < currentStep;
+              return (
+                <div
+                  key={`line-${index}`}
+                  className={`flex-1 h-0.5 mx-2 transition-colors ${
                     isCompleted ? 'bg-status-success' : 'bg-border'
-                  }`} />
-                )}
-              </div>
-            );
-          })}
+                  }`}
+                />
+              );
+            })}
+          </div>
+          
+          {/* Step indicators */}
+          <div className="relative flex items-start justify-between">
+            {steps.map((step, index) => {
+              const StepIcon = step.icon;
+              const isActive = index === currentStep;
+              const isCompleted = index < currentStep;
+              const isValid = step.isValid;
+              
+              return (
+                <div key={step.id} className="flex flex-col items-center flex-1">
+                  <button
+                    onClick={() => goToStep(index)}
+                    className={`w-12 h-12 rounded-full flex items-center justify-center transition-all z-10 ${
+                      isActive
+                        ? 'bg-brand text-white shadow-glow'
+                        : isCompleted
+                        ? 'bg-status-success text-white'
+                        : isValid
+                        ? 'bg-background-tertiary text-foreground-secondary hover:bg-background-secondary'
+                        : 'bg-status-error/20 text-status-error'
+                    }`}
+                    disabled={isLoading}
+                  >
+                    {isCompleted ? (
+                      <Check className="w-6 h-6" />
+                    ) : (
+                      <StepIcon className="w-6 h-6" />
+                    )}
+                  </button>
+                  <div className="mt-2 text-center">
+                    <p className={`text-sm font-medium ${
+                      isActive ? 'text-brand' : isCompleted ? 'text-status-success' : 'text-foreground-secondary'
+                    }`}>
+                      {step.title}
+                    </p>
+                    <p className="text-xs text-foreground-tertiary max-w-24">
+                      {step.description}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
